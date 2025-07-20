@@ -8,6 +8,19 @@
 /* This sets a different item border color for the default theme on ios and md */
 :root {
   --ion-item-border-color: var(--ion-background-color-step-200);
+  // Color Palette
+  --ff-primary: #4a90e2;       // Soft Blue
+  --ff-secondary: #7ed3b2;     // Sage Green
+  --ff-accent: #f5a623;        // Warm Orange
+
+  // Text Colors
+  --ff-text-dark: #2c3e50;
+  --ff-text-medium: #6a7382;
+  --ff-text-light: #8a8a8a;
+
+  // Background Colors
+  --ff-background-light: #f4f5f8;
+  --ff-background-white: #ffffff;
 }
 
 /* This sets a different background and item background for the default theme on ios */

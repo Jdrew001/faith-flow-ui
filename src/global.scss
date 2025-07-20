@@ -35,3 +35,30 @@
 @import '@ionic/angular/css/palettes/dark.always.css';
 /* @import '@ionic/angular/css/palettes/dark.class.css'; */
 /* @import '@ionic/angular/css/palettes/dark.system.css'; */
+
+// Custom Auth Styles
+.auth-page {
+  ion-content {
+    --background: #2c2c2e;
+  }
+}
+
+// Toast Custom Styles
+.toast-success {
+  --background: #34c759;
+  --color: #ffffff;
+}
+
+.toast-danger {
+  --background: #ff3b30;
+  --color: #ffffff;
+}
+
+// Status Bar styling for iOS
+@media (max-width: 767px) {
+  .ios {
+    .login-container {
+      padding-top: env(safe-area-inset-top);
+    }
+  }
+}

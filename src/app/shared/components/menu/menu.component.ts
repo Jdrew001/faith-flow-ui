@@ -36,7 +36,7 @@ export class MenuComponent implements OnInit, OnDestroy {
   ) { }
 
   ngOnInit() {
-    this.authSubscription = this.authService.currentUser$.subscribe(user => {
+    this.authSubscription = this.authService.currentUser$.subscribe((user: User | null) => {
       this.currentUser = user;
     });
   }
