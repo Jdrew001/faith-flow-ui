@@ -4,43 +4,7 @@ import { Router } from '@angular/router';
 import { NavController } from '@ionic/angular';
 import { environment } from 'src/environments/environment';
 import { HttpClient } from '@angular/common/http';
-
-export interface User {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: 'member' | 'leader' | 'admin';
-  churchName?: string;
-  avatar?: string;
-}
-
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-export interface RegisterData {
-  email: string;
-  password: string;
-  firstName: string;
-  lastName: string;
-  churchName?: string;
-}
-
-export interface LoginRequest {
-  phoneNumber: string;
-}
-
-export interface VerifyCodeRequest {
-  phoneNumber: string;
-  verificationCode: string;
-}
-
-export interface AuthResponse {
-  success: boolean;
-  token?: string;
-}
+import { AuthResponse, LoginCredentials, RegisterData, User, VerifyCodeResponse } from '../model/auth.model';
 
 @Injectable({
   providedIn: 'root'
@@ -75,14 +39,26 @@ export class AuthService {
     });
   }
 
-  verifyLoginCode(phoneNumber: string, verificationCode: string): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/verify-code`, { 
+  verifyLoginCode(phoneNumber: string, verificationCode: string): Observable<VerifyCodeResponse> {
+    return this.http.post<VerifyCodeResponse>(`${this.apiUrl}/verify-code`, { 
       phoneNumber: this.formatPhoneNumber(phoneNumber),
       verificationCode 
     }).pipe(
-      tap((response: any) => {
-        if (response.success && response.token) {
-          this.setAuthentication(response.token);
+      tap((response: VerifyCodeResponse) => {
+        if (response.success && response.accessToken) {
+          // Map the backend user format to our frontend User interface
+          const user: User = {
+            id: response.user.id,
+            email: response.user.email,
+            firstName: response.user.name.split(' ')[0] || response.user.name,
+            lastName: response.user.name.split(' ').slice(1).join(' ') || '',
+            role: response.user.role.toLowerCase() as 'member' | 'leader' | 'admin'
+          };
+          
+          this.setAuthentication(response.accessToken, user);
+          
+          // Store refresh token
+          localStorage.setItem('refresh_token', response.refreshToken);
         }
       })
     );
@@ -105,6 +81,7 @@ export class AuthService {
 
   logout() {
     localStorage.removeItem('auth_token');
+    localStorage.removeItem('refresh_token');
     localStorage.removeItem('current_user');
     this.isAuthenticatedSubject.next(false);
     this.currentUserSubject.next(null);

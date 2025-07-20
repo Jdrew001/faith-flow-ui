@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { AuthService } from '../../services/auth.service';
+import { AuthService } from '../services/auth.service';
 import { ToastController } from '@ionic/angular';
+import { VerifyCodeResponse } from '../model/auth.model';
 
 @Component({
   selector: 'app-login',
@@ -100,15 +101,17 @@ export class LoginComponent implements OnInit {
     const verificationCode = this.otpDigits.join('');
     if (verificationCode.length === 6) {
       this.authService.verifyLoginCode(this.formattedPhoneNumber, verificationCode).subscribe({
-        next: (response: any) => {
+        next: (response: VerifyCodeResponse) => {
           if (response.success) {
-            this.router.navigate(['/folder/home'], { replaceUrl: true });
+            this.showSuccessToast(`Welcome, ${response.user.name}!`);
+            this.router.navigate(['/summary'], { replaceUrl: true });
           } else {
             this.showErrorToast('Invalid verification code');
             this.clearOtp();
           }
         },
         error: (err: any) => {
+          console.error('Verification error:', err);
           this.showErrorToast('Verification failed. Please try again.');
           this.clearOtp();
         }
