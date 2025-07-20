@@ -1,40 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../auth/services/auth.service';
-import { Observable } from 'rxjs';
-
-interface AttendanceStats {
-  percentage: number;
-  present: number;
-  absent: number;
-  trend: 'up' | 'down' | 'stable';
-}
-
-interface FollowUpItem {
-  id: number;
-  name: string;
-  type: 'First Time Visitor' | 'Prayer Request' | 'Connection' | 'Follow-up';
-  priority: 'high' | 'medium' | 'low';
-  daysAgo: number;
-}
-
-interface Event {
-  id: number;
-  title: string;
-  date: Date;
-  time: string;
-  type: 'service' | 'meeting' | 'event';
-}
-
-interface EngagementData {
-  week: string;
-  value: number;
-}
-
-interface WorkflowTriggers {
-  count: number;
-  lastSync: Date;
-  status: 'active' | 'pending' | 'error';
-}
+import { DashboardService, AttendanceStats, FollowUpItem, UpcomingEvent, EngagementData, WorkflowTriggers } from '../services/dashboard.service';
+import { Observable, forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-summary',
@@ -46,81 +13,217 @@ export class SummaryComponent implements OnInit {
   currentUser$: Observable<any>;
   
   attendanceStats: AttendanceStats = {
-    percentage: 78,
-    present: 156,
-    absent: 44,
-    trend: 'up'
+    percentage: 0,
+    present: 0,
+    absent: 0,
+    trend: 'stable'
   };
 
-  followUpItems: FollowUpItem[] = [
-    {
-      id: 1,
-      name: 'Sarah Johnson',
-      type: 'First Time Visitor',
-      priority: 'high',
-      daysAgo: 2
-    },
-    {
-      id: 2,
-      name: 'Mike Chen',
-      type: 'Prayer Request',
-      priority: 'medium',
-      daysAgo: 1
-    },
-    {
-      id: 3,
-      name: 'Lisa Martinez',
-      type: 'Connection',
-      priority: 'high',
-      daysAgo: 3
-    }
-  ];
+  followUpItems: FollowUpItem[] = [];
 
-  upcomingEvents: Event[] = [
-    {
-      id: 1,
-      title: 'Sunday Service',
-      date: new Date(2024, 0, 21), // January 21, 2024
-      time: '10:00 AM',
-      type: 'service'
-    },
-    {
-      id: 2,
-      title: 'Prayer Meeting',
-      date: new Date(2024, 0, 23), // January 23, 2024
-      time: '7:00 PM',
-      type: 'meeting'
-    },
-    {
-      id: 3,
-      title: 'Youth Group',
-      date: new Date(2024, 0, 25), // January 25, 2024
-      time: '6:30 PM',
-      type: 'event'
-    }
-  ];
+  upcomingEvents: UpcomingEvent[] = [];
 
-  engagementTrends: EngagementData[] = [
-    { week: 'W1', value: 65 },
-    { week: 'W2', value: 72 },
-    { week: 'W3', value: 68 },
-    { week: 'W4', value: 78 },
-    { week: 'W5', value: 82 },
-    { week: 'W6', value: 75 },
-    { week: 'W7', value: 80 }
-  ];
+  engagementTrends: EngagementData[] = [];
 
   workflowTriggers: WorkflowTriggers = {
-    count: 12,
-    lastSync: new Date(2024, 0, 19, 14, 30), // January 19, 2024 at 2:30 PM
-    status: 'active'
+    count: 0,
+    lastSync: new Date().toISOString(),
+    status: 'pending',
+    activeWorkflows: 0,
+    completedToday: 0,
+    pendingActions: 0
   };
 
-  constructor(private authService: AuthService) {
+  isLoading = false;
+  isLoadingAttendance = true;
+  isLoadingFollowUps = true;
+  isLoadingEvents = true;
+  isLoadingEngagement = true;
+  isLoadingWorkflows = true;
+
+  constructor(
+    private authService: AuthService,
+    private dashboardService: DashboardService
+  ) {
     this.currentUser$ = this.authService.currentUser$;
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.loadDashboardData();
+  }
+
+  test(item: FollowUpItem) {
+    console.log('Testing item:', item);
+  }
+
+  private loadDashboardData() {
+    // Load data individually with separate loading states
+    this.loadAttendanceData();
+    this.loadFollowUpData();
+    this.loadEventsData();
+    this.loadEngagementData();
+    this.loadWorkflowData();
+  }
+
+  private loadAttendanceData() {
+    this.isLoadingAttendance = true;
+    this.dashboardService.getAttendanceStats().subscribe({
+      next: (data) => {
+        this.attendanceStats = data;
+        this.isLoadingAttendance = false;
+      },
+      error: (error) => {
+        console.error('Error loading attendance data:', error);
+        this.isLoadingAttendance = false;
+      }
+    });
+  }
+
+  private loadFollowUpData() {
+    this.isLoadingFollowUps = true;
+    this.dashboardService.getFollowUps('high', 5).subscribe({
+      next: (data) => {
+        this.followUpItems = data;
+        this.isLoadingFollowUps = false;
+      },
+      error: (error) => {
+        console.error('Error loading follow-up data:', error);
+        this.isLoadingFollowUps = false;
+      }
+    });
+  }
+
+  private loadEventsData() {
+    this.isLoadingEvents = true;
+    this.dashboardService.getUpcomingEvents(5).subscribe({
+      next: (data) => {
+        this.upcomingEvents = data;
+        this.isLoadingEvents = false;
+      },
+      error: (error) => {
+        console.error('Error loading events data:', error);
+        this.isLoadingEvents = false;
+      }
+    });
+  }
+
+  private loadEngagementData() {
+    this.isLoadingEngagement = true;
+    this.dashboardService.getEngagementTrends(7).subscribe({
+      next: (data) => {
+        this.engagementTrends = data;
+        this.isLoadingEngagement = false;
+      },
+      error: (error) => {
+        console.error('Error loading engagement data:', error);
+        this.isLoadingEngagement = false;
+      }
+    });
+  }
+
+  private loadWorkflowData() {
+    this.isLoadingWorkflows = true;
+    this.dashboardService.getWorkflowStats().subscribe({
+      next: (data) => {
+        this.workflowTriggers = data;
+        this.isLoadingWorkflows = false;
+      },
+      error: (error) => {
+        console.error('Error loading workflow data:', error);
+        this.isLoadingWorkflows = false;
+      }
+    });
+  }
+
+  /**
+   * Generate SVG path points from engagement trend data
+   */
+  generateEngagementPath(): string {
+    if (!this.engagementTrends || this.engagementTrends.length === 0) {
+      return '0,40 280,40'; // Flat line fallback
+    }
+
+    if (this.engagementTrends.length === 1) {
+      // Single point - draw a horizontal line
+      return `0,40 280,40`;
+    }
+
+    const width = 280;
+    const height = 80;
+    const padding = 10;
+    const chartWidth = width - (padding * 2);
+    const chartHeight = height - (padding * 2);
+
+    // Find min and max values for scaling
+    const values = this.engagementTrends.map(d => d.value);
+    const minValue = Math.min(...values);
+    const maxValue = Math.max(...values);
+    const valueRange = maxValue - minValue;
+
+    // If all values are the same, draw a horizontal line
+    if (valueRange === 0) {
+      const y = height / 2; // Center the line
+      return `${padding},${y} ${width - padding},${y}`;
+    }
+
+    // Generate points
+    const points = this.engagementTrends.map((data, index) => {
+      const x = padding + (index * chartWidth) / Math.max(this.engagementTrends.length - 1, 1);
+      // Invert Y coordinate (SVG Y increases downward)
+      const normalizedValue = (data.value - minValue) / valueRange;
+      const y = padding + chartHeight - (normalizedValue * chartHeight);
+      return `${Math.round(x)},${Math.round(y)}`;
+    });
+
+    return points.join(' ');
+  }
+
+  /**
+   * Get the current engagement percentage
+   */
+  getCurrentEngagementPercentage(): number {
+    if (!this.engagementTrends || this.engagementTrends.length === 0) {
+      return 0;
+    }
+    return this.engagementTrends[this.engagementTrends.length - 1].value;
+  }
+
+  /**
+   * Get the last point coordinates for the trend circle
+   */
+  getLastPointCoordinates(): { x: number; y: number } {
+    if (!this.engagementTrends || this.engagementTrends.length === 0) {
+      return { x: 280, y: 40 };
+    }
+
+    if (this.engagementTrends.length === 1) {
+      return { x: 280, y: 40 };
+    }
+
+    const width = 280;
+    const height = 80;
+    const padding = 10;
+    const chartWidth = width - (padding * 2);
+    const chartHeight = height - (padding * 2);
+
+    const values = this.engagementTrends.map(d => d.value);
+    const minValue = Math.min(...values);
+    const maxValue = Math.max(...values);
+    const valueRange = maxValue - minValue;
+
+    const lastData = this.engagementTrends[this.engagementTrends.length - 1];
+    const x = padding + chartWidth;
+    
+    let y;
+    if (valueRange === 0) {
+      y = height / 2; // Center if all values are the same
+    } else {
+      const normalizedValue = (lastData.value - minValue) / valueRange;
+      y = padding + chartHeight - (normalizedValue * chartHeight);
+    }
+
+    return { x: Math.round(x), y: Math.round(y) };
+  }
 
   onViewAllFollowUps() {
     // Navigate to follow-ups page
@@ -152,9 +255,11 @@ export class SummaryComponent implements OnInit {
 
   getTypeIcon(type: string): string {
     switch (type) {
+      case 'New Member': return 'person-add';
       case 'First Time Visitor': return 'person-add';
       case 'Prayer Request': return 'heart';
       case 'Connection': return 'people';
+      case 'Pastoral Care': return 'medical';
       case 'Follow-up': return 'call';
       default: return 'person';
     }
@@ -165,30 +270,45 @@ export class SummaryComponent implements OnInit {
       case 'service': return 'home';
       case 'meeting': return 'people';
       case 'event': return 'calendar';
+      case 'conference': return 'school';
       default: return 'calendar';
     }
   }
 
-  formatDate(date: Date): string {
+  formatDate(date: Date | string): string {
+    const eventDate = typeof date === 'string' ? new Date(date) : date;
+    
+    // Check if date is valid
+    if (isNaN(eventDate.getTime())) {
+      return 'Invalid Date';
+    }
+    
     const today = new Date();
-    const diffTime = date.getTime() - today.getTime();
+    const diffTime = eventDate.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
     if (diffDays === 0) return 'Today';
     if (diffDays === 1) return 'Tomorrow';
     if (diffDays < 7) return `${diffDays} days`;
     
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return eventDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   }
 
-  formatLastSync(date: Date): string {
+  formatLastSync(date: Date | string): string {
     const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
+    const syncDate = typeof date === 'string' ? new Date(date) : date;
+    
+    // Check if date is valid
+    if (isNaN(syncDate.getTime())) {
+      return 'Unknown';
+    }
+    
+    const diffMs = now.getTime() - syncDate.getTime();
     const diffMins = Math.floor(diffMs / (1000 * 60));
     const diffHours = Math.floor(diffMins / 60);
     
     if (diffMins < 60) return `${diffMins}m ago`;
     if (diffHours < 24) return `${diffHours}h ago`;
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return syncDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   }
 }

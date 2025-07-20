@@ -1,4 +1,4 @@
 export const environment = {
   production: false,
-  apiUrl: 'http://localhost:3000/faith-flow-service'
+  apiUrl: 'http://172.24.144.1:3000/faith-flow-service'
 };

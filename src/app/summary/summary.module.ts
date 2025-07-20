@@ -6,6 +6,7 @@ import { IonicModule } from '@ionic/angular';
 import { SummaryComponent } from './summary.component';
 import { MenuModule } from '../shared/components/menu/menu.module';
 import { SummaryRoutingModule } from './summary-routing.module';
+import { SkeletonLoaderComponent } from '../shared/components/skeleton-loader/skeleton-loader.component';
 
 
 
@@ -17,7 +18,8 @@ import { SummaryRoutingModule } from './summary-routing.module';
     SharedModule,
     CoreModule,
     IonicModule.forRoot(),
-    MenuModule
+    MenuModule,
+    SkeletonLoaderComponent
   ]
 })
 export class SummaryModule { }
