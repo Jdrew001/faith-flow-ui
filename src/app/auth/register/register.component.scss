@@ -1,0 +1,176 @@
+.register-content {
+  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+}
+
+.register-container {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.header-section {
+  text-align: center;
+  margin-bottom: 2rem;
+  color: white;
+  position: relative;
+}
+
+.back-button {
+  position: absolute;
+  left: 0;
+  top: 0;
+  --color: white;
+  z-index: 10;
+}
+
+.logo-container {
+  margin-bottom: 1rem;
+}
+
+.app-logo {
+  font-size: 3.5rem;
+  color: white;
+  margin-bottom: 0.5rem;
+}
+
+.header-section h1 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin: 0;
+  color: white;
+}
+
+.welcome-text {
+  font-size: 1rem;
+  opacity: 0.9;
+  margin: 0.5rem 0 0 0;
+  line-height: 1.4;
+}
+
+.form-card {
+  --background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  margin-bottom: 1.5rem;
+}
+
+.name-row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.name-item {
+  flex: 1;
+  --border-radius: 12px;
+  --border-width: 2px;
+  --border-color: var(--ion-color-light-shade);
+}
+
+.form-item {
+  margin-bottom: 1rem;
+  --border-radius: 12px;
+  --border-width: 2px;
+  --border-color: var(--ion-color-light-shade);
+}
+
+.form-item.ion-focused {
+  --border-color: var(--ion-color-primary);
+}
+
+.error-message {
+  color: var(--ion-color-danger);
+  font-size: 0.8rem;
+  margin: -0.5rem 0 0.75rem 0;
+  padding-left: 1rem;
+}
+
+.terms-section {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+  padding: 0 0.5rem;
+}
+
+.terms-label {
+  font-size: 0.9rem;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.terms-link {
+  color: var(--ion-color-primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.terms-link:hover {
+  text-decoration: underline;
+}
+
+.register-btn {
+  margin: 1.5rem 0 1rem 0;
+  --border-radius: 12px;
+  height: 48px;
+  font-weight: 600;
+  --background: var(--ion-color-primary);
+}
+
+.login-section {
+  text-align: center;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.login-section p {
+  margin: 0;
+  opacity: 0.9;
+}
+
+.login-link-btn {
+  --color: white;
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+  .register-container {
+    padding: 1rem;
+  }
+  
+  .app-logo {
+    font-size: 3rem;
+  }
+  
+  .header-section h1 {
+    font-size: 1.8rem;
+  }
+  
+  .welcome-text {
+    font-size: 0.9rem;
+  }
+  
+  .name-row {
+    flex-direction: column;
+    gap: 0;
+  }
+  
+  .name-item {
+    margin-bottom: 1rem;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  .form-card {
+    --background: rgba(40, 40, 40, 0.95);
+  }
+}

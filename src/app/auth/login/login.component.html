@@ -1,0 +1,120 @@
+<ion-content class="login-content">
+  <div class="login-container">
+    <!-- Header Section -->
+    <div class="header-section">
+      <div class="logo-container">
+        <ion-icon name="heart" class="app-logo"></ion-icon>
+        <h1>Faith Flow</h1>
+      </div>
+      <p class="welcome-text">Welcome back to your spiritual community</p>
+    </div>
+
+    <!-- Login Form -->
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+      <ion-card class="form-card">
+        <ion-card-content>
+          <!-- Email Field -->
+          <ion-item fill="outline" class="form-item">
+            <ion-label position="floating">Email Address</ion-label>
+            <ion-input 
+              type="email" 
+              formControlName="email"
+              [class.ion-invalid]="loginForm.get('email')?.invalid && loginForm.get('email')?.touched"
+              placeholder="Enter your email">
+            </ion-input>
+            <ion-icon name="mail-outline" slot="start"></ion-icon>
+          </ion-item>
+          
+          <div class="error-message" *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched">
+            {{ getErrorMessage('email') }}
+          </div>
+
+          <!-- Password Field -->
+          <ion-item fill="outline" class="form-item">
+            <ion-label position="floating">Password</ion-label>
+            <ion-input 
+              [type]="showPassword ? 'text' : 'password'" 
+              formControlName="password"
+              [class.ion-invalid]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+              placeholder="Enter your password">
+            </ion-input>
+            <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+            <ion-button 
+              fill="clear" 
+              slot="end" 
+              (click)="togglePasswordVisibility()"
+              type="button">
+              <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+            </ion-button>
+          </ion-item>
+          
+          <div class="error-message" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+            {{ getErrorMessage('password') }}
+          </div>
+
+          <!-- Remember Me & Forgot Password -->
+          <div class="form-options">
+            <ion-checkbox formControlName="rememberMe"></ion-checkbox>
+            <ion-label class="remember-me">Remember me</ion-label>
+            
+            <ion-button 
+              fill="clear" 
+              size="small" 
+              class="forgot-password-btn"
+              (click)="navigateToForgotPassword()"
+              type="button">
+              Forgot Password?
+            </ion-button>
+          </div>
+
+          <!-- Login Button -->
+          <ion-button 
+            expand="block" 
+            type="submit" 
+            class="login-btn"
+            [disabled]="isLoading">
+            <ion-spinner name="crescent" *ngIf="isLoading"></ion-spinner>
+            <span *ngIf="!isLoading">Sign In</span>
+          </ion-button>
+
+          <!-- Demo Info -->
+          <div class="demo-info">
+            <ion-note>
+              <strong>Demo Account:</strong><br>
+              Email: demo@faithflow.com<br>
+              Password: password
+            </ion-note>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </form>
+
+    <!-- Sign Up Section -->
+    <div class="signup-section">
+      <p>New to Faith Flow?</p>
+      <ion-button 
+        fill="outline" 
+        expand="block" 
+        (click)="navigateToRegister()"
+        class="signup-btn">
+        Create Account
+      </ion-button>
+    </div>
+
+    <!-- Social Login (Future Enhancement) -->
+    <div class="social-login">
+      <p class="divider-text">Or continue with</p>
+      <div class="social-buttons">
+        <ion-button fill="outline" class="social-btn google-btn" disabled>
+          <ion-icon name="logo-google" slot="start"></ion-icon>
+          Google
+        </ion-button>
+        <ion-button fill="outline" class="social-btn apple-btn" disabled>
+          <ion-icon name="logo-apple" slot="start"></ion-icon>
+          Apple
+        </ion-button>
+      </div>
+      <ion-note class="coming-soon">Social login coming soon</ion-note>
+    </div>
+  </div>
+</ion-content>

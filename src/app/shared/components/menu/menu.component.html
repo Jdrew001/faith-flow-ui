@@ -1,0 +1,98 @@
+<ion-content>
+  <!-- Show menu only if user is logged in -->
+  <div *ngIf="currentUser; else loginPrompt">
+    <!-- User Profile Section -->
+    <div class="user-profile">
+      <div class="user-avatar">
+        <ion-icon name="person-circle" *ngIf="!currentUser.avatar"></ion-icon>
+        <img [src]="currentUser.avatar" *ngIf="currentUser.avatar" alt="Profile">
+      </div>
+      <div class="user-info">
+        <h3>{{ currentUser.firstName }} {{ currentUser.lastName }}</h3>
+        <p>{{ currentUser.churchName || 'Faith Flow Member' }}</p>
+      </div>
+      <ion-button fill="clear" (click)="logout()" class="logout-btn">
+        <ion-icon name="log-out-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+    </div>
+
+    <ion-list id="inbox-list">
+    <ion-list-header>Faith Flow</ion-list-header>
+    <ion-note>Your spiritual community</ion-note>
+
+    @for (p of appPages; track p; let i = $index) {
+      <ion-menu-toggle auto-hide="false">
+        <ion-item 
+          routerDirection="root" 
+          [routerLink]="[p.url]" 
+          lines="none" 
+          detail="false" 
+          routerLinkActive="selected">
+          <ion-icon 
+            aria-hidden="true" 
+            slot="start" 
+            [ios]="p.icon + '-outline'" 
+            [md]="p.icon + '-sharp'">
+          </ion-icon>
+          <ion-label>{{ p.title }}</ion-label>
+        </ion-item>
+      </ion-menu-toggle>
+    }
+  </ion-list>
+
+  <ion-list id="labels-list">
+    <ion-list-header>Quick Access</ion-list-header>
+
+    @for (label of labels; track label) {
+      <ion-item lines="none">
+        <ion-icon 
+          aria-hidden="true" 
+          slot="start" 
+          ios="bookmark-outline" 
+          md="bookmark-sharp">
+        </ion-icon>
+        <ion-label>{{ label }}</ion-label>
+      </ion-item>
+    }
+  </ion-list>
+
+  <!-- PWA Install Section -->
+  <div class="pwa-install-section">
+    <app-pwa-install></app-pwa-install>
+  </div>
+
+  <!-- App Info Footer -->
+  <div class="menu-footer">
+    <ion-item lines="none">
+      <ion-icon name="information-circle-outline" slot="start"></ion-icon>
+      <ion-label>
+        <h3>Faith Flow v1.0</h3>
+        <p>Connecting hearts, strengthening faith</p>
+      </ion-label>
+    </ion-item>
+  </div>
+  </div>
+
+  <!-- Show login prompt when not authenticated -->
+  <ng-template #loginPrompt>
+    <div class="login-prompt">
+      <div class="logo-section">
+        <ion-icon name="heart" class="app-logo"></ion-icon>
+        <h2>Faith Flow</h2>
+        <p>Please sign in to access your spiritual community</p>
+      </div>
+      
+      <div class="login-buttons">
+        <ion-button expand="block" (click)="navigateToLogin()" class="login-btn">
+          <ion-icon name="log-in-outline" slot="start"></ion-icon>
+          Sign In
+        </ion-button>
+        
+        <ion-button expand="block" fill="outline" (click)="navigateToRegister()" class="register-btn">
+          <ion-icon name="person-add-outline" slot="start"></ion-icon>
+          Create Account
+        </ion-button>
+      </div>
+    </div>
+  </ng-template>
+</ion-content>

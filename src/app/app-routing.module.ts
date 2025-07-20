@@ -1,15 +1,39 @@
-import { NgModule } from '@angular/core';
-import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+import { inject, NgModule } from '@angular/core';
+import { CanMatchFn, PreloadAllModules, RouterModule, Routes, UrlTree } from '@angular/router';
+import { AuthGuard } from './guards/auth.guard';
+import { Observable, take, tap } from 'rxjs';
+import { AuthService } from './services/auth.service';
+import { NavController } from '@ionic/angular';
+
+const isAuthenticated = (): | boolean | UrlTree | Observable<boolean | UrlTree> | Promise<boolean | UrlTree> => {
+  const authService = inject(AuthService);
+  const navController = inject(NavController);
+  return authService.isAuthenticated$.pipe(
+      take(1),
+      tap((isAuthenticated: boolean) => {
+          if (!isAuthenticated) {
+            navController.navigateRoot('/auth/login', { replaceUrl:true });
+          }
+      }),
+  );
+}
+
+const canMatch: CanMatchFn = isAuthenticated;
 
 const routes: Routes = [
   {
     path: '',
-    redirectTo: 'folder/inbox',
+    redirectTo: 'summary',
     pathMatch: 'full'
   },
   {
-    path: 'folder/:id',
-    loadChildren: () => import('./folder/folder.module').then( m => m.FolderPageModule)
+    path: 'auth',
+    loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule)
+  },
+  {
+    path: 'summary',
+    loadChildren: () => import('./summary/summary.module').then(m => m.SummaryModule),
+    canActivate: [canMatch]
   }
 ];
 
