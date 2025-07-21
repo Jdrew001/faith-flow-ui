@@ -1,0 +1,298 @@
+<div class="ion-page" id="main-content">
+  <ion-header [translucent]="false" class="events-header">
+    <ion-toolbar>
+      <ion-buttons slot="start">
+        <ion-menu-button color="light"></ion-menu-button>
+      </ion-buttons>
+      <ion-title color="light">Events</ion-title>
+      <ion-buttons slot="end">
+        <ion-button (click)="openFilters()" fill="clear" color="light">
+          <ion-icon name="filter" slot="icon-only"></ion-icon>
+        </ion-button>
+        <ion-button (click)="createEvent()" fill="clear" color="light">
+          <ion-icon name="add" slot="icon-only"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+
+    <!-- Search and View Controls -->
+    <ion-toolbar>
+      <ion-searchbar 
+        [formControl]="searchControl"
+        placeholder="Search events..."
+        debounce="300"
+        showClearButton="focus"
+        class="events-searchbar">
+      </ion-searchbar>
+      
+      <ion-buttons slot="end">
+        <!-- View Mode Toggle -->
+        <ion-segment [value]="viewMode" (ionChange)="setViewMode($event.detail.value)" class="view-mode-segment">
+          <ion-segment-button value="list">
+            <ion-icon name="list"></ion-icon>
+          </ion-segment-button>
+          <ion-segment-button value="grid">
+            <ion-icon name="grid"></ion-icon>
+          </ion-segment-button>
+          <ion-segment-button value="calendar">
+            <ion-icon name="calendar"></ion-icon>
+          </ion-segment-button>
+        </ion-segment>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content class="events-content">
+    <!-- Quick Filters Bar -->
+    <div class="quick-filters">
+      <ion-chip 
+        *ngFor="let type of eventTypes" 
+        [color]="selectedType.value === type.value ? 'primary' : 'medium'"
+        (click)="selectedType.setValue(type.value)"
+        class="filter-chip">
+        <ion-icon [name]="type.icon"></ion-icon>
+        <ion-label>{{ type.label }}</ion-label>
+      </ion-chip>
+    </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Loading events...</p>
+  </div>
+
+  <!-- Events List View -->
+  <div *ngIf="!isLoading && viewMode === 'list'" class="events-list">
+    <div *ngFor="let event of (filteredEvents$ | async); trackBy: trackByEventId" 
+         class="event-card-container">
+      <ion-card class="event-card" (click)="viewEventDetails(event)">
+        <!-- Event Image -->
+        <div class="event-image-container">
+          <img [src]="'https://picsum.photos/400/200?random=' + event.id" [alt]="event.title" />
+          <div class="event-status-badge">
+            <ion-badge [color]="getStatusColor(event.status)">{{ event.status | titlecase }}</ion-badge>
+          </div>
+          <div class="event-type-icon">
+            <ion-icon [name]="getEventIcon(event.type)" [color]="getStatusColor(event.status)"></ion-icon>
+          </div>
+        </div>
+
+        <ion-card-content>
+          <!-- Event Header -->
+          <div class="event-header">
+            <h2 class="event-title">{{ event.title }}</h2>
+            <div class="event-actions">
+              <ion-button 
+                fill="clear" 
+                size="small" 
+                color="primary"
+                (click)="$event.stopPropagation(); takeAttendance(event)"
+                *ngIf="event.status === 'upcoming' || event.status === 'ongoing'">
+                <ion-icon name="people" slot="icon-only"></ion-icon>
+              </ion-button>
+              
+              <!-- Options Button -->
+              <ion-button 
+                fill="clear" 
+                size="small" 
+                color="medium"
+                class="options-button"
+                (click)="$event.stopPropagation(); presentEventOptions(event)">
+                <ion-icon name="ellipsis-horizontal" slot="icon-only"></ion-icon>
+              </ion-button>
+            </div>
+          </div>
+
+          <!-- Event Description -->
+          <p class="event-description" *ngIf="event.description">{{ event.description }}</p>
+
+          <!-- Event Details -->
+          <div class="event-details">
+            <!-- Date & Time -->
+            <div class="detail-item">
+              <ion-icon name="calendar" color="primary"></ion-icon>
+              <span>{{ formatDate(event.date) }} at {{ formatTime(event.time) }}</span>
+            </div>
+
+            <!-- Location -->
+            <div class="detail-item">
+              <ion-icon name="location" color="primary"></ion-icon>
+              <span>{{ event.location }}</span>
+            </div>
+
+            <!-- Recurring Event Indicator -->
+            <div class="detail-item" *ngIf="event.isRecurring">
+              <ion-icon name="repeat" color="secondary"></ion-icon>
+              <span>{{ event.recurrencePattern | titlecase }} event</span>
+            </div>
+          </div>
+
+          <!-- Attendance Progress -->
+          <div class="attendance-section" *ngIf="event.maxAttendees">
+            <div class="attendance-header">
+              <span class="attendance-label">Attendance</span>
+              <span class="attendance-count">{{ event.attendeeCount || 0 }}/{{ event.maxAttendees }}</span>
+            </div>
+            <ion-progress-bar 
+              [value]="getAttendancePercentage(event) / 100"
+              [color]="getAttendancePercentage(event) > 80 ? 'warning' : 'primary'">
+            </ion-progress-bar>
+            <span class="attendance-percentage">{{ getAttendancePercentage(event) }}% full</span>
+          </div>
+
+          <!-- Event Tags -->
+          <div class="event-tags" *ngIf="event.tags && event.tags.length > 0">
+            <ion-chip *ngFor="let tag of event.tags" color="light" outline="true">
+              <ion-label>{{ tag }}</ion-label>
+            </ion-chip>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="(filteredEvents$ | async)?.length === 0" class="empty-state">
+      <ion-icon name="calendar-outline" color="medium"></ion-icon>
+      <h3>No events found</h3>
+      <p>Try adjusting your filters or create a new event</p>
+      <ion-button fill="outline" (click)="createEvent()">
+        <ion-icon name="add" slot="start"></ion-icon>
+        Create Event
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- Events Grid View -->
+  <div *ngIf="!isLoading && viewMode === 'grid'" class="events-grid">
+    <div *ngFor="let event of (filteredEvents$ | async); trackBy: trackByEventId" 
+         class="grid-event-card">
+      <ion-card (click)="viewEventDetails(event)">
+        <div class="grid-event-image">
+          <img [src]="'https://picsum.photos/280/120?random=' + event.id" [alt]="event.title" />
+          <ion-badge [color]="getStatusColor(event.status)" class="status-badge">
+            {{ event.status }}
+          </ion-badge>
+          <ion-button 
+            fill="clear" 
+            size="small" 
+            color="light"
+            class="attendance-button"
+            (click)="$event.stopPropagation(); takeAttendance(event)"
+            *ngIf="event.status === 'upcoming' || event.status === 'ongoing'">
+            <ion-icon name="people" slot="icon-only"></ion-icon>
+          </ion-button>
+        </div>
+        <ion-card-content>
+          <h4>{{ event.title }}</h4>
+          <p class="grid-event-date">{{ formatDate(event.date) }}</p>
+          <p class="grid-event-time">{{ formatTime(event.time) }}</p>
+          <div class="grid-event-location">
+            <ion-icon name="location"></ion-icon>
+            <span>{{ event.location }}</span>
+          </div>
+          <div class="grid-attendance" *ngIf="event.maxAttendees">
+            <ion-icon name="people"></ion-icon>
+            <span>{{ event.attendeeCount || 0 }}/{{ event.maxAttendees }}</span>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+  </div>
+
+  <!-- Calendar View -->
+  <div *ngIf="!isLoading && viewMode === 'calendar'" class="calendar-view">
+    <ion-card class="calendar-placeholder">
+      <ion-card-content>
+        <div class="placeholder-content">
+          <ion-icon name="calendar" color="primary" size="large"></ion-icon>
+          <h3>Calendar View</h3>
+          <p>Advanced calendar view coming soon with drag & drop functionality!</p>
+          <ion-button fill="outline" (click)="setViewMode('list')">
+            <ion-icon name="list" slot="start"></ion-icon>
+            View as List
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+  </ion-content>
+</div>
+
+<!-- Filter Modal -->
+<ion-modal #filterModal trigger="filter-modal">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Filter Events</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="filterModal.dismiss()">
+            <ion-icon name="close"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+
+    <ion-content class="filter-content">
+      <!-- Event Type Filter -->
+      <div class="filter-section">
+        <h3>Event Type</h3>
+        <ion-radio-group [formControl]="selectedType">
+          <ion-item *ngFor="let type of eventTypes">
+            <ion-radio slot="start" [value]="type.value"></ion-radio>
+            <ion-icon [name]="type.icon" slot="start"></ion-icon>
+            <ion-label>{{ type.label }}</ion-label>
+          </ion-item>
+        </ion-radio-group>
+      </div>
+
+      <!-- Status Filter -->
+      <div class="filter-section">
+        <h3>Status</h3>
+        <ion-radio-group [formControl]="selectedStatus">
+          <ion-item *ngFor="let status of statusOptions">
+            <ion-radio slot="start" [value]="status.value"></ion-radio>
+            <ion-badge [color]="status.color" slot="start">{{ status.label }}</ion-badge>
+            <ion-label>{{ status.label }}</ion-label>
+          </ion-item>
+        </ion-radio-group>
+      </div>
+
+      <!-- Date Range Filter -->
+      <div class="filter-section">
+        <h3>Date Range</h3>
+        <ion-radio-group [formControl]="dateRange">
+          <ion-item>
+            <ion-radio slot="start" value="all"></ion-radio>
+            <ion-label>All Dates</ion-label>
+          </ion-item>
+          <ion-item>
+            <ion-radio slot="start" value="today"></ion-radio>
+            <ion-label>Today</ion-label>
+          </ion-item>
+          <ion-item>
+            <ion-radio slot="start" value="week"></ion-radio>
+            <ion-label>This Week</ion-label>
+          </ion-item>
+          <ion-item>
+            <ion-radio slot="start" value="month"></ion-radio>
+            <ion-label>This Month</ion-label>
+          </ion-item>
+          <ion-item>
+            <ion-radio slot="start" value="past"></ion-radio>
+            <ion-label>Past Events</ion-label>
+          </ion-item>
+        </ion-radio-group>
+      </div>
+
+      <!-- Filter Actions -->
+      <div class="filter-actions">
+        <ion-button expand="block" fill="clear" (click)="clearFilters()">
+          Clear All Filters
+        </ion-button>
+        <ion-button expand="block" (click)="applyFilters()">
+          Apply Filters
+        </ion-button>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>
