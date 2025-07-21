@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
+import { MenuController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 import { User } from 'src/app/auth/model/auth.model';
 import { AuthService } from 'src/app/auth/services/auth.service';
@@ -33,7 +34,8 @@ export class MenuComponent implements OnInit, OnDestroy {
 
   constructor(
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private menuCtrl: MenuController
   ) { }
 
   ngOnInit() {
@@ -50,6 +52,7 @@ export class MenuComponent implements OnInit, OnDestroy {
 
   logout() {
     this.authService.logout();
+    this.menuCtrl.close();
     this.router.navigate(['/auth/login'], { replaceUrl: true });
   }
 

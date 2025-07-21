@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { NavController, MenuController } from '@ionic/angular';
+import { NavController, MenuController, ViewDidEnter } from '@ionic/angular';
 import { ActivatedRoute } from '@angular/router';
 import { AssignmentForm, Assignee } from './components/assignment-modal.component';
 
@@ -27,7 +27,7 @@ export interface FollowUpItem {
   styleUrls: ['./followups.page.scss'],
   standalone: false
 })
-export class FollowupsPage implements OnInit {
+export class FollowupsPage implements ViewDidEnter {
   followups: FollowUpItem[] = [];
   filteredFollowups: FollowUpItem[] = [];
   showBackButton: boolean = false; // Control back button visibility
@@ -82,7 +82,7 @@ export class FollowupsPage implements OnInit {
     private route: ActivatedRoute
   ) { }
 
-  ngOnInit() {
+  ionViewDidEnter() {
     // Always close the menu when navigating to this page
     this.menuCtrl.close();
     

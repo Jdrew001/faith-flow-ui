@@ -17,7 +17,10 @@ export class AuthService {
   isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
   currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private navController: NavController
+  ) {
     // Check initial authentication state
     this.checkAuthStatus();
     this.loadStoredUser();
@@ -85,6 +88,7 @@ export class AuthService {
     localStorage.removeItem('current_user');
     this.isAuthenticatedSubject.next(false);
     this.currentUserSubject.next(null);
+    this.navController.navigateRoot(['/auth/login']);
   }
 
   private loadStoredUser() {
@@ -147,5 +151,39 @@ export class AuthService {
         observer.complete();
       }, 1000);
     });
+  }
+
+  getAccessToken(): string | null {
+    return localStorage.getItem('auth_token');
+  }
+
+  setAccessToken(token: string): void {
+    localStorage.setItem('auth_token', token);
+  }
+
+  getRefreshToken(): string | null {
+    return localStorage.getItem('refresh_token');
+  }
+
+  refreshAccessToken(): Observable<VerifyCodeResponse> {
+    const refreshToken = this.getRefreshToken();
+    if (!refreshToken) {
+      throw new Error('No refresh token available');
+    }
+
+    return this.http.post<VerifyCodeResponse>(`${this.apiUrl}/refresh`, { 
+      refreshToken 
+    }).pipe(
+      tap((response: VerifyCodeResponse) => {
+        if (response.success && response.accessToken) {
+          this.setAccessToken(response.accessToken);
+          
+          // Update refresh token if provided
+          if (response.refreshToken) {
+            localStorage.setItem('refresh_token', response.refreshToken);
+          }
+        }
+      })
+    );
   }
 }
