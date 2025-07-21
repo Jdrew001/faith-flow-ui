@@ -1,0 +1,207 @@
+// Assignment Modal Styles
+.assignment-modal {
+  .modal-content {
+    padding: 16px;
+  }
+
+  .followup-header {
+    background: var(--ion-color-light);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    .followup-info {
+      flex: 1;
+
+      h3 {
+        margin: 0 0 8px 0;
+        color: var(--ion-color-dark);
+        font-weight: 600;
+      }
+
+      .person-name, .followup-type {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 4px 0;
+        color: var(--ion-color-medium-shade);
+        font-size: 14px;
+
+        ion-icon {
+          font-size: 16px;
+        }
+      }
+    }
+
+    .priority-chip {
+      font-weight: 600;
+    }
+  }
+
+  .assignment-form {
+    h4 {
+      margin: 0 0 20px 0;
+      color: var(--ion-color-dark);
+      font-weight: 600;
+    }
+
+    .form-section {
+      margin-bottom: 24px;
+
+      .section-label {
+        display: block;
+        font-weight: 600;
+        color: var(--ion-color-dark);
+        margin-bottom: 12px;
+        font-size: 16px;
+      }
+    }
+
+    .assignee-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+
+      .assignee-card {
+        background: var(--ion-color-light);
+        border: 2px solid transparent;
+        border-radius: 12px;
+        padding: 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+
+        &:hover {
+          background: var(--ion-color-light-shade);
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        &.selected {
+          border-color: var(--ion-color-primary);
+          background: rgba(var(--ion-color-primary-rgb), 0.1);
+          box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.2);
+        }
+
+        .assignee-avatar {
+          width: 48px;
+          height: 48px;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 600;
+          font-size: 18px;
+          color: white;
+
+          &[data-color="primary"] { background: var(--ion-color-primary); }
+          &[data-color="secondary"] { background: var(--ion-color-secondary); }
+          &[data-color="tertiary"] { background: var(--ion-color-tertiary); }
+          &[data-color="success"] { background: var(--ion-color-success); }
+          &[data-color="warning"] { background: var(--ion-color-warning); }
+
+          &.unassigned {
+            background: var(--ion-color-medium);
+            ion-icon {
+              font-size: 24px;
+            }
+          }
+        }
+
+        .assignee-info {
+          flex: 1;
+
+          .assignee-name {
+            font-weight: 600;
+            color: var(--ion-color-dark);
+            margin-bottom: 2px;
+          }
+
+          .assignee-role {
+            font-size: 12px;
+            color: var(--ion-color-medium);
+          }
+        }
+
+        .selection-icon {
+          color: var(--ion-color-primary);
+          font-size: 24px;
+        }
+
+        &.unassigned-card.selected {
+          border-color: var(--ion-color-medium);
+          background: rgba(var(--ion-color-medium-rgb), 0.1);
+        }
+      }
+    }
+
+    ion-item {
+      --background: var(--ion-color-light);
+      --border-radius: 12px;
+      margin-bottom: 8px;
+    }
+
+    ion-textarea {
+      --background: transparent;
+    }
+  }
+
+  .modal-actions {
+    padding-top: 24px;
+    border-top: 1px solid var(--ion-color-light);
+
+    ion-button {
+      margin-bottom: 12px;
+      --border-radius: 12px;
+      font-weight: 600;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}
+
+// Priority option styling in select
+.priority-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  &.high { color: var(--ion-color-danger); }
+  &.medium { color: var(--ion-color-warning); }
+  &.low { color: var(--ion-color-success); }
+}
+
+// Responsive design
+@media (min-width: 768px) {
+  .assignment-modal {
+    .assignee-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 12px;
+      
+      ion-button {
+        margin-bottom: 0;
+        flex: 1;
+      }
+    }
+  }
+}
+
+@media (min-width: 1024px) {
+  .assignment-modal {
+    .assignee-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+}

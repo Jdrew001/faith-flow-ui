@@ -1,0 +1,147 @@
+<ion-modal [isOpen]="isOpen" (willDismiss)="closeModal()">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Assign Follow-up</ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="closeModal()" fill="clear">
+            <ion-icon name="close"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    
+    <ion-content class="assignment-modal">
+      <div class="modal-content" *ngIf="followupItem">
+        <!-- Follow-up Info Header -->
+        <div class="followup-header">
+          <div class="followup-info">
+            <h3>{{ followupItem.title }}</h3>
+            <p class="person-name">
+              <ion-icon name="person-outline"></ion-icon>
+              {{ followupItem.personName }}
+            </p>
+            <p class="followup-type">
+              <ion-icon [name]="getTypeIcon(followupItem.type)"></ion-icon>
+              {{ followupItem.type }}
+            </p>
+          </div>
+          <ion-chip [color]="getPriorityColor(followupItem.priority)" class="priority-chip">
+            {{ followupItem.priority | titlecase }}
+          </ion-chip>
+        </div>
+
+        <!-- Assignment Form -->
+        <div class="assignment-form">
+          <h4>Assignment Details</h4>
+          
+          <!-- Assignee Selection -->
+          <div class="form-section">
+            <ion-label class="section-label">Assign To</ion-label>
+            <div class="assignee-grid">
+              <div 
+                *ngFor="let assignee of getAvailableAssignees()" 
+                class="assignee-card" 
+                [class.selected]="assignmentForm.assignedTo === assignee.value"
+                (click)="selectAssignee(assignee.value)">
+                <div class="assignee-avatar" [attr.data-color]="assignee.color">
+                  {{ assignee.avatar }}
+                </div>
+                <div class="assignee-info">
+                  <div class="assignee-name">{{ assignee.label }}</div>
+                  <div class="assignee-role">{{ assignee.role }}</div>
+                </div>
+                <ion-icon 
+                  name="checkmark-circle" 
+                  class="selection-icon"
+                  *ngIf="assignmentForm.assignedTo === assignee.value">
+                </ion-icon>
+              </div>
+              
+              <!-- Unassigned Option -->
+              <div 
+                class="assignee-card unassigned-card" 
+                [class.selected]="assignmentForm.assignedTo === ''"
+                (click)="selectAssignee('')">
+                <div class="assignee-avatar unassigned">
+                  <ion-icon name="person-outline"></ion-icon>
+                </div>
+                <div class="assignee-info">
+                  <div class="assignee-name">Unassigned</div>
+                  <div class="assignee-role">No assignee</div>
+                </div>
+                <ion-icon 
+                  name="checkmark-circle" 
+                  class="selection-icon"
+                  *ngIf="assignmentForm.assignedTo === ''">
+                </ion-icon>
+              </div>
+            </div>
+          </div>
+
+          <!-- Priority Update -->
+          <div class="form-section">
+            <ion-item>
+              <ion-label>Priority Level</ion-label>
+              <ion-select [(ngModel)]="assignmentForm.priority" interface="popover">
+                <ion-select-option value="high">
+                  <span class="priority-option high">🔴 High Priority</span>
+                </ion-select-option>
+                <ion-select-option value="medium">
+                  <span class="priority-option medium">🟡 Medium Priority</span>
+                </ion-select-option>
+                <ion-select-option value="low">
+                  <span class="priority-option low">🟢 Low Priority</span>
+                </ion-select-option>
+              </ion-select>
+            </ion-item>
+          </div>
+
+          <!-- Due Date -->
+          <div class="form-section">
+            <ion-item>
+              <ion-label>Due Date</ion-label>
+              <ion-datetime 
+                [(ngModel)]="assignmentForm.dueDate" 
+                display-format="MMM DD, YYYY"
+                picker-format="YYYY-MM-DD"
+                placeholder="Select date">
+              </ion-datetime>
+            </ion-item>
+          </div>
+
+          <!-- Assignment Notes -->
+          <div class="form-section">
+            <ion-item>
+              <ion-label position="stacked">Assignment Notes</ion-label>
+              <ion-textarea 
+                [(ngModel)]="assignmentForm.notes"
+                placeholder="Add any special instructions or context..."
+                rows="3"
+                auto-grow="true">
+              </ion-textarea>
+            </ion-item>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="modal-actions">
+          <ion-button 
+            expand="block" 
+            fill="clear" 
+            (click)="closeModal()"
+            color="medium">
+            Cancel
+          </ion-button>
+          <ion-button 
+            expand="block" 
+            (click)="saveAssignment()"
+            [disabled]="!assignmentForm.assignedTo">
+            <ion-icon name="checkmark-outline" slot="start"></ion-icon>
+            Assign Follow-up
+          </ion-button>
+        </div>
+      </div>
+    </ion-content>
+  </ng-template>
+</ion-modal>

@@ -1,4 +1,6 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
+import { MenuController, ViewDidEnter } from '@ionic/angular';
 import { AuthService } from '../auth/services/auth.service';
 import { DashboardService, AttendanceStats, FollowUpItem, UpcomingEvent, EngagementData, WorkflowTriggers } from '../services/dashboard.service';
 import { Observable, forkJoin } from 'rxjs';
@@ -9,7 +11,7 @@ import { Observable, forkJoin } from 'rxjs';
   styleUrls: ['./summary.component.scss'],
   standalone: false
 })
-export class SummaryComponent implements OnInit {
+export class SummaryComponent implements ViewDidEnter {
   currentUser$: Observable<any>;
   
   attendanceStats: AttendanceStats = {
@@ -43,17 +45,18 @@ export class SummaryComponent implements OnInit {
 
   constructor(
     private authService: AuthService,
-    private dashboardService: DashboardService
+    private dashboardService: DashboardService,
+    private router: Router,
+    private menuCtrl: MenuController
   ) {
     this.currentUser$ = this.authService.currentUser$;
   }
 
-  ngOnInit() {
+  ionViewDidEnter() {
+    // Close the menu when navigating to this page
+    this.menuCtrl.close();
+    
     this.loadDashboardData();
-  }
-
-  test(item: FollowUpItem) {
-    console.log('Testing item:', item);
   }
 
   private loadDashboardData() {
@@ -226,8 +229,7 @@ export class SummaryComponent implements OnInit {
   }
 
   onViewAllFollowUps() {
-    // Navigate to follow-ups page
-    console.log('Navigate to follow-ups');
+    this.router.navigate(['/followups'], { queryParams: { fromSummary: 'true' } });
   }
 
   onGoToEvents() {
@@ -311,4 +313,5 @@ export class SummaryComponent implements OnInit {
     if (diffHours < 24) return `${diffHours}h ago`;
     return syncDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   }
+
 }

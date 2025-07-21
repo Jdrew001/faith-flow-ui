@@ -54,6 +54,43 @@
   --color: #ffffff;
 }
 
+// Global Header Styles - Match Card Colors
+ion-app ion-header {
+  ion-toolbar {
+    --background: #3a3a3c !important;
+    --color: #ffffff !important;
+    --border-color: #48484a !important;
+  }
+}
+
+// Ensure menu buttons are visible across all platforms
+ion-app ion-menu-button {
+  --color: #8e8e93 !important;
+  color: #8e8e93 !important;
+}
+
+// Override Ionic's button-native color for menu buttons
+ion-app ion-menu-button .button-native {
+  color: #8e8e93 !important;
+}
+
+::ng-deep .button-inner {
+  color: #8e8e93 !important;
+}
+
+// Ensure all header buttons are visible across all platforms
+ion-app ion-header ion-button {
+  --color: #ffffff !important;
+}
+
+// Override any theme-specific toolbar styles
+:root.ios ion-app ion-header ion-toolbar,
+:root.md ion-app ion-header ion-toolbar {
+  --background: #3a3a3c !important;
+  --color: #ffffff !important;
+  --border-color: #48484a !important;
+}
+
 // Status Bar styling for iOS
 @media (max-width: 767px) {
   .ios {

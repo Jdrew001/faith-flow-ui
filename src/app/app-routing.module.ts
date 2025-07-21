@@ -16,6 +16,11 @@ const routes: Routes = [
     path: 'summary',
     loadChildren: () => import('./summary/summary.module').then(m => m.SummaryModule),
     canActivate: [AuthGuard]
+  },
+  {
+    path: 'followups',
+    loadChildren: () => import('./followups/followups.module').then(m => m.FollowupsPageModule),
+    canActivate: [AuthGuard]
   }
 ];
 
