@@ -1,0 +1,45 @@
+<ion-card class="session-card">
+  <ion-card-header>
+    <div class="session-header">
+      <div class="session-info">
+        <ion-card-title>{{ session?.title || 'Session Title' }}</ion-card-title>
+        <ion-card-subtitle>{{ session?.type || 'Session Type' }}</ion-card-subtitle>
+      </div>
+      <ion-chip [color]="getStatusColor(session?.status)" class="status-chip">
+        <ion-icon [name]="getStatusIcon(session?.status)"></ion-icon>
+        <ion-label>{{ session?.status | titlecase }}</ion-label>
+      </ion-chip>
+    </div>
+  </ion-card-header>
+  
+  <ion-card-content>
+    <div class="session-details">
+      <div class="detail-row">
+        <ion-icon name="calendar" color="primary"></ion-icon>
+        <span>{{ formatDate(session?.date) }}</span>
+      </div>
+      
+      <div class="detail-row">
+        <ion-icon name="time" color="primary"></ion-icon>
+        <span>{{ formatTime(session?.startTime) }} - {{ formatTime(session?.endTime) }}</span>
+      </div>
+      
+      <div class="detail-row" *ngIf="session?.location">
+        <ion-icon name="location" color="primary"></ion-icon>
+        <span>{{ session.location }}</span>
+      </div>
+    </div>
+    
+    <div class="attendance-info" *ngIf="session?.attendance">
+      <div class="attendance-header">
+        <span class="label">Attendance</span>
+        <span class="count">{{ session.attendance.present }}/{{ session.attendance.total }}</span>
+      </div>
+      <ion-progress-bar 
+        [value]="session.attendance.rate / 100" 
+        [color]="getAttendanceColor(session.attendance.rate)">
+      </ion-progress-bar>
+      <span class="rate">{{ session.attendance.rate }}% attendance</span>
+    </div>
+  </ion-card-content>
+</ion-card>

@@ -1,0 +1,85 @@
+.session-card {
+  margin: 1rem 0;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  
+  .session-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    
+    .session-info {
+      flex: 1;
+      
+      ion-card-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+      }
+      
+      ion-card-subtitle {
+        color: var(--ion-color-medium);
+        font-size: 0.9rem;
+      }
+    }
+    
+    .status-chip {
+      flex-shrink: 0;
+    }
+  }
+  
+  .session-details {
+    margin-bottom: 1rem;
+    
+    .detail-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      
+      ion-icon {
+        margin-right: 0.75rem;
+        font-size: 1rem;
+      }
+      
+      span {
+        font-size: 0.9rem;
+        color: var(--ion-color-dark);
+      }
+    }
+  }
+  
+  .attendance-info {
+    background: var(--ion-color-light);
+    border-radius: 8px;
+    padding: 0.75rem;
+    
+    .attendance-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      
+      .label {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--ion-color-dark);
+      }
+      
+      .count {
+        font-weight: 600;
+        font-size: 0.9rem;
+        color: var(--ion-color-primary);
+      }
+    }
+    
+    ion-progress-bar {
+      margin-bottom: 0.25rem;
+      border-radius: 3px;
+    }
+    
+    .rate {
+      font-size: 0.8rem;
+      color: var(--ion-color-medium);
+    }
+  }
+}

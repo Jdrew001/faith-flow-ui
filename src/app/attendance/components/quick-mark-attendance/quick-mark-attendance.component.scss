@@ -1,0 +1,350 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.quick-mark-content {
+  --background: #f8f9fa;
+}
+
+.session-info-header {
+  background: linear-gradient(135deg, var(--ion-color-primary) 0%, var(--ion-color-secondary) 100%);
+  color: white;
+  padding: 20px;
+  
+  .session-details {
+    margin-bottom: 16px;
+    
+    h3 {
+      margin: 0 0 4px 0;
+      font-size: 1.3rem;
+      font-weight: 600;
+    }
+    
+    p {
+      margin: 0;
+      font-size: 0.9rem;
+      opacity: 0.9;
+    }
+  }
+  
+  .attendance-summary {
+    display: flex;
+    gap: 20px;
+    
+    .summary-item {
+      text-align: center;
+      
+      .count {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 2px;
+      }
+      
+      .label {
+        font-size: 0.8rem;
+        opacity: 0.9;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      
+      &.present .count {
+        color: var(--ion-color-success-tint);
+      }
+      
+      &.absent .count {
+        color: var(--ion-color-danger-tint);
+      }
+      
+      &.total .count {
+        color: var(--ion-color-warning-tint);
+      }
+    }
+  }
+}
+
+.search-actions-section {
+  background: white;
+  padding: 16px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  
+  .people-searchbar {
+    --background: #f1f3f4;
+    --border-radius: 12px;
+    margin-bottom: 12px;
+  }
+  
+  .quick-actions {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    
+    ion-button {
+      white-space: nowrap;
+      --padding-start: 12px;
+      --padding-end: 12px;
+      
+      ion-icon {
+        font-size: 16px;
+      }
+    }
+  }
+}
+
+.loading-container {
+  padding: 20px;
+}
+
+.people-list {
+  padding: 20px;
+  
+  .person-card {
+    margin-bottom: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+    
+    &.marked-present {
+      border-color: var(--ion-color-success);
+      background: rgba(var(--ion-color-success-rgb), 0.05);
+    }
+    
+    &.marked-absent {
+      border-color: var(--ion-color-danger);
+      background: rgba(var(--ion-color-danger-rgb), 0.05);
+    }
+    
+    ion-card-content {
+      padding: 16px;
+    }
+    
+    .person-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      position: relative;
+      
+      .person-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex: 1;
+        
+        .person-avatar {
+          width: 48px;
+          height: 48px;
+          border: 2px solid var(--ion-color-light-shade);
+        }
+        
+        .person-details {
+          flex: 1;
+          
+          .person-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--ion-color-dark);
+            margin-bottom: 4px;
+          }
+          
+          .person-meta {
+            .person-email {
+              font-size: 0.85rem;
+              color: var(--ion-color-medium-shade);
+              margin-bottom: 4px;
+            }
+            
+            .person-groups {
+              display: flex;
+              gap: 4px;
+              flex-wrap: wrap;
+              
+              .group-chip {
+                font-size: 0.7rem;
+                height: 20px;
+                --background: #f1f3f4;
+                --color: var(--ion-color-medium-shade);
+              }
+            }
+          }
+        }
+      }
+      
+      .attendance-actions {
+        display: flex;
+        gap: 8px;
+        
+        .attendance-btn {
+          --padding-start: 8px;
+          --padding-end: 8px;
+          min-width: 80px;
+          
+          ion-icon {
+            font-size: 14px;
+          }
+        }
+      }
+      
+      .status-indicator {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        
+        .status-icon {
+          font-size: 20px;
+          background: white;
+          border-radius: 50%;
+        }
+      }
+    }
+  }
+}
+
+.empty-state {
+  padding: 32px 20px;
+  
+  .empty-content {
+    text-align: center;
+    padding: 32px;
+    
+    ion-icon {
+      margin-bottom: 16px;
+    }
+    
+    h3 {
+      margin: 0 0 8px 0;
+      color: var(--ion-color-dark);
+    }
+    
+    p {
+      margin: 0;
+      color: var(--ion-color-medium);
+    }
+  }
+}
+
+.quick-mark-footer {
+  ion-toolbar {
+    --background: white;
+    --border-style: solid;
+    --border-width: 1px 0 0 0;
+    --border-color: var(--ion-color-light-shade);
+    
+    .footer-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      gap: 12px;
+      
+      ion-button {
+        flex: 1;
+        margin: 0;
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .session-info-header {
+    padding: 16px;
+    
+    .attendance-summary {
+      gap: 16px;
+      
+      .summary-item {
+        .count {
+          font-size: 1.3rem;
+        }
+        
+        .label {
+          font-size: 0.75rem;
+        }
+      }
+    }
+  }
+  
+  .search-actions-section {
+    padding: 12px;
+    
+    .quick-actions {
+      gap: 6px;
+      
+      ion-button {
+        font-size: 0.8rem;
+        --padding-start: 8px;
+        --padding-end: 8px;
+      }
+    }
+  }
+  
+  .people-list {
+    padding: 16px;
+    
+    .person-card {
+      .person-content {
+        gap: 12px;
+        
+        .person-info {
+          gap: 10px;
+          
+          .person-avatar {
+            width: 40px;
+            height: 40px;
+          }
+          
+          .person-details .person-name {
+            font-size: 0.95rem;
+          }
+        }
+        
+        .attendance-actions {
+          flex-direction: column;
+          gap: 6px;
+          
+          .attendance-btn {
+            min-width: 70px;
+            font-size: 0.8rem;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Dark mode support
+@media (prefers-color-scheme: dark) {
+  .quick-mark-content {
+    --background: #1a1a1a;
+  }
+  
+  .search-actions-section {
+    background: #2d2d2d;
+  }
+  
+  .person-card {
+    background: #2d2d2d;
+    
+    &.marked-present {
+      background: rgba(var(--ion-color-success-rgb), 0.1);
+    }
+    
+    &.marked-absent {
+      background: rgba(var(--ion-color-danger-rgb), 0.1);
+    }
+  }
+  
+  .people-searchbar {
+    --background: #404040;
+  }
+  
+  .quick-mark-footer ion-toolbar {
+    --background: #2d2d2d;
+    --border-color: #404040;
+  }
+}

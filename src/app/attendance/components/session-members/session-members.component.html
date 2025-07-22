@@ -1,0 +1,164 @@
+<div class="session-members-modal">
+  <ion-header>
+    <ion-toolbar>
+      <ion-title>{{ session?.title }} - Members</ion-title>
+      <ion-buttons slot="end">
+        <ion-button (click)="dismiss()" fill="clear">
+          <ion-icon name="close" slot="icon-only"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+    
+    <!-- Session Info Header -->
+    <ion-toolbar class="session-info-toolbar">
+      <div class="session-summary">
+        <div class="session-details">
+          <h3>{{ session?.title }}</h3>
+          <div class="session-meta">
+            <span>{{ session?.date | date:'EEE, MMM d, y' }}</span>
+            <span>{{ session?.startTime }} - {{ session?.endTime }}</span>
+            <span>{{ session?.location }}</span>
+          </div>
+        </div>
+        
+        <div class="attendance-stats-summary">
+          <div class="stat-circle">
+            <div class="rate">{{ attendanceRate }}%</div>
+            <div class="label">Rate</div>
+          </div>
+        </div>
+      </div>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content class="members-content">
+    <!-- Quick Actions Sticky Bar -->
+    <div class="quick-actions-bar">
+      <ion-button 
+        (click)="markAllPresent()" 
+        fill="clear" 
+        size="small" 
+        color="success">
+        <ion-icon name="checkmark-circle" slot="start"></ion-icon>
+        Mark All Present
+      </ion-button>
+      
+      <ion-button 
+        (click)="markAllAbsent()" 
+        fill="clear" 
+        size="small" 
+        color="danger">
+        <ion-icon name="close-circle" slot="start"></ion-icon>
+        Mark All Absent
+      </ion-button>
+      
+      <ion-button 
+        (click)="clearAll()" 
+        fill="clear" 
+        size="small" 
+        color="medium">
+        <ion-icon name="refresh" slot="start"></ion-icon>
+        Clear All
+      </ion-button>
+    </div>
+
+    <!-- Search & Filter Bar -->
+    <div class="search-filter-bar">
+      <ion-searchbar 
+        [formControl]="searchControl"
+        placeholder="Search members..."
+        debounce="300"
+        showClearButton="focus"
+        class="member-searchbar">
+      </ion-searchbar>
+
+      <div class="filter-buttons">
+        <ion-button 
+          [fill]="selectedFilter === 'all' ? 'solid' : 'outline'"
+          [color]="selectedFilter === 'all' ? 'primary' : 'medium'"
+          size="small"
+          (click)="onFilterChange('all')">
+          All ({{ members.length }})
+        </ion-button>
+        
+        <ion-button 
+          [fill]="selectedFilter === 'unmarked' ? 'solid' : 'outline'"
+          [color]="selectedFilter === 'unmarked' ? 'warning' : 'medium'"
+          size="small"
+          (click)="onFilterChange('unmarked')">
+          Unmarked ({{ unmarkedCount }})
+        </ion-button>
+        
+        <ion-button 
+          [fill]="selectedFilter === 'present' ? 'solid' : 'outline'"
+          [color]="selectedFilter === 'present' ? 'success' : 'medium'"
+          size="small"
+          (click)="onFilterChange('present')">
+          Present ({{ presentCount }})
+        </ion-button>
+        
+        <ion-button 
+          [fill]="selectedFilter === 'absent' ? 'solid' : 'outline'"
+          [color]="selectedFilter === 'absent' ? 'danger' : 'medium'"
+          size="small"
+          (click)="onFilterChange('absent')">
+          Absent ({{ absentCount }})
+        </ion-button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-state">
+      <ion-spinner name="circular"></ion-spinner>
+      <p>Loading members...</p>
+    </div>
+
+    <!-- Members List -->
+    <div *ngIf="!isLoading" class="members-list">
+      <div 
+        *ngFor="let member of filteredMembers; trackBy: trackByMemberId"
+        class="member-row"
+        (click)="toggleMemberStatus(member)">
+        
+        <div class="member-avatar">
+          <div *ngIf="!member.avatar" class="avatar-initials">
+            {{ getInitials(member.personName) }}
+          </div>
+          <img *ngIf="member.avatar" [src]="member.avatar" [alt]="member.personName">
+        </div>
+        
+        <div class="member-info">
+          <div class="member-name">{{ member.personName }}</div>
+          <div class="member-status">
+            <ion-icon 
+              [name]="getStatusIcon(member.status)" 
+              [color]="getStatusColor(member.status)">
+            </ion-icon>
+            <span [class]="'status-text ' + member.status.toLowerCase()">
+              {{ member.status }}
+            </span>
+            <span *ngIf="member.timestamp" class="timestamp">
+              {{ member.timestamp | date:'shortTime' }}
+            </span>
+          </div>
+        </div>
+        
+        <div class="member-actions">
+          <ion-button 
+            fill="clear" 
+            size="small"
+            [color]="getStatusColor(member.status)">
+            <ion-icon [name]="getStatusIcon(member.status)" slot="icon-only"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="filteredMembers.length === 0" class="empty-members">
+        <ion-icon name="people-outline" class="empty-icon"></ion-icon>
+        <h3>No Members Found</h3>
+        <p>No members match your current search or filter.</p>
+      </div>
+    </div>
+  </ion-content>
+</div>

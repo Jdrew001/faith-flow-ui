@@ -17,14 +17,24 @@ const routes: Routes = [
     loadChildren: () => import('./summary/summary.module').then(m => m.SummaryModule),
     canActivate: [AuthGuard]
   },
+  // {
+  //   path: 'events',
+  //   loadChildren: () => import('./events/events.module').then(m => m.EventsPageModule),
+  //   canActivate: [AuthGuard]
+  // },
   {
     path: 'events',
-    loadChildren: () => import('./events/events.module').then(m => m.EventsPageModule),
-    canActivate: [AuthGuard]
+    redirectTo: '/attendance',
+    pathMatch: 'full'
   },
   {
     path: 'followups',
     loadChildren: () => import('./followups/followups.module').then(m => m.FollowupsPageModule),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'attendance',
+    loadChildren: () => import('./attendance/attendance.module').then(m => m.AttendancePageModule),
     canActivate: [AuthGuard]
   }
 ];

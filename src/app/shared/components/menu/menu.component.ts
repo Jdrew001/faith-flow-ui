@@ -17,9 +17,8 @@ export class MenuComponent implements OnInit, OnDestroy {
 
   public appPages = [
     { title: 'Dashboard', url: '/summary', icon: 'grid', description: 'Overview & metrics' },
-    { title: 'Attendance', url: '/attendance', icon: 'people', description: 'Track participation' },
+    { title: 'Attendance', url: '/attendance', icon: 'people', description: 'Sessions & participation' },
     { title: 'Follow-ups', url: '/followups', icon: 'heart', description: 'Member care' },
-    { title: 'Events', url: '/events', icon: 'calendar', description: 'Church activities' },
     { title: 'Workflows', url: '/workflows', icon: 'repeat', description: 'Automated processes' },
     { title: 'Reports', url: '/reports', icon: 'analytics', description: 'Insights & trends' },
     { title: 'Settings', url: '/settings', icon: 'settings', description: 'Configure app' }
@@ -29,7 +28,7 @@ export class MenuComponent implements OnInit, OnDestroy {
     { title: 'Add Visitor', icon: 'person-add', action: 'addVisitor' },
     { title: 'Prayer Request', icon: 'heart', action: 'prayerRequest' },
     { title: 'Send Message', icon: 'mail', action: 'sendMessage' },
-    { title: 'Create Event', icon: 'add-circle', action: 'createEvent' }
+    { title: 'New Session', icon: 'add-circle', action: 'createSession' }
   ];
 
   constructor(
@@ -75,8 +74,9 @@ export class MenuComponent implements OnInit, OnDestroy {
       case 'sendMessage':
         console.log('Send message functionality');
         break;
-      case 'createEvent':
-        console.log('Create event functionality');
+      case 'createSession':
+        this.router.navigate(['/attendance'], { queryParams: { action: 'create' } });
+        this.menuCtrl.close();
         break;
       default:
         console.log('Unknown action:', action);

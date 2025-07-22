@@ -1,0 +1,326 @@
+// Session Members Modal - Clean & Functional Design
+
+.session-members-modal {
+  
+  ion-header {
+    ion-toolbar {
+      --background: #3a3a3c;
+      --color: #ffffff;
+      --border-color: #48484a;
+      
+      ion-title {
+        font-weight: 600;
+        font-size: 18px;
+      }
+      
+      ion-buttons {
+        ion-button {
+          --color: #ffffff;
+        }
+      }
+    }
+    
+    .session-info-toolbar {
+      --background: #2c2c2e;
+      padding: 16px 0;
+      border-bottom: 1px solid #48484a;
+      
+      .session-summary {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 16px;
+        
+        .session-details {
+          flex: 1;
+          
+          h3 {
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+          }
+          
+          .session-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            
+            span {
+              color: #8e8e93;
+              font-size: 12px;
+            }
+          }
+        }
+        
+        .attendance-stats-summary {
+          .stat-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #34c759, #30d158);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            
+            .rate {
+              color: #ffffff;
+              font-size: 16px;
+              font-weight: 700;
+            }
+            
+            .label {
+              color: #ffffff;
+              font-size: 10px;
+              opacity: 0.8;
+            }
+          }
+        }
+      }
+    }
+  }
+  
+  .members-content {
+    --background: #2c2c2e;
+    --padding-start: 0;
+    --padding-end: 0;
+    height: 100vh;
+  }
+  
+  // Quick Actions Bar
+  .quick-actions-bar {
+    background: #3a3a3c;
+    padding: 12px 16px;
+    border-bottom: 1px solid #48484a;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+        margin-bottom: 12px;
+    
+    ion-button {
+      --border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      flex: 1;
+      min-width: 120px;
+      
+      ion-icon {
+        font-size: 16px;
+      }
+    }
+  }
+  
+  // Search & Filter Bar
+  .search-filter-bar {
+    padding: 16px;
+    background: #2c2c2e;
+    border-bottom: 1px solid #48484a;
+    
+    .member-searchbar {
+      --background: #48484a;
+      --color: #ffffff;
+      --placeholder-color: #8e8e93;
+      --icon-color: #8e8e93;
+      --clear-button-color: #8e8e93;
+      border-radius: 12px;
+      margin-bottom: 12px;
+    }
+    
+    .filter-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      
+      ion-button {
+        --border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        min-width: auto;
+        
+        &[fill="outline"] {
+          --border-width: 1px;
+        }
+      }
+    }
+  }
+  
+  // Loading State
+  .loading-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #8e8e93;
+    
+    ion-spinner {
+      --color: #007aff;
+      margin-bottom: 16px;
+    }
+    
+    p {
+      font-size: 16px;
+      margin: 0;
+    }
+  }
+  
+  // Members List
+  .members-list {
+    padding: 10px 16px 20px;
+    
+    .member-row {
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      background: #3a3a3c;
+      border-radius: 12px;
+      margin-bottom: 8px;
+      border: 1px solid #48484a;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background: #48484a;
+        transform: translateX(4px);
+      }
+      
+      &:active {
+        transform: scale(0.98);
+      }
+      
+      .member-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin-right: 16px;
+        overflow: hidden;
+        
+        .avatar-initials {
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(135deg, #007aff, #5ac8fa);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: #ffffff;
+          font-size: 14px;
+          font-weight: 600;
+        }
+        
+        img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+      }
+      
+      .member-info {
+        flex: 1;
+        
+        .member-name {
+          color: #ffffff;
+          font-size: 16px;
+          font-weight: 600;
+          margin-bottom: 4px;
+        }
+        
+        .member-status {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          
+          ion-icon {
+            font-size: 16px;
+          }
+          
+          .status-text {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            
+            &.present {
+              color: #34c759;
+            }
+            
+            &.absent {
+              color: #ff453a;
+            }
+            
+            &.late {
+              color: #ff9500;
+            }
+            
+            &.excused {
+              color: #8e8e93;
+            }
+            
+            &.unmarked {
+              color: #8e8e93;
+            }
+          }
+          
+          .timestamp {
+            color: #8e8e93;
+            font-size: 11px;
+            margin-left: auto;
+          }
+        }
+      }
+      
+      .member-actions {
+        ion-button {
+          --background: transparent;
+          --box-shadow: none;
+        }
+      }
+    }
+    
+    // Empty State
+    .empty-members {
+      text-align: center;
+      padding: 60px 20px;
+      color: #8e8e93;
+      
+      .empty-icon {
+        font-size: 64px;
+        margin-bottom: 16px;
+      }
+      
+      h3 {
+        color: #ffffff;
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0 0 8px 0;
+      }
+      
+      p {
+        font-size: 14px;
+        margin: 0;
+        line-height: 1.4;
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (min-width: 768px) {
+  .session-members-modal {
+    .filter-buttons {
+      justify-content: center;
+    }
+    
+    .members-list {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+  }
+}
+
+// Action Sheet Styling (Global)
+ion-action-sheet {
+  .selected {
+    font-weight: 700;
+    color: var(--ion-color-primary) !important;
+  }
+}

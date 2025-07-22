@@ -232,9 +232,9 @@ export class SummaryComponent implements ViewDidEnter {
     this.router.navigate(['/followups'], { queryParams: { fromSummary: 'true' } });
   }
 
-  onGoToEvents() {
-    // Navigate to events page
-    console.log('Navigate to events');
+  onGoToSessions() {
+    // Navigate to attendance page
+    this.router.navigate(['/attendance']);
   }
 
   onViewWorkflows() {

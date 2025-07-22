@@ -1,0 +1,45 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Bulk Attendance</ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" (click)="dismiss()">
+        <ion-icon name="close" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="bulk-attendance-content">
+    <div class="feature-placeholder">
+      <ion-icon name="people" size="large" color="medium"></ion-icon>
+      <h3>Bulk Attendance Operations</h3>
+      <p>Advanced bulk attendance features will be implemented here:</p>
+      
+      <ul class="feature-list">
+        <li>Import attendance from CSV/Excel</li>
+        <li>Mark all present/absent</li>
+        <li>Attendance templates</li>
+        <li>Batch operations</li>
+        <li>Smart suggestions</li>
+      </ul>
+      
+      <div class="action-buttons">
+        <ion-button expand="block" fill="outline" (click)="importFromFile()">
+          <ion-icon name="document" slot="start"></ion-icon>
+          Import from File
+        </ion-button>
+        
+        <ion-button expand="block" fill="outline" (click)="markAllPresent()">
+          <ion-icon name="checkmark-circle" slot="start"></ion-icon>
+          Mark All Present
+        </ion-button>
+        
+        <ion-button expand="block" fill="outline" (click)="useTemplate()">
+          <ion-icon name="copy" slot="start"></ion-icon>
+          Use Template
+        </ion-button>
+      </div>
+    </div>
+  </div>
+</ion-content>

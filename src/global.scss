@@ -99,3 +99,24 @@ ion-app ion-header ion-button {
     }
   }
 }
+
+// Session Members Modal - Full Screen Styling
+.session-members-fullscreen {
+  --width: 100vw;
+  --height: 100vh;
+  --min-width: 100vw;
+  --max-width: 100vw;
+  --min-height: 100vh;
+  --max-height: 100vh;
+  --border-radius: 0;
+  --box-shadow: none;
+  
+  .modal-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+  }
+}

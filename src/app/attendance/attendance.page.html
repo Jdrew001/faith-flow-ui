@@ -1,0 +1,180 @@
+<div class="ion-page" id="main-content">
+  <ion-header [translucent]="false" class="attendance-header">
+    <ion-toolbar>
+      <ion-buttons slot="start">
+        <ion-menu-button color="light"></ion-menu-button>
+      </ion-buttons>
+      <ion-title color="light">Attendance</ion-title>
+      <ion-buttons slot="end">
+        <ion-button (click)="refreshData()" fill="clear" color="light">
+          <ion-icon name="refresh" slot="icon-only"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+
+    <!-- Summary Stats Header -->
+    <ion-toolbar class="stats-toolbar">
+      <div class="summary-stats">
+        <div class="stat-card">
+          <div class="stat-value">{{ attendanceStats.totalSessions }}</div>
+          <div class="stat-label">Sessions</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ attendanceStats.attendanceRate }}%</div>
+          <div class="stat-label">Attendance Rate</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">{{ attendanceStats.totalAttendees }}</div>
+          <div class="stat-label">People</div>
+        </div>
+      </div>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content class="attendance-content">
+    <!-- Time Filter Tabs -->
+    <div class="time-filter-section">
+      <ion-segment 
+        [value]="selectedTimeFilter" 
+        (ionChange)="onTimeFilterChange($event)"
+        class="time-segment">
+        <ion-segment-button value="today">
+          <ion-label>Today</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="week">
+          <ion-label>Week</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="month">
+          <ion-label>Month</ion-label>
+        </ion-segment-button>
+      </ion-segment>
+
+      <!-- Date Navigation -->
+      <div class="date-navigation">
+        <ion-button fill="clear" (click)="navigatePrevious()">
+          <ion-icon name="chevron-back" slot="icon-only"></ion-icon>
+        </ion-button>
+        <div class="current-date">{{ getCurrentDateLabel() }}</div>
+        <ion-button fill="clear" (click)="navigateNext()">
+          <ion-icon name="chevron-forward" slot="icon-only"></ion-icon>
+        </ion-button>
+      </div>
+    </div>
+
+    <!-- Search Bar -->
+    <!-- <div class="search-section">
+      <ion-searchbar 
+        [formControl]="searchControl"
+        placeholder="Search sessions or dates..."
+        debounce="300"
+        showClearButton="focus"
+        class="session-searchbar">
+      </ion-searchbar>
+    </div> -->
+
+    <!-- Session Cards -->
+    <div class="sessions-container">
+      <div *ngIf="isLoading" class="loading-state">
+        <ion-spinner name="circular"></ion-spinner>
+        <p>Loading sessions...</p>
+      </div>
+
+      <div *ngIf="!isLoading && filteredSessions.length > 0" class="session-cards">
+        <ion-card 
+          *ngFor="let session of filteredSessions; trackBy: trackBySessionId"
+          class="session-card enhanced"
+          (click)="openSessionMembers(session)">
+          
+          <div class="card-header">
+            <div class="session-type-badge">
+              <ion-icon [name]="getSessionTypeIcon(session.type)"></ion-icon>
+              <span>{{ getSessionTypeLabel(session.type) }}</span>
+            </div>
+            <ion-chip [color]="getStatusColor(session.status)" class="status-chip">
+              {{ session.status | titlecase }}
+            </ion-chip>
+          </div>
+
+          <ion-card-content>
+            <h2 class="session-title">{{ session.title }}</h2>
+            
+            <div class="session-meta">
+              <div class="meta-item">
+                <ion-icon name="calendar-outline"></ion-icon>
+                <span>{{ session.date | date:'EEE, MMM d' }}</span>
+              </div>
+              <div class="meta-item">
+                <ion-icon name="time-outline"></ion-icon>
+                <span>{{ session.startTime }} - {{ session.endTime }}</span>
+              </div>
+              <div class="meta-item">
+                <ion-icon name="location-outline"></ion-icon>
+                <span>{{ session.location }}</span>
+              </div>
+            </div>
+
+            <div class="attendance-summary">
+              <div class="attendance-progress">
+                <div class="progress-circle">
+                  <svg width="50" height="50">
+                    <circle class="progress-bg" cx="25" cy="25" r="20"></circle>
+                    <circle 
+                      class="progress-fill" 
+                      cx="25" 
+                      cy="25" 
+                      r="20"
+                      [style.stroke-dasharray]="125.6"
+                      [style.stroke-dashoffset]="125.6 - (125.6 * session.attendanceRate / 100)">
+                    </circle>
+                  </svg>
+                  <div class="progress-text">{{ session.attendanceRate }}%</div>
+                </div>
+              </div>
+              
+              <div class="attendance-stats">
+                <div class="stat-row">
+                  <span class="present-count">{{ session.presentCount }} Present</span>
+                  <span class="total-count">of {{ session.totalExpected }}</span>
+                </div>
+                <div class="absent-count">
+                  {{ session.totalExpected - session.presentCount }} Absent
+                </div>
+              </div>
+            </div>
+
+            <!-- <div class="quick-actions" (click)="$event.stopPropagation()">
+              <ion-button 
+                fill="clear" 
+                size="small"
+                (click)="quickMarkAllPresent(session, $event)">
+                <ion-icon name="checkmark-circle" slot="start"></ion-icon>
+                Mark All Present
+              </ion-button>
+            </div> -->
+          </ion-card-content>
+        </ion-card>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!isLoading && filteredSessions.length === 0" class="empty-state">
+        <ion-card class="empty-card">
+          <ion-card-content>
+            <ion-icon name="calendar-outline" class="empty-icon"></ion-icon>
+            <h3>No Sessions Found</h3>
+            <p>No sessions match your current filters for this time period.</p>
+            <ion-button (click)="clearAllFilters()" fill="outline">
+              Clear Filters
+            </ion-button>
+          </ion-card-content>
+        </ion-card>
+      </div>
+    </div>
+  </ion-content>
+
+  <!-- Floating Action Button -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="createNewSession()" color="primary">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</div>

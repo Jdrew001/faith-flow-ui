@@ -1,0 +1,37 @@
+<div class="attendance-stats">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-value">{{ stats?.totalSessions || 0 }}</div>
+      <div class="stat-label">Total Sessions</div>
+      <ion-icon name="calendar" class="stat-icon"></ion-icon>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-value">{{ stats?.averageAttendance || 0 }}%</div>
+      <div class="stat-label">Avg Attendance</div>
+      <ion-icon name="trending-up" class="stat-icon"></ion-icon>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-value">{{ stats?.totalAttendees || 0 }}</div>
+      <div class="stat-label">Total Attendees</div>
+      <ion-icon name="people" class="stat-icon"></ion-icon>
+    </div>
+    
+    <div class="stat-card">
+      <div class="stat-value">{{ formatGrowth(stats?.weeklyGrowth) }}</div>
+      <div class="stat-label">Weekly Growth</div>
+      <ion-icon [name]="getGrowthIcon(stats?.weeklyGrowth)" [color]="getGrowthColor(stats?.weeklyGrowth)" class="stat-icon"></ion-icon>
+    </div>
+  </div>
+  
+  <div class="highlight-stat" *ngIf="stats?.mostPopularSession">
+    <div class="highlight-content">
+      <ion-icon name="star" color="warning"></ion-icon>
+      <div class="highlight-text">
+        <div class="highlight-title">Most Popular</div>
+        <div class="highlight-value">{{ stats.mostPopularSession }}</div>
+      </div>
+    </div>
+  </div>
+</div>
