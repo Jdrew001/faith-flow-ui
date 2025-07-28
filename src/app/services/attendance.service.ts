@@ -321,4 +321,35 @@ export class AttendanceService {
       throw error;
     }
   }
+
+  async createSession(sessionData: Partial<Session>): Promise<Session> {
+    try {
+      // Mock implementation - in real app, this would make HTTP POST request
+      const newSession: Session = {
+        id: 'session_' + Date.now(), // Generate unique ID
+        title: sessionData.title || 'New Session',
+        description: sessionData.description || '',
+        date: sessionData.date || new Date(),
+        startTime: sessionData.startTime || '10:00',
+        endTime: sessionData.endTime || '11:00',
+        location: sessionData.location || '',
+        type: sessionData.type || 'service',
+        status: 'upcoming',
+        presentCount: 0,
+        totalExpected: 0,
+        attendanceRate: 0,
+        leader: sessionData.leader,
+        tags: sessionData.tags || []
+      };
+
+      // In real implementation, this would be:
+      // const response = await this.http.post<Session>(`${this.apiUrl}/sessions`, sessionData).toPromise();
+      
+      console.log('Creating new session:', newSession);
+      return newSession;
+    } catch (error) {
+      console.error('Error creating session:', error);
+      throw error;
+    }
+  }
 }

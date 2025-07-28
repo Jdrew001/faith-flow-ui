@@ -12,6 +12,7 @@ import { QuickMarkAttendanceComponent } from './components/quick-mark-attendance
 import { SessionCardComponent } from './components/session-card/session-card.component';
 import { SessionDetailModalComponent } from './components/session-detail-modal/session-detail-modal.component';
 import { SessionMembersComponent } from './components/session-members/session-members.component';
+import { CreateSessionModalComponent } from './components/create-session-modal/create-session-modal.component';
 
 @NgModule({
   imports: [
@@ -30,7 +31,8 @@ import { SessionMembersComponent } from './components/session-members/session-me
     QuickMarkAttendanceComponent,
     AttendanceTrendsComponent,
     BulkAttendanceModalComponent,
-    SessionMembersComponent
+    SessionMembersComponent,
+    CreateSessionModalComponent
   ]
 })
 export class AttendancePageModule {}

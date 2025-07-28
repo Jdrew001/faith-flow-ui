@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { ModalController, ToastController, ActionSheetController } from '@ionic/angular';
+import { ModalController, ToastController } from '@ionic/angular';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 
@@ -8,6 +8,7 @@ import { AttendanceService, Session, AttendanceSummary } from '../services/atten
 import { SessionDetailModalComponent } from './components/session-detail-modal/session-detail-modal.component';
 import { BulkAttendanceModalComponent } from './components/bulk-attendance-modal/bulk-attendance-modal.component';
 import { SessionMembersComponent } from './components/session-members/session-members.component';
+import { CreateSessionModalComponent } from './components/create-session-modal/create-session-modal.component';
 
 @Component({
   selector: 'app-attendance',
@@ -38,8 +39,7 @@ export class AttendancePage implements OnInit, OnDestroy {
   constructor(
     private attendanceService: AttendanceService,
     private modalController: ModalController,
-    private toastController: ToastController,
-    private actionSheetController: ActionSheetController
+    private toastController: ToastController
   ) {}
 
   ngOnInit() {
@@ -228,43 +228,20 @@ export class AttendancePage implements OnInit, OnDestroy {
   }
 
   async createNewSession() {
-    const actionSheet = await this.actionSheetController.create({
-      header: 'Create New Session',
-      buttons: [
-        {
-          text: 'Service',
-          icon: 'people',
-          handler: () => this.createSession('service')
-        },
-        {
-          text: 'Meeting',
-          icon: 'business',
-          handler: () => this.createSession('meeting')
-        },
-        {
-          text: 'Event',
-          icon: 'calendar',
-          handler: () => this.createSession('event')
-        },
-        {
-          text: 'Class',
-          icon: 'school',
-          handler: () => this.createSession('class')
-        },
-        {
-          text: 'Cancel',
-          icon: 'close',
-          role: 'cancel'
-        }
-      ]
+    const modal = await this.modalController.create({
+      component: CreateSessionModalComponent,
+      componentProps: {
+        defaultType: 'service' // Default to service type
+      }
     });
 
-    await actionSheet.present();
-  }
+    await modal.present();
 
-  private async createSession(type: string) {
-    // Navigate to create session page or open modal
-    await this.showToast(`Creating new ${type}...`, 'primary');
+    const { data } = await modal.onDidDismiss();
+    if (data?.created) {
+      await this.showToast(`Session "${data.session.title}" created successfully!`, 'success');
+      await this.loadData(); // Refresh the sessions list
+    }
   }
 
   async markAttendance(session: Session, event: Event) {

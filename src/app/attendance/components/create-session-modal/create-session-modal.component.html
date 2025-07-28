@@ -1,0 +1,153 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Create New Session</ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" (click)="dismiss()">
+        <ion-icon name="close" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="create-session-content">
+  <form [formGroup]="sessionForm" (ngSubmit)="createSession()">
+    <div class="session-form">
+
+      <!-- Session Details -->
+      <div class="form-section">
+        <h4 class="section-title">Session Details</h4>
+        
+        <!-- Session Name -->
+        <ion-item class="form-item" [class.error]="hasFieldError('name')">
+          <ion-label position="stacked">Session Name *</ion-label>
+          <ion-input 
+            formControlName="name"
+            placeholder="Enter session name"
+            fill="outline">
+          </ion-input>
+        </ion-item>
+        <div class="error-message" *ngIf="hasFieldError('name')">
+          {{ getFieldError('name') }}
+        </div>
+
+        <!-- Description -->
+        <ion-item class="form-item">
+          <ion-label position="stacked">Description</ion-label>
+          <ion-textarea 
+            formControlName="description"
+            placeholder="Optional description..."
+            rows="3"
+            fill="outline">
+          </ion-textarea>
+        </ion-item>
+
+        <!-- Date and Time -->
+        <div class="datetime-section">
+          <ion-label class="datetime-label">Date & Time *</ion-label>
+          <ion-datetime 
+            formControlName="datetime"
+            [min]="getMinDateTime()"
+            presentation="date-time"
+            class="full-width-datetime">
+          </ion-datetime>
+          <div class="error-message" *ngIf="hasFieldError('datetime')">
+            {{ getFieldError('datetime') }}
+          </div>
+        </div>
+
+        <!-- Location -->
+        <ion-item class="form-item" [class.error]="hasFieldError('location')">
+          <ion-label position="stacked">Location *</ion-label>
+          <ion-input 
+            formControlName="location"
+            placeholder="Enter location"
+            fill="outline">
+          </ion-input>
+        </ion-item>
+        <div class="error-message" *ngIf="hasFieldError('location')">
+          {{ getFieldError('location') }}
+        </div>
+      </div>
+
+      <!-- Occurrence Pattern -->
+      <div class="form-section">
+        <h4 class="section-title">Occurrence</h4>
+        <div class="occurrence-grid">
+          <div 
+            *ngFor="let option of occurrenceOptions" 
+            class="occurrence-card" 
+            [class.selected]="sessionForm.get('occurrence')?.value === option.value"
+            (click)="selectOccurrence(option.value)">
+            <div class="occurrence-icon">
+              <ion-icon [name]="option.icon"></ion-icon>
+            </div>
+            <div class="occurrence-info">
+              <div class="occurrence-label">{{ option.label }}</div>
+            </div>
+            <ion-icon 
+              name="checkmark-circle" 
+              class="selection-icon"
+              *ngIf="sessionForm.get('occurrence')?.value === option.value">
+            </ion-icon>
+          </div>
+        </div>
+      </div>
+
+      <!-- Session Preview -->
+      <div class="form-section" *ngIf="sessionForm.get('name')?.value && sessionForm.get('datetime')?.value">
+        <h4 class="section-title">Preview</h4>
+        <div class="session-preview">
+          <div class="preview-header">
+            <div class="preview-icon">
+              <ion-icon name="calendar"></ion-icon>
+            </div>
+            <div class="preview-info">
+              <h5 class="preview-title">{{ sessionForm.get('name')?.value }}</h5>
+              <p class="preview-type">Session</p>
+            </div>
+          </div>
+          
+          <div class="preview-details">
+            <div class="preview-item">
+              <ion-icon name="calendar"></ion-icon>
+              <span>{{ formatDateTime(sessionForm.get('datetime')?.value) }}</span>
+            </div>
+            
+            <div class="preview-item" *ngIf="sessionForm.get('location')?.value">
+              <ion-icon name="location"></ion-icon>
+              <span>{{ sessionForm.get('location')?.value }}</span>
+            </div>
+            
+            <div class="preview-item">
+              <ion-icon name="refresh"></ion-icon>
+              <span>{{ sessionForm.get('occurrence')?.value | titlecase }} session</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</ion-content>
+
+<!-- Action Buttons Footer -->
+<div class="form-actions">
+  <ion-button 
+    expand="block" 
+    fill="clear" 
+    (click)="dismiss()"
+    color="medium"
+    class="cancel-btn">
+    Cancel
+  </ion-button>
+  
+  <ion-button 
+    expand="block" 
+    type="submit"
+    [disabled]="!sessionForm.valid || isLoading"
+    class="create-btn"
+    (click)="createSession()">
+    <ion-spinner *ngIf="isLoading" slot="start"></ion-spinner>
+    <ion-icon name="add-circle" slot="start" *ngIf="!isLoading"></ion-icon>
+    {{ isLoading ? 'Creating...' : 'Create Session' }}
+  </ion-button>
+</div>
