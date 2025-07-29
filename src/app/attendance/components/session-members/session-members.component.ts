@@ -1,10 +1,11 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { ModalController, ToastController, ActionSheetController } from '@ionic/angular';
 import { FormControl } from '@angular/forms';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 import { AttendanceService } from '../../../services/attendance.service';
 import { Session, AttendanceRecord, Person } from '../../../models/attendance.model';
+import { AutoHideHeaderDirective } from '../../../shared/directives';
 
 interface MemberAttendance {
   id: string;
@@ -14,6 +15,7 @@ interface MemberAttendance {
   status: 'Present' | 'Absent' | 'Late' | 'Excused' | 'Unmarked';
   timestamp?: string;
   notes?: string;
+  selected?: boolean; // Add selection state
 }
 
 @Component({
@@ -22,7 +24,7 @@ interface MemberAttendance {
   styleUrls: ['./session-members.component.scss'],
   standalone: false
 })
-export class SessionMembersComponent implements OnInit {
+export class SessionMembersComponent implements OnInit, OnDestroy {
   @Input() session!: Session;
   
   members: MemberAttendance[] = [];
@@ -31,9 +33,21 @@ export class SessionMembersComponent implements OnInit {
   selectedFilter = 'all'; // all, unmarked, present, absent
   isLoading = true;
   
+  // Selection state
+  isSelectionMode = false;
+  selectedMembers: Set<string> = new Set();
+  longPressActive = false;
+  longPressTimer: any;
+  touchStartTime = 0;
+  
+  // Header visibility state (managed by directive)
+  headerHidden = false;
+  
   // Stats
   presentCount = 0;
   absentCount = 0;
+  lateCount = 0;
+  excusedCount = 0;
   unmarkedCount = 0;
   attendanceRate = 0;
 
@@ -47,6 +61,13 @@ export class SessionMembersComponent implements OnInit {
   async ngOnInit() {
     await this.loadMembers();
     this.setupSearch();
+  }
+
+  ngOnDestroy() {
+    // Clean up timers
+    if (this.longPressTimer) {
+      clearTimeout(this.longPressTimer);
+    }
   }
 
   private setupSearch() {
@@ -65,7 +86,8 @@ export class SessionMembersComponent implements OnInit {
     try {
       // Load session attendance records
       const attendanceRecords = await this.attendanceService.getSessionAttendance(this.session.id);
-      const allPeople = await this.attendanceService.getPeople();
+      // Use the faster getActiveMembers method instead of getPeople
+      const allPeople = await this.attendanceService.getActiveMembers();
       
       // Create member attendance list
       this.members = allPeople.map(person => {
@@ -114,6 +136,12 @@ export class SessionMembersComponent implements OnInit {
       case 'absent':
         filtered = filtered.filter(member => member.status === 'Absent');
         break;
+      case 'late':
+        filtered = filtered.filter(member => member.status === 'Late');
+        break;
+      case 'excused':
+        filtered = filtered.filter(member => member.status === 'Excused');
+        break;
     }
 
     this.filteredMembers = filtered;
@@ -122,9 +150,14 @@ export class SessionMembersComponent implements OnInit {
   calculateStats() {
     this.presentCount = this.members.filter(m => m.status === 'Present').length;
     this.absentCount = this.members.filter(m => m.status === 'Absent').length;
+    this.lateCount = this.members.filter(m => m.status === 'Late').length;
+    this.excusedCount = this.members.filter(m => m.status === 'Excused').length;
     this.unmarkedCount = this.members.filter(m => m.status === 'Unmarked').length;
+    
+    // Calculate attendance rate as present + late out of total members
+    const attendedCount = this.presentCount + this.lateCount;
     this.attendanceRate = this.members.length > 0 ? 
-      Math.round((this.presentCount / this.members.length) * 100) : 0;
+      Math.round((attendedCount / this.members.length) * 100) : 0;
   }
 
   onFilterChange(filter: string) {
@@ -171,13 +204,19 @@ export class SessionMembersComponent implements OnInit {
     await actionSheet.present();
   }
 
-  async updateMemberStatus(member: MemberAttendance, status: 'Present' | 'Absent' | 'Late' | 'Excused') {
+  async updateMemberStatus(member: MemberAttendance, status: 'Present' | 'Absent' | 'Late' | 'Excused' | 'Unmarked') {
     try {
       member.status = status;
-      member.timestamp = new Date().toISOString();
       
-      // Update in service (mock for now)
-      await this.attendanceService.updateAttendanceRecord(this.session.id, member.personId, status);
+      if (status === 'Unmarked') {
+        member.timestamp = undefined;
+        // For unmarked status, we might want to clear the attendance record
+        // await this.attendanceService.clearAttendanceRecord(this.session.id, member.personId);
+      } else {
+        member.timestamp = new Date().toISOString();
+        // Update in service for other statuses
+        await this.attendanceService.updateAttendanceRecord(this.session.id, member.personId, status);
+      }
       
       this.calculateStats();
       this.filterMembers();
@@ -244,6 +283,205 @@ export class SessionMembersComponent implements OnInit {
     }
   }
 
+  // Enhanced selection mode management
+  exitSelectionMode() {
+    this.isSelectionMode = false;
+    this.selectedMembers.clear();
+    this.members.forEach(member => member.selected = false);
+    this.longPressActive = false;
+    
+    // Clear any active timers
+    if (this.longPressTimer) {
+      clearTimeout(this.longPressTimer);
+    }
+  }
+
+  // Bulk Selection Methods
+  toggleSelectionMode() {
+    this.isSelectionMode = !this.isSelectionMode;
+    if (!this.isSelectionMode) {
+      this.exitSelectionMode();
+    }
+  }
+
+  toggleMemberSelection(member: MemberAttendance, event: Event) {
+    event.stopPropagation();
+    
+    if (this.selectedMembers.has(member.personId)) {
+      this.selectedMembers.delete(member.personId);
+      member.selected = false;
+    } else {
+      this.selectedMembers.add(member.personId);
+      member.selected = true;
+    }
+  }
+
+  selectAllVisible() {
+    this.filteredMembers.forEach(member => {
+      member.selected = true;
+      this.selectedMembers.add(member.personId);
+    });
+  }
+
+  deselectAll() {
+    this.selectedMembers.clear();
+    this.members.forEach(member => member.selected = false);
+  }
+
+  async markSelectedAs(status: 'Present' | 'Absent' | 'Late' | 'Excused') {
+    if (this.selectedMembers.size === 0) {
+      await this.showToast('No members selected', 'warning');
+      return;
+    }
+
+    try {
+      const selectedMembersList = this.members.filter(member => 
+        this.selectedMembers.has(member.personId)
+      );
+
+      for (const member of selectedMembersList) {
+        member.status = status;
+        member.timestamp = new Date().toISOString();
+        
+        // Update in service
+        await this.attendanceService.updateAttendanceRecord(this.session.id, member.personId, status);
+      }
+      
+      this.calculateStats();
+      this.filterMembers();
+      
+      await this.showToast(`${selectedMembersList.length} members marked as ${status}`, 'success');
+      
+      // Exit selection mode after bulk operation
+      this.exitSelectionMode();
+    } catch (error) {
+      console.error('Error updating bulk attendance:', error);
+      await this.showToast('Error updating attendance', 'danger');
+    }
+  }
+
+  get selectedCount(): number {
+    return this.selectedMembers.size;
+  }
+
+  // Handle member row clicks - either select or show status menu
+  async handleMemberClick(member: MemberAttendance, event: Event) {
+    // Prevent action if this was a long press
+    if (this.longPressActive) {
+      return;
+    }
+    
+    // Check if this was a quick tap (less than 200ms)
+    const tapDuration = Date.now() - this.touchStartTime;
+    
+    if (this.isSelectionMode) {
+      this.toggleMemberSelection(member, event);
+    } else if (tapDuration < 200) {
+      // Quick tap - cycle through status
+      await this.quickStatusToggle(member, event);
+    } else {
+      // Longer tap - show full action sheet
+      await this.toggleMemberStatus(member);
+    }
+  }
+
+  // Touch and long press handlers for better UX
+  onTouchStart(member: MemberAttendance, event: TouchEvent) {
+    this.touchStartTime = Date.now();
+    this.longPressActive = false;
+    
+    // Clear any existing timer
+    if (this.longPressTimer) {
+      clearTimeout(this.longPressTimer);
+    }
+    
+    // Start long press timer (reduced to 350ms for better responsiveness)
+    this.longPressTimer = setTimeout(() => {
+      this.longPressActive = true;
+      this.onLongPress(member);
+    }, 350);
+  }
+
+  onTouchEnd(event: TouchEvent) {
+    // Clear the long press timer
+    if (this.longPressTimer) {
+      clearTimeout(this.longPressTimer);
+    }
+    
+    // Reset long press state after a short delay
+    setTimeout(() => {
+      this.longPressActive = false;
+    }, 100);
+  }
+
+  onTouchMove(event: TouchEvent) {
+    // Cancel long press if user moves finger (scrolling)
+    if (this.longPressTimer) {
+      clearTimeout(this.longPressTimer);
+    }
+  }
+
+  onLongPress(member: MemberAttendance) {
+    // If not in selection mode, enter it and select this member
+    if (!this.isSelectionMode) {
+      this.isSelectionMode = true;
+      this.selectedMembers.add(member.personId);
+      member.selected = true;
+      
+      // Enhanced haptic feedback
+      if ('vibrate' in navigator) {
+        navigator.vibrate([50, 30, 50]); // Pattern: vibrate-pause-vibrate
+      }
+      
+      // Add visual feedback class
+      this.addLongPressVisualFeedback(member);
+      
+      // Show toast feedback
+      this.showToast(`Selection mode activated. ${member.personName} selected.`, 'primary');
+    }
+  }
+
+  private addLongPressVisualFeedback(member: MemberAttendance) {
+    // Add temporary visual feedback
+    const memberElement = document.querySelector(`[data-member-id="${member.personId}"]`);
+    if (memberElement) {
+      memberElement.classList.add('long-press-feedback');
+      setTimeout(() => {
+        memberElement.classList.remove('long-press-feedback');
+      }, 200);
+    }
+  }
+
+  // Quick status toggle for single tap when not in selection mode
+  async quickStatusToggle(member: MemberAttendance, event: Event) {
+    event.stopPropagation();
+    
+    // Cycle through: Unmarked -> Present -> Absent -> Unmarked
+    let newStatus: 'Present' | 'Absent' | 'Late' | 'Excused' | 'Unmarked';
+    
+    switch (member.status) {
+      case 'Unmarked':
+        newStatus = 'Present';
+        break;
+      case 'Present':
+        newStatus = 'Absent';
+        break;
+      case 'Absent':
+        newStatus = 'Late';
+        break;
+      case 'Late':
+        newStatus = 'Excused';
+        break;
+      case 'Excused':
+        newStatus = 'Unmarked';
+        break;
+      default:
+        newStatus = 'Present';
+    }
+    
+    await this.updateMemberStatus(member, newStatus);
+  }
+
   getStatusIcon(status: string): string {
     switch (status) {
       case 'Present': return 'checkmark-circle';
@@ -277,6 +515,9 @@ export class SessionMembersComponent implements OnInit {
   }
 
   async dismiss() {
+    // Check if session time has ended and auto-mark unmarked as absent
+    await this.autoMarkUnmarkedAsAbsent();
+    
     await this.modalCtrl.dismiss({
       updated: true,
       stats: {
@@ -284,6 +525,94 @@ export class SessionMembersComponent implements OnInit {
         absent: this.absentCount,
         rate: this.attendanceRate
       }
+    });
+  }
+
+  async autoMarkUnmarkedAsAbsent() {
+    // Check if the session has ended (compare current time with session end time)
+    const sessionEndTime = this.getSessionEndDateTime();
+    const now = new Date();
+    
+    if (now >= sessionEndTime) {
+      const unmarkedMembers = this.members.filter(member => member.status === 'Unmarked');
+      
+      if (unmarkedMembers.length > 0) {
+        // Show confirmation dialog
+        const shouldAutoMark = await this.showAutoMarkConfirmation(unmarkedMembers.length);
+        
+        if (shouldAutoMark) {
+          try {
+            // Use backend endpoint for auto-marking
+            const result = await this.attendanceService.autoMarkUnmarkedAsAbsent(this.session.id);
+            
+            // Update local state to reflect the changes
+            for (const member of unmarkedMembers) {
+              member.status = 'Absent';
+              member.timestamp = new Date().toISOString();
+            }
+            
+            this.calculateStats();
+            this.filterMembers();
+            
+            await this.showToast(`${result.markedCount || unmarkedMembers.length} unmarked members marked as absent`, 'warning');
+          } catch (error) {
+            console.error('Error auto-marking unmarked as absent:', error);
+            
+            // Fallback to local marking if backend fails
+            for (const member of unmarkedMembers) {
+              try {
+                await this.attendanceService.updateAttendanceRecord(this.session.id, member.personId, 'Absent');
+                member.status = 'Absent';
+                member.timestamp = new Date().toISOString();
+              } catch (updateError) {
+                console.error(`Failed to mark ${member.personName} as absent:`, updateError);
+              }
+            }
+            
+            this.calculateStats();
+            this.filterMembers();
+            
+            await this.showToast(`${unmarkedMembers.length} unmarked members marked as absent (local fallback)`, 'warning');
+          }
+        }
+      }
+    }
+  }
+
+  private getSessionEndDateTime(): Date {
+    const sessionDate = new Date(this.session.date);
+    const [hours, minutes] = this.session.endTime.split(':').map(Number);
+    sessionDate.setHours(hours, minutes, 0, 0);
+    return sessionDate;
+  }
+
+  private async showAutoMarkConfirmation(count: number): Promise<boolean> {
+    return new Promise(async (resolve) => {
+      const actionSheet = await this.actionSheetController.create({
+        header: 'Session Ended',
+        subHeader: `${count} members are still unmarked. Mark them as absent?`,
+        buttons: [
+          {
+            text: `Mark ${count} as Absent`,
+            icon: 'close-circle',
+            cssClass: 'danger-button',
+            handler: () => resolve(true)
+          },
+          {
+            text: 'Leave Unmarked',
+            icon: 'help-circle',
+            handler: () => resolve(false)
+          },
+          {
+            text: 'Cancel',
+            icon: 'close',
+            role: 'cancel',
+            handler: () => resolve(false)
+          }
+        ]
+      });
+
+      await actionSheet.present();
     });
   }
 
@@ -295,5 +624,10 @@ export class SessionMembersComponent implements OnInit {
       position: 'bottom'
     });
     await toast.present();
+  }
+
+  // Handler for auto-hide header directive
+  onHeaderVisibilityChange(isHidden: boolean) {
+    this.headerHidden = isHidden;
   }
 }

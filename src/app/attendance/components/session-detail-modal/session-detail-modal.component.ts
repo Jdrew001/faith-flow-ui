@@ -94,6 +94,7 @@ export class SessionDetailModalComponent implements OnInit {
       case 'meeting': return 'business-outline';
       case 'sessions': return 'calendar-outline';
       case 'class': return 'school-outline';
+      case 'event': return 'calendar-clear-outline';
       default: return 'calendar-outline';
     }
   }

@@ -120,3 +120,8 @@ ion-app ion-header ion-button {
     border-radius: 0;
   }
 }
+
+:host(.checkbox-checked) .checkbox-icon, :host(.checkbox-indeterminate) .checkbox-icon {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}

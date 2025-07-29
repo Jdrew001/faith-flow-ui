@@ -7,34 +7,56 @@
   --background: #2c2c2e;
   background: #2c2c2e;
   color: #ffffff;
+  
+  // Ensure proper scrolling
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .session-form {
   padding: 16px;
+  padding-bottom: 0; // Remove bottom padding since we'll add it separately
+  min-height: calc(100vh - 100px); // Ensure content takes full height
 }
 
-// Form Sections
+// Bottom padding for safe scrolling
+.bottom-padding {
+  height: 80px; // Extra space at bottom for comfortable scrolling
+  flex-shrink: 0;
+}
+
+// Form Sections with improved spacing
 .form-section {
-  margin-bottom: 24px;
+  margin-bottom: 32px;
   
   .section-title {
-    margin: 0 0 16px 0;
-    font-size: 1.1rem;
-    font-weight: 600;
+    margin: 0 0 20px 0;
+    font-size: 1.2rem;
+    font-weight: 700;
     color: #ffffff;
+    display: flex;
+    align-items: center;
+    
+    &::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, #48484a 0%, transparent 100%);
+      margin-left: 16px;
+    }
   }
 }
 
-// Date Time Section - Full Width
+// Date Time Section - Enhanced Full Width
 .datetime-section {
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   
   .datetime-label {
     display: block;
     font-weight: 600;
     color: #ffffff;
     margin-bottom: 8px;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
   }
   
   .full-width-datetime {
@@ -42,21 +64,27 @@
     --background: #3a3a3c;
     --color: #ffffff;
     border: 1px solid #48484a;
-    border-radius: 8px;
-    padding: 12px;
+    border-radius: 12px;
+    padding: 16px;
     display: block;
+    font-size: 1rem;
+    
+    &:focus-within {
+      border-color: #007aff;
+      box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+    }
     
     ion-datetime {
       width: 100%;
       --background: #3a3a3c;
       --color: #ffffff;
       border: none;
-      border-radius: 8px;
+      border-radius: 12px;
     }
   }
 }
 
-// Form Items - Dark Theme
+// Form Items - Enhanced Dark Theme
 ion-item.form-item {
   --background: transparent;
   --border-radius: 0;
@@ -64,7 +92,7 @@ ion-item.form-item {
   --padding-end: 0;
   --inner-padding-start: 0;
   --inner-padding-end: 0;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   
   &.error {
     ion-label {
@@ -76,73 +104,122 @@ ion-item.form-item {
     font-weight: 600;
     color: #ffffff;
     margin-bottom: 8px;
+    font-size: 0.95rem;
   }
   
   ion-input, ion-textarea, ion-datetime {
     --background: #3a3a3c;
     --color: #ffffff;
     --placeholder-color: #8e8e93;
-    --padding-start: 12px;
-    --padding-end: 12px;
+    --padding-start: 16px;
+    --padding-end: 16px;
     border: 1px solid #48484a;
-    border-radius: 8px;
-    margin-top: 4px;
+    border-radius: 12px;
+    margin-top: 8px;
+    font-size: 1rem;
+    
+    &:focus-within {
+      border-color: #007aff;
+      box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+    }
   }
   
   ion-textarea {
-    --padding-top: 12px;
-    --padding-bottom: 12px;
+    --padding-top: 16px;
+    --padding-bottom: 16px;
   }
   
   ion-datetime {
-    --padding-top: 12px;
-    --padding-bottom: 12px;
+    --padding-top: 16px;
+    --padding-bottom: 16px;
+  }
+}
+
+// Ion Select Enhanced Dark Theme Styling
+ion-select {
+  --background: #3a3a3c;
+  --color: #ffffff;
+  --placeholder-color: #8e8e93;
+  --padding-start: 16px;
+  --padding-end: 16px;
+  border: 1px solid #48484a;
+  border-radius: 12px;
+  margin-top: 8px;
+  font-size: 1rem;
+  min-height: 48px;
+  
+  &:focus-within {
+    border-color: #007aff;
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+  }
+}
+
+ion-select-option {
+  --background: #3a3a3c;
+  --color: #ffffff;
+  
+  &:checked {
+    --background: #007aff;
+    --color: #ffffff;
   }
 }
 
 .error-message {
   color: #ff453a;
-  font-size: 0.8rem;
-  margin: -12px 0 16px 0;
+  font-size: 0.85rem;
+  margin: -16px 0 20px 0;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  &::before {
+    content: '⚠';
+    font-size: 1rem;
+  }
 }
 
-// Occurrence Selection - Dark Theme
+// Occurrence Selection - Enhanced Dark Theme
 .occurrence-grid {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
   
   .occurrence-card {
     background: #3a3a3c;
     border: 2px solid transparent;
-    border-radius: 8px;
-    padding: 12px 16px;
+    border-radius: 12px;
+    padding: 16px 20px;
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 16px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     
     &:hover {
       background: #48484a;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
     
     &.selected {
       border-color: #007aff;
-      background: rgba(0, 122, 255, 0.2);
+      background: rgba(0, 122, 255, 0.15);
+      box-shadow: 0 0 0 1px rgba(0, 122, 255, 0.3);
     }
     
     .occurrence-icon {
-      width: 24px;
-      height: 24px;
+      width: 32px;
+      height: 32px;
       display: flex;
       align-items: center;
       justify-content: center;
+      background: rgba(0, 122, 255, 0.1);
+      border-radius: 8px;
       
       ion-icon {
-        font-size: 18px;
-        color: #8e8e93;
+        font-size: 20px;
+        color: #007aff;
       }
     }
     
@@ -150,43 +227,45 @@ ion-item.form-item {
       flex: 1;
       
       .occurrence-label {
-        font-weight: 500;
+        font-weight: 600;
         color: #ffffff;
-        font-size: 0.9rem;
+        font-size: 1rem;
       }
     }
     
     .selection-icon {
       color: #007aff;
-      font-size: 20px;
+      font-size: 24px;
     }
   }
 }
 
-// Session Preview - Dark Theme
+// Session Preview - Enhanced Dark Theme
 .session-preview {
-  background: #3a3a3c;
-  border-radius: 8px;
-  padding: 16px;
+  background: linear-gradient(135deg, #3a3a3c 0%, #2c2c2e 100%);
+  border-radius: 16px;
+  padding: 20px;
   border: 1px solid #48484a;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
   
   .preview-header {
     display: flex;
     align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
+    gap: 16px;
+    margin-bottom: 16px;
     
     .preview-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 8px;
-      background: #007aff;
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #007aff 0%, #0056d3 100%);
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
       
       ion-icon {
-        font-size: 20px;
+        font-size: 24px;
         color: white;
       }
     }
@@ -195,9 +274,9 @@ ion-item.form-item {
       flex: 1;
       
       .preview-title {
-        margin: 0 0 2px 0;
-        font-size: 1.1rem;
-        font-weight: 600;
+        margin: 0 0 4px 0;
+        font-size: 1.3rem;
+        font-weight: 700;
         color: #ffffff;
       }
       
@@ -205,7 +284,9 @@ ion-item.form-item {
         margin: 0;
         color: #8e8e93;
         font-weight: 500;
-        font-size: 0.85rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
       }
     }
   }
@@ -214,18 +295,21 @@ ion-item.form-item {
     .preview-item {
       display: flex;
       align-items: center;
-      gap: 8px;
-      margin-bottom: 6px;
-      font-size: 0.85rem;
+      gap: 12px;
+      margin-bottom: 10px;
+      font-size: 0.95rem;
       
       ion-icon {
-        font-size: 14px;
-        color: #8e8e93;
+        font-size: 16px;
+        color: #007aff;
+        background: rgba(0, 122, 255, 0.1);
+        padding: 6px;
+        border-radius: 6px;
       }
       
       span {
         color: #ffffff;
-        font-weight: 400;
+        font-weight: 500;
       }
       
       &:last-child {
@@ -235,29 +319,30 @@ ion-item.form-item {
   }
 }
 
-// Action Buttons - Dark Theme
+// Action Buttons - Now inside scrollable content
 .form-actions {
-  padding: 16px;
-  border-top: 1px solid #48484a;
-  margin-top: 0;
-  background: #2c2c2e;
+  padding: 24px 0 16px 0;
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   
   .cancel-btn {
     --color: #8e8e93;
-    --border-radius: 8px;
-    height: 44px;
+    --border-radius: 12px;
+    height: 48px;
     font-weight: 500;
-    margin-bottom: 8px;
-    --background: transparent;
     border: 1px solid #48484a;
+    margin-bottom: 0;
   }
   
   .create-btn {
     --background: #007aff;
     --color: white;
-    --border-radius: 8px;
-    height: 44px;
+    --border-radius: 12px;
+    height: 48px;
     font-weight: 600;
+    margin-bottom: 0;
     
     &:disabled {
       --background: #48484a;
@@ -404,9 +489,15 @@ ion-datetime {
 
 // Responsive design
 @media (min-width: 768px) {
+  .session-form {
+    padding: 24px;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
   .form-actions {
-    display: flex;
-    gap: 12px;
+    flex-direction: row;
+    gap: 16px;
     
     .cancel-btn,
     .create-btn {
@@ -419,5 +510,17 @@ ion-datetime {
 @media (max-width: 480px) {
   .session-form {
     padding: 12px;
+  }
+  
+  .form-section {
+    margin-bottom: 24px;
+    
+    .section-title {
+      font-size: 1.1rem;
+    }
+  }
+  
+  .occurrence-card {
+    padding: 12px 16px !important;
   }
 }

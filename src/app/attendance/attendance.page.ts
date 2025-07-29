@@ -228,11 +228,11 @@ export class AttendancePage implements OnInit, OnDestroy {
     }
   }
 
-  async createNewSession() {
+  async createNewSession(sessionType?: string) {
     const modal = await this.modalController.create({
       component: CreateSessionModalComponent,
       componentProps: {
-        defaultType: 'service' // Default to service type
+        defaultType: sessionType || 'service' // Default to service type
       }
     });
 
@@ -328,6 +328,7 @@ export class AttendancePage implements OnInit, OnDestroy {
       case 'meeting': return 'business-outline';
       case 'event': return 'calendar-outline';
       case 'class': return 'school-outline';
+      case 'sessions': return 'calendar-clear-outline';
       default: return 'calendar-outline';
     }
   }

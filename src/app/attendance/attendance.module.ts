@@ -13,6 +13,7 @@ import { SessionCardComponent } from './components/session-card/session-card.com
 import { SessionDetailModalComponent } from './components/session-detail-modal/session-detail-modal.component';
 import { SessionMembersComponent } from './components/session-members/session-members.component';
 import { CreateSessionModalComponent } from './components/create-session-modal/create-session-modal.component';
+import { AutoHideHeaderDirective } from '../shared/directives';
 
 @NgModule({
   imports: [
@@ -21,7 +22,8 @@ import { CreateSessionModalComponent } from './components/create-session-modal/c
     ReactiveFormsModule,
     IonicModule,
     AttendancePageRoutingModule,
-    SharedModule
+    SharedModule,
+    AutoHideHeaderDirective
   ],
   declarations: [
     AttendancePage,

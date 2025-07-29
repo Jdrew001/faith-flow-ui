@@ -5,11 +5,23 @@ export interface Session {
   startTime: string;
   endTime: string;
   location: string;
-  type: 'service' | 'meeting' | 'event' | 'class';
+  type: 'service' | 'meeting' | 'event' | 'class' | 'sessions';
   status: 'upcoming' | 'active' | 'completed' | 'cancelled';
   presentCount: number;
   totalExpected: number;
   attendanceRate: number;
+  description?: string;
+  leader?: string;
+  tags?: string[];
+}
+
+export interface CreateSessionDto {
+  title: string;
+  date: Date;
+  startTime: string;
+  endTime: string;
+  location: string;
+  type?: 'service' | 'meeting' | 'event' | 'class';
   description?: string;
   leader?: string;
   tags?: string[];

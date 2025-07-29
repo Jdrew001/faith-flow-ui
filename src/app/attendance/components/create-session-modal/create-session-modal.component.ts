@@ -1,8 +1,8 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { ModalController } from '@ionic/angular';
+import { ModalController, ToastController } from '@ionic/angular';
 import { AttendanceService } from '../../../services/attendance.service';
-import { Session } from '../../../models/attendance.model';
+import { Session, CreateSessionDto } from '../../../models/attendance.model';
 
 export interface CreateSessionForm {
   name: string;
@@ -10,7 +10,8 @@ export interface CreateSessionForm {
   datetime: string;
   occurrence: 'once' | 'weekly' | 'monthly';
   location: string;
-  type?: 'service' | 'meeting' | 'sessions' | 'class';
+  type: 'service' | 'meeting' | 'event' | 'class';
+  leader: string;
 }
 
 @Component({
@@ -34,7 +35,8 @@ export class CreateSessionModalComponent implements OnInit {
   constructor(
     private modalCtrl: ModalController,
     private formBuilder: FormBuilder,
-    private attendanceService: AttendanceService
+    private attendanceService: AttendanceService,
+    private toastController: ToastController
   ) {
     this.initializeForm();
   }
@@ -49,7 +51,9 @@ export class CreateSessionModalComponent implements OnInit {
       description: [''],
       datetime: ['', Validators.required],
       occurrence: ['once', Validators.required],
-      location: ['', Validators.required]
+      location: ['', Validators.required],
+      type: [this.defaultType || 'service'],
+      leader: ['']
     });
   }
 
@@ -67,30 +71,40 @@ export class CreateSessionModalComponent implements OnInit {
         this.dismiss({ created: true, session: newSession });
       } catch (error) {
         console.error('Error creating session:', error);
-        // Could add toast notification here
+        // Show error feedback to user
+        this.showErrorToast('Failed to create session. Please try again.');
       } finally {
         this.isLoading = false;
       }
     } else {
       this.markFormGroupTouched();
+      this.showErrorToast('Please fill in all required fields correctly.');
     }
   }
 
-  private prepareSessionData(formData: CreateSessionForm): Partial<Session> {
+  private async showErrorToast(message: string) {
+    const toast = await this.toastController.create({
+      message,
+      color: 'danger',
+      duration: 3000,
+      position: 'bottom'
+    });
+    await toast.present();
+  }
+
+  private prepareSessionData(formData: CreateSessionForm): CreateSessionDto {
     const sessionDate = new Date(formData.datetime);
     
     return {
       title: formData.name,
-      description: formData.description,
+      description: formData.description || undefined,
       date: sessionDate,
       startTime: sessionDate.toTimeString().slice(0, 5), // HH:MM format
       endTime: this.calculateEndTime(sessionDate),
       location: formData.location,
-      type: 'service', // Default to service type
-      status: 'upcoming',
-      presentCount: 0,
-      totalExpected: 0,
-      attendanceRate: 0
+      type: formData.type as 'service' | 'meeting' | 'event' | 'class' || 'service',
+      leader: formData.leader || undefined,
+      tags: [] // We can add tag functionality later
     };
   }
 
@@ -129,7 +143,8 @@ export class CreateSessionModalComponent implements OnInit {
       datetime: 'Date and time',
       location: 'Location',
       occurrence: 'Occurrence',
-      type: 'Session type'
+      type: 'Session type',
+      leader: 'Session leader'
     };
     return labels[fieldName] || fieldName;
   }

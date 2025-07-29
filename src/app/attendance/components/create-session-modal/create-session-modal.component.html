@@ -9,7 +9,7 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content class="create-session-content">
+<ion-content class="create-session-content" [scrollY]="true">
   <form [formGroup]="sessionForm" (ngSubmit)="createSession()">
     <div class="session-form">
 
@@ -67,6 +67,30 @@
         <div class="error-message" *ngIf="hasFieldError('location')">
           {{ getFieldError('location') }}
         </div>
+
+        <!-- Session Type -->
+        <ion-item class="form-item">
+          <ion-label position="stacked">Session Type</ion-label>
+          <ion-select 
+            formControlName="type"
+            placeholder="Select session type"
+            fill="outline">
+            <ion-select-option value="service">Service</ion-select-option>
+            <ion-select-option value="meeting">Meeting</ion-select-option>
+            <ion-select-option value="class">Class</ion-select-option>
+            <ion-select-option value="event">Event</ion-select-option>
+          </ion-select>
+        </ion-item>
+
+        <!-- Leader Assignment -->
+        <ion-item class="form-item">
+          <ion-label position="stacked">Session Leader</ion-label>
+          <ion-input 
+            formControlName="leader"
+            placeholder="Enter leader name (optional)"
+            fill="outline">
+          </ion-input>
+        </ion-item>
       </div>
 
       <!-- Occurrence Pattern -->
@@ -103,7 +127,7 @@
             </div>
             <div class="preview-info">
               <h5 class="preview-title">{{ sessionForm.get('name')?.value }}</h5>
-              <p class="preview-type">Session</p>
+              <p class="preview-type">{{ sessionForm.get('type')?.value | titlecase }} Session</p>
             </div>
           </div>
           
@@ -118,36 +142,49 @@
               <span>{{ sessionForm.get('location')?.value }}</span>
             </div>
             
+            <div class="preview-item" *ngIf="sessionForm.get('type')?.value">
+              <ion-icon name="bookmark"></ion-icon>
+              <span>{{ sessionForm.get('type')?.value | titlecase }} session</span>
+            </div>
+            
+            <div class="preview-item" *ngIf="sessionForm.get('leader')?.value">
+              <ion-icon name="person"></ion-icon>
+              <span>Led by {{ sessionForm.get('leader')?.value }}</span>
+            </div>
+            
             <div class="preview-item">
               <ion-icon name="refresh"></ion-icon>
-              <span>{{ sessionForm.get('occurrence')?.value | titlecase }} session</span>
+              <span>{{ sessionForm.get('occurrence')?.value | titlecase }} occurrence</span>
             </div>
           </div>
         </div>
       </div>
-    </div>
-  </form>
-</ion-content>
 
-<!-- Action Buttons Footer -->
-<div class="form-actions">
-  <ion-button 
-    expand="block" 
-    fill="clear" 
-    (click)="dismiss()"
-    color="medium"
-    class="cancel-btn">
-    Cancel
-  </ion-button>
-  
-  <ion-button 
-    expand="block" 
-    type="submit"
-    [disabled]="!sessionForm.valid || isLoading"
-    class="create-btn"
-    (click)="createSession()">
-    <ion-spinner *ngIf="isLoading" slot="start"></ion-spinner>
-    <ion-icon name="add-circle" slot="start" *ngIf="!isLoading"></ion-icon>
-    {{ isLoading ? 'Creating...' : 'Create Session' }}
-  </ion-button>
-</div>
+      <!-- Action Buttons - Inside scrollable content -->
+      <div class="form-actions">
+        <ion-button 
+          expand="block" 
+          fill="clear" 
+          (click)="dismiss()"
+          color="medium"
+          class="cancel-btn">
+          Cancel
+        </ion-button>
+        
+        <ion-button 
+          expand="block" 
+          type="submit"
+          [disabled]="!sessionForm.valid || isLoading"
+          class="create-btn"
+          (click)="createSession()">
+          <ion-spinner *ngIf="isLoading" slot="start"></ion-spinner>
+          <ion-icon name="add-circle" slot="start" *ngIf="!isLoading"></ion-icon>
+          {{ isLoading ? 'Creating...' : 'Create Session' }}
+        </ion-button>
+      </div>
+      
+      <!-- Bottom padding for safe scrolling -->
+      <div class="bottom-padding"></div>
+    </div>
+  </form> 
+</ion-content>

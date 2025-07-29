@@ -3,7 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, firstValueFrom } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-import { Session, AttendanceRecord, AttendanceSummary, Person } from '../models';
+import { Session, AttendanceRecord, AttendanceSummary, Person, CreateSessionDto } from '../models';
+import { MemberService } from './member.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,7 @@ export class AttendanceService {
   private sessionsSubject = new BehaviorSubject<Session[]>([]);
   public sessions$ = this.sessionsSubject.asObservable();
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private memberService: MemberService) {}
 
   async getSessions(): Promise<Session[]> {
     try {
@@ -193,11 +194,21 @@ export class AttendanceService {
 
   async getPeople(): Promise<Person[]> {
     try {
-      // Make actual API call to backend
-      const response = await firstValueFrom(this.http.get<Person[]>(`${this.apiUrl}/members`));
-      return response || [];
+      // Make actual API call to backend - using members endpoint for faster response
+      const response = await firstValueFrom(this.http.get<any>(`${environment.apiUrl}/members`));
+      
+      // Transform members response to Person format
+      const members = response?.members || response || [];
+      return members.map((member: any) => ({
+        id: member.id,
+        name: member.name,
+        email: member.email,
+        phone: member.phone,
+        groups: [], // Could be enhanced with actual group data
+        lastAttendance: undefined // Could be enhanced with last attendance date
+      }));
     } catch (error) {
-      console.error('Error fetching people:', error);
+      console.error('Error fetching members:', error);
       // Fallback to mock data
       const mockPeople: Person[] = [
         {
@@ -229,6 +240,31 @@ export class AttendanceService {
     }
   }
 
+  /**
+   * Get active members for attendance using the member service (faster)
+   */
+  async getActiveMembers(): Promise<Person[]> {
+    try {
+      const response = await this.memberService.getMembers({ 
+        status: 'ACTIVE',
+        limit: 1000 // Get a large number to include all active members
+      });
+      
+      return response.members.map(member => ({
+        id: member.id,
+        name: member.name,
+        email: member.email,
+        phone: member.phone,
+        groups: [], // Could be enhanced with actual group data
+        lastAttendance: undefined // Could be enhanced with last attendance date
+      }));
+    } catch (error) {
+      console.error('Error fetching active members:', error);
+      // Fallback to the regular getPeople method
+      return await this.getPeople();
+    }
+  }
+
   getSessionTrends(sessionId: string): Observable<any> {
     // This would return attendance trends data over time
     return this.http.get(`${this.apiUrl}/trends/session/${sessionId}`);
@@ -251,10 +287,13 @@ export class AttendanceService {
     }
   }
 
-  async createSession(sessionData: Partial<Session>): Promise<Session> {
+  async createSession(sessionData: CreateSessionDto): Promise<Session> {
     try {
-      // Make actual API call to backend
+      // Make actual API call to backend with proper DTO format
       const response = await firstValueFrom(this.http.post<Session>(`${this.apiUrl}/sessions`, sessionData));
+      
+      // If successful, refresh the sessions list
+      await this.getSessions();
       
       return response || {
         id: 'session_' + Date.now(),
@@ -297,6 +336,22 @@ export class AttendanceService {
     } catch (error) {
       console.error('Error deleting session:', error);
       return false;
+    }
+  }
+
+  async autoMarkUnmarkedAsAbsent(sessionId: string): Promise<{ markedCount: number; memberIds: string[] }> {
+    try {
+      const response = await firstValueFrom(
+        this.http.post<{ success: boolean; message: string; data: { markedCount: number; memberIds: string[] } }>(
+          `${this.apiUrl}/sessions/${sessionId}/auto-mark-absent`,
+          {}
+        )
+      );
+      
+      return response.data;
+    } catch (error) {
+      console.error('Error auto-marking unmarked as absent:', error);
+      throw error;
     }
   }
 }

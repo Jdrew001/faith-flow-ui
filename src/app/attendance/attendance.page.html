@@ -127,14 +127,14 @@
                       [style.stroke-dashoffset]="125.6 - (125.6 * session.attendanceRate / 100)">
                     </circle>
                   </svg>
-                  <div class="progress-text">{{ session.attendanceRate }}%</div>
+                  <!-- <div class="progress-text">{{ session.attendanceRate }}%</div> -->
                 </div>
               </div>
               
               <div class="attendance-stats">
                 <div class="stat-row">
                   <span class="present-count">{{ session.presentCount }} Present</span>
-                  <span class="total-count">of {{ session.totalExpected }}</span>
+                  <span class="total-count">{{ session.presentCount }} of {{ session.totalExpected }}</span>
                 </div>
                 <div class="absent-count">
                   {{ session.totalExpected - session.presentCount }} Absent
@@ -171,10 +171,25 @@
     </div>
   </ion-content>
 
-  <!-- Floating Action Button -->
+  <!-- Floating Action Button with Menu -->
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button (click)="createNewSession()" color="primary">
+    <ion-fab-button color="primary">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>
+    
+    <ion-fab-list side="top">
+      <ion-fab-button (click)="createNewSession('service')" color="primary" title="Service">
+        <ion-icon name="people"></ion-icon>
+      </ion-fab-button>
+      <ion-fab-button (click)="createNewSession('meeting')" color="secondary" title="Meeting">
+        <ion-icon name="business"></ion-icon>
+      </ion-fab-button>
+      <ion-fab-button (click)="createNewSession('class')" color="tertiary" title="Class">
+        <ion-icon name="school"></ion-icon>
+      </ion-fab-button>
+      <ion-fab-button (click)="createNewSession('event')" color="success" title="Event">
+        <ion-icon name="calendar"></ion-icon>
+      </ion-fab-button>
+    </ion-fab-list>
   </ion-fab>
 </div>
