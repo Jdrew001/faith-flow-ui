@@ -61,26 +61,90 @@ ion-app ion-header {
     --color: #ffffff !important;
     --border-color: #48484a !important;
   }
+  
+  // Ensure all titles are white
+  ion-title {
+    color: #ffffff !important;
+    --color: #ffffff !important;
+  }
+  
+  // Ensure all buttons and their content are white
+  ion-button {
+    --color: #ffffff !important;
+    color: #ffffff !important;
+    
+    // Target button inner content
+    .button-native {
+      color: #ffffff !important;
+    }
+    
+    // Target any icons within buttons
+    ion-icon {
+      color: #ffffff !important;
+      --color: #ffffff !important;
+    }
+  }
+  
+  // Target any standalone icons
+  ion-icon {
+    color: #ffffff !important;
+    --color: #ffffff !important;
+  }
+  
+  // Target buttons in ion-buttons containers
+  ion-buttons {
+    ion-button {
+      --color: #ffffff !important;
+      color: #ffffff !important;
+      
+      .button-native {
+        color: #ffffff !important;
+      }
+      
+      ion-icon {
+        color: #ffffff !important;
+        --color: #ffffff !important;
+      }
+    }
+  }
 }
 
-// Ensure menu buttons are visible across all platforms
+// Ensure menu buttons are white and visible across all platforms
 ion-app ion-menu-button {
-  --color: #8e8e93 !important;
-  color: #8e8e93 !important;
+  --color: #ffffff !important;
+  color: #ffffff !important;
 }
 
 // Override Ionic's button-native color for menu buttons
 ion-app ion-menu-button .button-native {
-  color: #8e8e93 !important;
+  color: #ffffff !important;
+}
+
+// Ensure menu button icons are white
+ion-app ion-menu-button ion-icon {
+  color: #ffffff !important;
+  --color: #ffffff !important;
 }
 
 ::ng-deep .button-inner {
-  color: #8e8e93 !important;
+  color: #ffffff !important;
 }
 
 // Ensure all header buttons are visible across all platforms
 ion-app ion-header ion-button {
   --color: #ffffff !important;
+  color: #ffffff !important;
+  
+  // Target button inner content
+  .button-native {
+    color: #ffffff !important;
+  }
+  
+  // Target any icons
+  ion-icon {
+    color: #ffffff !important;
+    --color: #ffffff !important;
+  }
 }
 
 // Override any theme-specific toolbar styles
@@ -89,6 +153,88 @@ ion-app ion-header ion-button {
   --background: #3a3a3c !important;
   --color: #ffffff !important;
   --border-color: #48484a !important;
+  
+  // Ensure titles are white on all platforms
+  ion-title {
+    color: #ffffff !important;
+    --color: #ffffff !important;
+  }
+  
+  // Ensure buttons and icons are white on all platforms
+  ion-button {
+    --color: #ffffff !important;
+    color: #ffffff !important;
+    
+    .button-native {
+      color: #ffffff !important;
+    }
+    
+    ion-icon {
+      color: #ffffff !important;
+      --color: #ffffff !important;
+    }
+  }
+  
+  // Target any standalone icons
+  ion-icon {
+    color: #ffffff !important;
+    --color: #ffffff !important;
+  }
+}
+
+// Additional high-specificity styles for top menu bar
+// Ensure all header elements are consistently white
+ion-header ion-toolbar ion-title,
+ion-modal ion-header ion-toolbar ion-title,
+ion-page ion-header ion-toolbar ion-title {
+  color: #ffffff !important;
+  --color: #ffffff !important;
+}
+
+ion-header ion-toolbar ion-button,
+ion-modal ion-header ion-toolbar ion-button,
+ion-page ion-header ion-toolbar ion-button {
+  --color: #ffffff !important;
+  color: #ffffff !important;
+}
+
+ion-header ion-toolbar ion-button ion-icon,
+ion-modal ion-header ion-toolbar ion-button ion-icon,
+ion-page ion-header ion-toolbar ion-button ion-icon {
+  color: #ffffff !important;
+  --color: #ffffff !important;
+}
+
+ion-header ion-toolbar ion-buttons ion-button,
+ion-modal ion-header ion-toolbar ion-buttons ion-button,
+ion-page ion-header ion-toolbar ion-buttons ion-button {
+  --color: #ffffff !important;
+  color: #ffffff !important;
+}
+
+ion-header ion-toolbar ion-buttons ion-button ion-icon,
+ion-modal ion-header ion-toolbar ion-buttons ion-button ion-icon,
+ion-page ion-header ion-toolbar ion-buttons ion-button ion-icon {
+  color: #ffffff !important;
+  --color: #ffffff !important;
+}
+
+// Override any deep styling that might interfere
+::ng-deep ion-header ion-toolbar {
+  --background: #3a3a3c !important;
+  --color: #ffffff !important;
+  
+  ion-title {
+    color: #ffffff !important;
+  }
+  
+  ion-button {
+    --color: #ffffff !important;
+    
+    ion-icon {
+      color: #ffffff !important;
+    }
+  }
 }
 
 // Status Bar styling for iOS
