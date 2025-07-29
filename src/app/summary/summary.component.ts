@@ -23,7 +23,7 @@ export class SummaryComponent implements ViewDidEnter {
 
   followUpItems: FollowUpItem[] = [];
 
-  upcomingEvents: UpcomingEvent[] = [];
+  upcomingsessions: UpcomingEvent[] = [];
 
   engagementTrends: EngagementData[] = [];
 
@@ -39,7 +39,7 @@ export class SummaryComponent implements ViewDidEnter {
   isLoading = false;
   isLoadingAttendance = true;
   isLoadingFollowUps = true;
-  isLoadingEvents = true;
+  isLoadingsessions = true;
   isLoadingEngagement = true;
   isLoadingWorkflows = true;
 
@@ -63,7 +63,7 @@ export class SummaryComponent implements ViewDidEnter {
     // Load data individually with separate loading states
     this.loadAttendanceData();
     this.loadFollowUpData();
-    this.loadEventsData();
+    this.loadsessionsData();
     this.loadEngagementData();
     this.loadWorkflowData();
   }
@@ -96,16 +96,16 @@ export class SummaryComponent implements ViewDidEnter {
     });
   }
 
-  private loadEventsData() {
-    this.isLoadingEvents = true;
-    this.dashboardService.getUpcomingEvents(5).subscribe({
+  private loadsessionsData() {
+    this.isLoadingsessions = true;
+    this.dashboardService.getUpcomingsessions(5).subscribe({
       next: (data) => {
-        this.upcomingEvents = data;
-        this.isLoadingEvents = false;
+        this.upcomingsessions = data;
+        this.isLoadingsessions = false;
       },
       error: (error) => {
-        console.error('Error loading events data:', error);
-        this.isLoadingEvents = false;
+        console.error('Error loading sessions data:', error);
+        this.isLoadingsessions = false;
       }
     });
   }

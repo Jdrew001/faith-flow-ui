@@ -1,7 +1,8 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ModalController } from '@ionic/angular';
-import { AttendanceService, Session } from '../../../services/attendance.service';
+import { AttendanceService } from '../../../services/attendance.service';
+import { Session } from '../../../models/attendance.model';
 
 export interface CreateSessionForm {
   name: string;
@@ -9,7 +10,7 @@ export interface CreateSessionForm {
   datetime: string;
   occurrence: 'once' | 'weekly' | 'monthly';
   location: string;
-  type?: 'service' | 'meeting' | 'event' | 'class';
+  type?: 'service' | 'meeting' | 'sessions' | 'class';
 }
 
 @Component({

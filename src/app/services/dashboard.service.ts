@@ -46,7 +46,7 @@ export interface DashboardSummary {
   attendance: AttendanceStats;
   engagement: EngagementData[];
   followUps: FollowUpItem[];
-  events: {
+  sessions: {
     stats: any;
     upcoming: UpcomingEvent[];
   };
@@ -82,8 +82,8 @@ export class DashboardService {
     return this.http.get<FollowUpItem[]>(`${this.apiUrl}/dashboard/follow-ups/urgent`).pipe(delay(2000));
   }
 
-  getUpcomingEvents(limit: number = 5): Observable<UpcomingEvent[]> {
-    return this.http.get<UpcomingEvent[]>(`${this.apiUrl}/dashboard/events/upcoming?limit=${limit}`).pipe(delay(2000));
+  getUpcomingsessions(limit: number = 5): Observable<UpcomingEvent[]> {
+    return this.http.get<UpcomingEvent[]>(`${this.apiUrl}/dashboard/sessions/upcoming?limit=${limit}`).pipe(delay(2000));
   }
 
   getWorkflowStats(): Observable<WorkflowTriggers> {

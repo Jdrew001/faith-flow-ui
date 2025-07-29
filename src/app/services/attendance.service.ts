@@ -1,54 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable, BehaviorSubject, firstValueFrom } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { environment } from '../../environments/environment';
-
-export interface Session {
-  id: string;
-  title: string;
-  date: Date;
-  startTime: string;
-  endTime: string;
-  location: string;
-  type: 'service' | 'meeting' | 'event' | 'class';
-  status: 'upcoming' | 'active' | 'completed' | 'cancelled';
-  presentCount: number;
-  totalExpected: number;
-  attendanceRate: number;
-  description?: string;
-  leader?: string;
-  tags?: string[];
-}
-
-export interface AttendanceRecord {
-  id: string;
-  sessionId: string;
-  personId: string;
-  personName: string;
-  status: 'Present' | 'Absent';
-  timestamp: string;
-  notes?: string;
-}
-
-export interface AttendanceSummary {
-  totalSessions: number;
-  averageAttendance: number;
-  totalAttendees: number;
-  weeklyGrowth: number;
-  mostPopularSession: string;
-  attendanceRate: number;
-}
-
-export interface Person {
-  id: string;
-  name: string;
-  email?: string;
-  phone?: string;
-  avatar?: string;
-  groups?: string[];
-  lastAttendance?: string;
-}
+import { Session, AttendanceRecord, AttendanceSummary, Person } from '../models';
 
 @Injectable({
   providedIn: 'root'
@@ -62,7 +17,15 @@ export class AttendanceService {
 
   async getSessions(): Promise<Session[]> {
     try {
-      // For now, return mock data - replace with actual API call
+      // Make actual API call to backend
+      const response = await firstValueFrom(this.http.get<Session[]>(`${this.apiUrl}/sessions`));
+      const sessions = response || [];
+      
+      this.sessionsSubject.next(sessions);
+      return sessions;
+    } catch (error) {
+      console.error('Error fetching sessions:', error);
+      // Fallback to mock data if API fails
       const mockSessions: Session[] = [
         {
           id: '1',
@@ -95,68 +58,29 @@ export class AttendanceService {
           status: 'upcoming',
           leader: 'Sarah Wilson',
           tags: ['youth', 'games', 'bible study']
-        },
-        {
-          id: '3',
-          title: 'Wednesday Bible Study',
-          description: 'Deep dive into Scripture with discussion',
-          startTime: '19:00',
-          endTime: '20:30',
-          date: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
-          type: 'class',
-          location: 'Fellowship Hall',
-          presentCount: 38,
-          totalExpected: 45,
-          attendanceRate: 84.4,
-          status: 'upcoming',
-          leader: 'Dr. Smith',
-          tags: ['bible study', 'discussion']
-        },
-        {
-          id: '4',
-          title: 'Small Group Alpha',
-          description: 'Exploring faith questions in a small group setting',
-          startTime: '19:30',
-          endTime: '21:00',
-          date: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
-          type: 'meeting',
-          location: 'Room 201',
-          presentCount: 10,
-          totalExpected: 12,
-          attendanceRate: 83.3,
-          status: 'upcoming',
-          leader: 'Mark Johnson',
-          tags: ['small group', 'faith exploration']
-        },
-        {
-          id: '5',
-          title: 'Prayer Meeting',
-          description: 'Corporate prayer and intercession',
-          startTime: '18:30',
-          endTime: '19:30',
-          date: new Date(Date.now() + 4 * 24 * 60 * 60 * 1000),
-          type: 'meeting',
-          location: 'Prayer Room',
-          presentCount: 22,
-          totalExpected: 25,
-          attendanceRate: 88.0,
-          status: 'upcoming',
-          leader: 'Mary Davis',
-          tags: ['prayer', 'intercession']
         }
       ];
-
+      
       this.sessionsSubject.next(mockSessions);
       return mockSessions;
-    } catch (error) {
-      console.error('Error fetching sessions:', error);
-      return [];
     }
   }
 
   async getAttendanceStats(): Promise<AttendanceSummary> {
     try {
-      // Mock stats - replace with actual API call
+      // Make actual API call to backend
+      const response = await firstValueFrom(this.http.get<AttendanceSummary>(`${this.apiUrl}/summary`));
+      return response || {
+        totalSessions: 0,
+        averageAttendance: 0,
+        totalAttendees: 0,
+        weeklyGrowth: 0,
+        mostPopularSession: '',
+        attendanceRate: 0
+      };
+    } catch (error) {
+      console.error('Error fetching attendance stats:', error);
+      // Fallback to mock data
       return {
         totalSessions: 28,
         averageAttendance: 78.5,
@@ -165,22 +89,17 @@ export class AttendanceService {
         mostPopularSession: 'Sunday Morning Service',
         attendanceRate: 89.3
       };
-    } catch (error) {
-      console.error('Error fetching attendance stats:', error);
-      return {
-        totalSessions: 0,
-        averageAttendance: 0,
-        totalAttendees: 0,
-        weeklyGrowth: 0,
-        mostPopularSession: '',
-        attendanceRate: 0
-      };
     }
   }
 
   async getSessionAttendance(sessionId: string): Promise<AttendanceRecord[]> {
     try {
-      // Mock attendance records - replace with actual API call
+      // Make actual API call to backend
+      const response = await firstValueFrom(this.http.get<AttendanceRecord[]>(`${this.apiUrl}/sessions/${sessionId}/attendance`));
+      return response || [];
+    } catch (error) {
+      console.error('Error fetching session attendance:', error);
+      // Fallback to mock data
       const mockRecords: AttendanceRecord[] = [
         {
           id: '1',
@@ -208,27 +127,32 @@ export class AttendanceService {
         }
       ];
       return mockRecords;
-    } catch (error) {
-      console.error('Error fetching session attendance:', error);
-      return [];
     }
   }
 
   async markAttendance(sessionId: string, personId: string, status: 'Present' | 'Absent', notes?: string): Promise<AttendanceRecord> {
     try {
-      const record: AttendanceRecord = {
+      const attendanceData = {
+        personId,
+        status,
+        notes
+      };
+
+      // Make actual API call to backend
+      const response = await firstValueFrom(this.http.post<AttendanceRecord>(
+        `${this.apiUrl}/sessions/${sessionId}/attendance`,
+        attendanceData
+      ));
+      
+      return response || {
         id: Math.random().toString(36).substr(2, 9),
         sessionId,
         personId,
-        personName: 'Person Name', // This would come from person lookup
+        personName: 'Person Name',
         status,
         timestamp: new Date().toISOString(),
         notes
       };
-
-      // Here you would make an actual API call
-      console.log('Marking attendance:', record);
-      return record;
     } catch (error) {
       console.error('Error marking attendance:', error);
       throw error;
@@ -237,18 +161,20 @@ export class AttendanceService {
 
   async bulkMarkAttendance(sessionId: string, attendanceData: { personId: string; status: 'Present' | 'Absent' }[]): Promise<AttendanceRecord[]> {
     try {
-      const records: AttendanceRecord[] = attendanceData.map(data => ({
+      // Make actual API call to backend
+      const response = await firstValueFrom(this.http.post<AttendanceRecord[]>(
+        `${this.apiUrl}/sessions/${sessionId}/bulk-attendance`,
+        attendanceData
+      ));
+
+      return response || attendanceData.map(data => ({
         id: Math.random().toString(36).substr(2, 9),
         sessionId,
         personId: data.personId,
-        personName: 'Person Name', // This would come from person lookup
+        personName: 'Person Name',
         status: data.status,
         timestamp: new Date().toISOString()
       }));
-
-      // Here you would make an actual API call
-      console.log('Bulk marking attendance:', records);
-      return records;
     } catch (error) {
       console.error('Error bulk marking attendance:', error);
       throw error;
@@ -267,7 +193,12 @@ export class AttendanceService {
 
   async getPeople(): Promise<Person[]> {
     try {
-      // Mock people data - replace with actual API call
+      // Make actual API call to backend
+      const response = await firstValueFrom(this.http.get<Person[]>(`${this.apiUrl}/members`));
+      return response || [];
+    } catch (error) {
+      console.error('Error fetching people:', error);
+      // Fallback to mock data
       const mockPeople: Person[] = [
         {
           id: 'p1',
@@ -295,9 +226,6 @@ export class AttendanceService {
         }
       ];
       return mockPeople;
-    } catch (error) {
-      console.error('Error fetching people:', error);
-      return [];
     }
   }
 
@@ -313,9 +241,10 @@ export class AttendanceService {
 
   async updateAttendanceRecord(sessionId: string, personId: string, status: string): Promise<void> {
     try {
-      // Mock implementation - replace with actual API call
-      console.log(`Updating attendance for session ${sessionId}, person ${personId}, status: ${status}`);
-      // In real implementation, this would make an HTTP request to update the attendance record
+      // Make actual API call to backend
+      await firstValueFrom(this.http.put(`${this.apiUrl}/sessions/${sessionId}/attendance/${personId}`, {
+        status
+      }));
     } catch (error) {
       console.error('Error updating attendance record:', error);
       throw error;
@@ -324,9 +253,11 @@ export class AttendanceService {
 
   async createSession(sessionData: Partial<Session>): Promise<Session> {
     try {
-      // Mock implementation - in real app, this would make HTTP POST request
-      const newSession: Session = {
-        id: 'session_' + Date.now(), // Generate unique ID
+      // Make actual API call to backend
+      const response = await firstValueFrom(this.http.post<Session>(`${this.apiUrl}/sessions`, sessionData));
+      
+      return response || {
+        id: 'session_' + Date.now(),
         title: sessionData.title || 'New Session',
         description: sessionData.description || '',
         date: sessionData.date || new Date(),
@@ -341,15 +272,31 @@ export class AttendanceService {
         leader: sessionData.leader,
         tags: sessionData.tags || []
       };
-
-      // In real implementation, this would be:
-      // const response = await this.http.post<Session>(`${this.apiUrl}/sessions`, sessionData).toPromise();
-      
-      console.log('Creating new session:', newSession);
-      return newSession;
     } catch (error) {
       console.error('Error creating session:', error);
       throw error;
+    }
+  }
+
+  async updateSession(sessionId: string, sessionData: Partial<Session>): Promise<Session> {
+    try {
+      // Make actual API call to backend
+      const response = await firstValueFrom(this.http.put<Session>(`${this.apiUrl}/sessions/${sessionId}`, sessionData));
+      return response!;
+    } catch (error) {
+      console.error('Error updating session:', error);
+      throw error;
+    }
+  }
+
+  async deleteSession(sessionId: string): Promise<boolean> {
+    try {
+      // Make actual API call to backend
+      await firstValueFrom(this.http.delete(`${this.apiUrl}/sessions/${sessionId}`));
+      return true;
+    } catch (error) {
+      console.error('Error deleting session:', error);
+      return false;
     }
   }
 }

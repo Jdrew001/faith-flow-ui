@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ModalController } from '@ionic/angular';
-import { AttendanceService, AttendanceRecord, Session } from '../../../services/attendance.service';
+import { AttendanceService } from '../../../services/attendance.service';
+import { AttendanceRecord, Session } from '../../../models/attendance.model';
 
 @Component({
   selector: 'app-session-detail-modal',
@@ -91,7 +92,7 @@ export class SessionDetailModalComponent implements OnInit {
     switch (type) {
       case 'service': return 'people-outline';
       case 'meeting': return 'business-outline';
-      case 'event': return 'calendar-outline';
+      case 'sessions': return 'calendar-outline';
       case 'class': return 'school-outline';
       default: return 'calendar-outline';
     }

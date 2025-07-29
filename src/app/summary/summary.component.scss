@@ -135,7 +135,7 @@ ion-card {
   }
 }
 
-// List Cards (Follow-up & Events)
+// List Cards (Follow-up & sessions)
 .list-card {
   .list-header {
     display: flex;
@@ -208,8 +208,8 @@ ion-card {
   }
 }
 
-.events-card {
-  .events-list {
+.sessions-card {
+  .sessions-list {
     display: flex;
     flex-direction: column;
     gap: 12px;

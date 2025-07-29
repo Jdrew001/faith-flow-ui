@@ -3,7 +3,8 @@ import { ModalController, ToastController, ActionSheetController } from '@ionic/
 import { FormControl } from '@angular/forms';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
-import { Session, AttendanceService, AttendanceRecord, Person } from '../../../services/attendance.service';
+import { AttendanceService } from '../../../services/attendance.service';
+import { Session, AttendanceRecord, Person } from '../../../models/attendance.model';
 
 interface MemberAttendance {
   id: string;

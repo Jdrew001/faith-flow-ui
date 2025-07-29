@@ -92,7 +92,7 @@
             </ion-card>
 
             <!-- Upcoming Sessions Card -->
-            <ion-card class="list-card events-card">
+            <ion-card class="list-card sessions-card">
               <ion-card-header>
                 <div class="list-header">
                   <div class="list-title-section">
@@ -105,11 +105,11 @@
                 </div>
               </ion-card-header>
               <ion-card-content>
-                <div *ngIf="isLoadingEvents">
+                <div *ngIf="isLoadingsessions">
                   <app-skeleton-loader type="list" [lines]="3"></app-skeleton-loader>
                 </div>
-                <div *ngIf="!isLoadingEvents" class="events-list">
-                  <div class="event-item" *ngFor="let event of upcomingEvents.slice(0, 3)">
+                <div *ngIf="!isLoadingsessions" class="sessions-list">
+                  <div class="event-item" *ngFor="let event of upcomingsessions.slice(0, 3)">
                     <div class="event-info">
                       <ion-icon [name]="getEventIcon(event.type)" color="primary"></ion-icon>
                       <div class="event-details">

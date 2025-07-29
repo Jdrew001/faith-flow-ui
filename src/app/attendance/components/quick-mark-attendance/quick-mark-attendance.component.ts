@@ -1,6 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ModalController } from '@ionic/angular';
-import { Session, AttendanceService, Person } from '../../../services/attendance.service';
+import { AttendanceService } from '../../../services/attendance.service';
+import { Session, Person } from '../../../models/attendance.model';
 
 @Component({
   selector: 'app-quick-mark-attendance',
