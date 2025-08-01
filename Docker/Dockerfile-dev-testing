@@ -1,8 +1,11 @@
 # Use Node.js official image as base
-FROM node:22-alpine
+FROM node:22.12-alpine
 
 # Set working directory
 WORKDIR /app
+
+# Verify Node.js version
+RUN node --version && npm --version
 
 # Copy package.json and package-lock.json (if available)
 COPY package*.json ./
