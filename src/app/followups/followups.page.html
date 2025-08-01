@@ -1,0 +1,220 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button *ngIf="!showBackButton"></ion-menu-button>
+      <ion-back-button 
+        *ngIf="showBackButton" 
+        defaultHref="/summary">
+      </ion-back-button>
+    </ion-buttons>
+    <ion-title>Follow-ups</ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" (click)="showFilterModal = true">
+        <ion-icon name="filter-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <!-- Search Bar -->
+  <ion-searchbar
+    [(ngModel)]="searchTerm"
+    (ionInput)="filterFollowups()"
+    placeholder="Search follow-ups..."
+    show-clear-button="focus">
+  </ion-searchbar>
+
+  <!-- Filter Pills -->
+  <div class="filter-pills" *ngIf="hasActiveFilters()">
+    <ion-chip *ngIf="selectedStatus !== 'all'" (click)="clearStatusFilter()" color="primary">
+      <ion-label>{{ selectedStatus | titlecase }}</ion-label>
+      <ion-icon name="close-circle"></ion-icon>
+    </ion-chip>
+    <ion-chip *ngIf="selectedPriority !== 'all'" (click)="clearPriorityFilter()" color="secondary">
+      <ion-label>{{ selectedPriority | titlecase }} Priority</ion-label>
+      <ion-icon name="close-circle"></ion-icon>
+    </ion-chip>
+    <ion-chip *ngIf="selectedAssignee !== 'all'" (click)="clearAssigneeFilter()" color="tertiary">
+      <ion-label>{{ selectedAssignee }}</ion-label>
+      <ion-icon name="close-circle"></ion-icon>
+    </ion-chip>
+  </div>
+
+  <!-- Sort Options -->
+  <div class="sort-options">
+    <ion-segment [(ngModel)]="sortBy" (ionChange)="sortFollowups()">
+      <ion-segment-button value="dueDate">
+        <ion-label>Due Date</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="priority">
+        <ion-label>Priority</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="createdDate">
+        <ion-label>Created</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </div>
+
+  <!-- Follow-ups List -->
+  <div class="followups-container">
+    <div *ngIf="filteredFollowups.length === 0" class="empty-state">
+      <ion-icon name="checkmark-circle-outline" size="large"></ion-icon>
+      <h3>No follow-ups found</h3>
+      <p *ngIf="searchTerm || hasActiveFilters()">Try adjusting your search or filters</p>
+      <p *ngIf="!searchTerm && !hasActiveFilters()">All caught up! Great work.</p>
+    </div>
+
+    <ion-card *ngFor="let followup of filteredFollowups" class="followup-card" [class]="'priority-' + followup.priority">
+      <ion-card-header>
+        <div class="card-header-content">
+          <div class="header-left">
+            <ion-card-subtitle>
+              <ion-icon [name]="getTypeIcon(followup.type)"></ion-icon>
+              {{ followup.type | titlecase }}
+            </ion-card-subtitle>
+            <ion-card-title>{{ followup.title }}</ion-card-title>
+          </div>
+          <div class="header-right">
+            <ion-chip [color]="getPriorityColor(followup.priority)" size="small">
+              {{ followup.priority | titlecase }}
+            </ion-chip>
+            <ion-chip [color]="getStatusColor(followup.status)" size="small">
+              {{ followup.status | titlecase }}
+            </ion-chip>
+          </div>
+        </div>
+      </ion-card-header>
+
+      <ion-card-content>
+        <p class="description">{{ followup.description }}</p>
+        
+        <div class="followup-details">
+          <div class="detail-row">
+            <ion-icon name="person-outline"></ion-icon>
+            <span>{{ followup.personName }}</span>
+          </div>
+          <div class="detail-row" *ngIf="followup.assignedTo">
+            <ion-icon name="people-outline"></ion-icon>
+            <span>Assigned to: </span>
+            <div class="assignee-badge">
+              <div class="assignee-avatar-small" [attr.data-color]="getAssigneeDetails(followup.assignedTo)?.color">
+                {{ getAssigneeDetails(followup.assignedTo)?.avatar }}
+              </div>
+              <span>{{ followup.assignedTo }}</span>
+            </div>
+          </div>
+          <div class="detail-row">
+            <ion-icon name="calendar-outline"></ion-icon>
+            <span>Due: {{ followup.dueDate | date:'mediumDate' }}</span>
+            <ion-badge *ngIf="followup.dueDate && isOverdue(followup.dueDate)" color="danger" class="overdue-badge">
+              Overdue
+            </ion-badge>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <ion-button 
+            fill="clear" 
+            size="small" 
+            (click)="markAsComplete(followup)"
+            [disabled]="followup.status === 'completed'">
+            <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+            Complete
+          </ion-button>
+          <ion-button 
+            fill="clear" 
+            size="small" 
+            (click)="markAsInProgress(followup)"
+            [disabled]="followup.status === 'in-progress'">
+            <ion-icon name="time-outline" slot="start"></ion-icon>
+            In Progress
+          </ion-button>
+          <ion-button fill="clear" size="small" (click)="editFollowup(followup)">
+            <ion-icon name="create-outline" slot="start"></ion-icon>
+            Edit
+          </ion-button>
+          <ion-button fill="clear" size="small" (click)="assignFollowup(followup)">
+            <ion-icon name="person-add-outline" slot="start"></ion-icon>
+            Assign
+          </ion-button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Filter Modal -->
+  <ion-modal [isOpen]="showFilterModal" (willDismiss)="showFilterModal = false">
+    <ng-template>
+      <ion-header>
+        <ion-toolbar>
+          <ion-title>Filter Follow-ups</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="showFilterModal = false">
+              <ion-icon name="close"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content>
+        <ion-list>
+          <ion-item>
+            <ion-label>Status</ion-label>
+            <ion-select [(ngModel)]="selectedStatus" (ionChange)="filterFollowups()">
+              <ion-select-option value="all">All</ion-select-option>
+              <ion-select-option value="pending">Pending</ion-select-option>
+              <ion-select-option value="in-progress">In Progress</ion-select-option>
+              <ion-select-option value="completed">Completed</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>Priority</ion-label>
+            <ion-select [(ngModel)]="selectedPriority" (ionChange)="filterFollowups()">
+              <ion-select-option value="all">All</ion-select-option>
+              <ion-select-option value="high">High</ion-select-option>
+              <ion-select-option value="medium">Medium</ion-select-option>
+              <ion-select-option value="low">Low</ion-select-option>
+            </ion-select>
+          </ion-item>
+
+          <ion-item>
+            <ion-label>Assignee</ion-label>
+            <ion-select [(ngModel)]="selectedAssignee" (ionChange)="filterFollowups()">
+              <ion-select-option value="all">All</ion-select-option>
+              <ion-select-option value="Pastor John">Pastor John</ion-select-option>
+              <ion-select-option value="Sarah Wilson">Sarah Wilson</ion-select-option>
+              <ion-select-option value="Mike Johnson">Mike Johnson</ion-select-option>
+              <ion-select-option value="Unassigned">Unassigned</ion-select-option>
+            </ion-select>
+          </ion-item>
+        </ion-list>
+
+        <div class="modal-actions">
+          <ion-button expand="block" fill="clear" (click)="clearAllFilters()">
+            Clear All Filters
+          </ion-button>
+          <ion-button expand="block" (click)="showFilterModal = false">
+            Apply Filters
+          </ion-button>
+        </div>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+
+  <!-- Assignment Modal Component -->
+  <app-assignment-modal
+    [isOpen]="showAssignModal"
+    [followupItem]="selectedFollowupForAssign"
+    [assignees]="assignees"
+    (close)="closeAssignModal()"
+    (save)="saveAssignment($event)">
+  </app-assignment-modal>
+
+  <!-- Floating Action Button -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="addNewFollowup()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

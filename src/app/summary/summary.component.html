@@ -1,0 +1,195 @@
+
+  <div class="ion-page" id="main-content">
+      <ion-header [translucent]="false" class="dashboard-header">
+        <ion-toolbar>
+          <ion-buttons slot="start">
+            <ion-menu-button color="light"></ion-menu-button>
+          </ion-buttons>
+          <ion-buttons slot="end">
+            <ion-button fill="clear" color="light" (click)="onLogout()">
+              <ion-icon name="log-out-outline" slot="icon-only"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+
+      <ion-content >
+        <!-- Welcome Section -->
+        <div class="welcome-section" *ngIf="currentUser$ | async as user">
+          <h2>Welcome back, {{ user.firstName || 'User' }}!</h2>
+          <p class="welcome-subtitle">Here's what's happening in your ministry</p>
+        </div>
+
+        <!-- Dashboard Grid -->
+        <div class="dashboard-grid">
+            
+            <!-- Attendance Stats Card -->
+            <ion-card class="stat-card attendance-card">
+              <ion-card-header>
+                <div class="stat-header">
+                  <ion-icon name="people-outline" class="stat-icon"></ion-icon>
+                  <div class="stat-title-section">
+                    <ion-card-title>Attendance</ion-card-title>
+                    <ion-card-subtitle>This Week</ion-card-subtitle>
+                  </div>
+                  <ion-chip 
+                    *ngIf="!isLoadingAttendance" 
+                    [color]="attendanceStats.trend === 'up' ? 'success' : 'warning'" 
+                    class="trend-chip">
+                    <ion-icon [name]="attendanceStats.trend === 'up' ? 'trending-up' : 'trending-down'"></ion-icon>
+                    {{ attendanceStats.percentage }}%
+                  </ion-chip>
+                </div>
+              </ion-card-header>
+              <ion-card-content>
+                <div *ngIf="isLoadingAttendance">
+                  <app-skeleton-loader type="stat" [lines]="2"></app-skeleton-loader>
+                </div>
+                <div *ngIf="!isLoadingAttendance" class="attendance-stats">
+                  <div class="stat-item">
+                    <span class="stat-number present">{{ attendanceStats.present }}</span>
+                    <span class="stat-label">Present</span>
+                  </div>
+                  <div class="stat-divider"></div>
+                  <div class="stat-item">
+                    <span class="stat-number absent">{{ attendanceStats.absent }}</span>
+                    <span class="stat-label">Absent</span>
+                  </div>
+                </div>
+              </ion-card-content>
+            </ion-card>
+
+            <!-- Follow-Up Needs Card -->
+            <ion-card class="list-card followup-card">
+              <ion-card-header>
+                <div class="list-header">
+                  <div class="list-title-section">
+                    <ion-card-title>Needs Follow-up</ion-card-title>
+                    <ion-card-subtitle *ngIf="!isLoadingFollowUps">{{ followUpItems.length }} people</ion-card-subtitle>
+                  </div>
+                  <ion-button fill="clear" size="small" color="primary" (click)="onViewAllFollowUps()">
+                    View All
+                  </ion-button>
+                </div>
+              </ion-card-header>
+              <ion-card-content>
+                <div *ngIf="isLoadingFollowUps">
+                  <app-skeleton-loader type="list" [lines]="3"></app-skeleton-loader>
+                </div>
+                <div *ngIf="!isLoadingFollowUps" class="followup-list">
+                  <div class="followup-item" *ngFor="let item of followUpItems.slice(0, 3)">
+                    <div class="followup-info">
+                      <ion-icon [name]="getTypeIcon(item.type)" [color]="getPriorityColor(item.priority)"></ion-icon>
+                      <div class="followup-details">
+                        <span class="followup-name">{{ item.name }}</span>
+                        <span class="followup-type">{{ item.type }}</span>
+                      </div>
+                    </div>
+                    <span class="followup-time">{{ item.daysAgo }}d</span>
+                  </div>
+                </div>
+              </ion-card-content>
+            </ion-card>
+
+            <!-- Upcoming Sessions Card -->
+            <ion-card class="list-card sessions-card">
+              <ion-card-header>
+                <div class="list-header">
+                  <div class="list-title-section">
+                    <ion-card-title>Upcoming Sessions</ion-card-title>
+                    <ion-card-subtitle>Next 7 days</ion-card-subtitle>
+                  </div>
+                  <ion-button fill="clear" size="small" color="primary" (click)="onGoToSessions()">
+                    Go to Attendance
+                  </ion-button>
+                </div>
+              </ion-card-header>
+              <ion-card-content>
+                <div *ngIf="isLoadingsessions">
+                  <app-skeleton-loader type="list" [lines]="3"></app-skeleton-loader>
+                </div>
+                <div *ngIf="!isLoadingsessions" class="sessions-list">
+                  <div class="event-item" *ngFor="let event of upcomingsessions.slice(0, 3)">
+                    <div class="event-info">
+                      <ion-icon [name]="getEventIcon(event.type)" color="primary"></ion-icon>
+                      <div class="event-details">
+                        <span class="event-title">{{ event.title }}</span>
+                        <span class="event-time">{{ event.time }}</span>
+                      </div>
+                    </div>
+                    <span class="event-date">{{ formatDate(event.date) }}</span>
+                  </div>
+                </div>
+              </ion-card-content>
+            </ion-card>
+
+            <!-- Engagement Trends Card -->
+            <ion-card class="chart-card engagement-card">
+              <ion-card-header>
+                <div class="chart-header">
+                  <div class="chart-title-section">
+                    <ion-card-title>Engagement Trends</ion-card-title>
+                    <ion-card-subtitle>Last 7 weeks</ion-card-subtitle>
+                  </div>
+                  <span *ngIf="!isLoadingEngagement" class="current-metric">80%</span>
+                </div>
+              </ion-card-header>
+              <ion-card-content>
+                <div *ngIf="isLoadingEngagement">
+                  <app-skeleton-loader type="chart" [lines]="8"></app-skeleton-loader>
+                </div>
+                <div *ngIf="!isLoadingEngagement" class="mini-chart">
+                  <div class="chart-container">
+                    <svg viewBox="0 0 280 80" class="trend-chart">
+                      <polyline 
+                        fill="none" 
+                        stroke="#007aff" 
+                        stroke-width="2"
+                        points="0,45 40,35 80,40 120,20 160,10 200,25 240,15 280,20"
+                      />
+                      <circle cx="280" cy="20" r="3" fill="#007aff"/>
+                    </svg>
+                  </div>
+                  <div class="chart-labels">
+                    <span *ngFor="let data of engagementTrends" class="chart-label">{{ data.week }}</span>
+                  </div>
+                </div>
+              </ion-card-content>
+            </ion-card>
+
+            <!-- Workflow Triggers Card -->
+            <ion-card class="stat-card workflow-card">
+              <ion-card-header>
+                <div class="workflow-header">
+                  <div class="workflow-title-section">
+                    <ion-card-title>Workflow Triggers</ion-card-title>
+                    <ion-card-subtitle>Active automations</ion-card-subtitle>
+                  </div>
+                  <ion-button fill="clear" size="small" color="primary" (click)="onViewWorkflows()">
+                    <ion-icon name="settings-outline" slot="icon-only"></ion-icon>
+                  </ion-button>
+                </div>
+              </ion-card-header>
+              <ion-card-content>
+                <div class="workflow-stats">
+                  <div class="workflow-count">
+                    <span class="workflow-number">{{ workflowTriggers.count }}</span>
+                    <span class="workflow-label">Active Triggers</span>
+                  </div>
+                  <div class="workflow-sync">
+                    <div class="sync-info">
+                      <ion-icon 
+                        [name]="workflowTriggers.status === 'active' ? 'checkmark-circle' : 'alert-circle'"
+                        [color]="workflowTriggers.status === 'active' ? 'success' : 'warning'"
+                      ></ion-icon>
+                      <span class="sync-text">Last sync: {{ formatLastSync(workflowTriggers.lastSync) }}</span>
+                    </div>
+                  </div>
+                </div>
+              </ion-card-content>
+            </ion-card>
+
+        </div>
+        <!-- End Dashboard Content -->
+      </ion-content>
+  </div>

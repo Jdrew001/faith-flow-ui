@@ -1,0 +1,93 @@
+<ion-content class="login-container auth-page">
+  <div class="login-header">
+    <ion-button fill="clear" class="back-button" (click)="goBack()" *ngIf="showVerificationCode">
+      <ion-icon name="chevron-back" slot="icon-only"></ion-icon>
+    </ion-button>
+    <h1>WELCOME!</h1>
+  </div>
+  
+  <!-- Phone Number Input Stage -->
+  <div *ngIf="!showVerificationCode" class="login-stage">
+    <div class="input-section">
+      <p class="input-label">Your mobile number</p>
+      <div class="phone-display">{{ displayPhoneNumber || '+1' }}</div>
+      <p class="input-description">We will send you One-Time-Password (OTP) via SMS. Please ensure correct number</p>
+    </div>
+    
+    <div class="keypad-container">
+      <div class="keypad">
+        <div class="keypad-row" *ngFor="let row of keypadNumbers">
+          <button 
+            class="keypad-button" 
+            *ngFor="let num of row" 
+            (click)="onKeypadPress(num)"
+            [disabled]="num === null">
+            <span *ngIf="num !== null">{{ num }}</span>
+          </button>
+        </div>
+        <div class="keypad-row">
+          <button class="keypad-button" disabled></button>
+          <button class="keypad-button" (click)="onKeypadPress(0)">0</button>
+          <button class="keypad-button delete-button" (click)="onDeletePress()">
+            <ion-icon name="backspace-outline"></ion-icon>
+          </button>
+        </div>
+      </div>
+      
+      <ion-button 
+        expand="block" 
+        class="next-button"
+        (click)="requestLoginCode()"
+        [disabled]="phoneNumber.length < 10">
+        NEXT
+      </ion-button>
+    </div>
+  </div>
+  
+  <!-- Verification Code Input Stage -->
+  <div *ngIf="showVerificationCode" class="verification-stage">
+    <div class="input-section">
+      <h2>Verify OTP</h2>
+      <p class="input-description">Please enter the 6-digit OTP sent to {{ formattedPhoneNumber }}</p>
+      
+      <div class="otp-display">
+        <div 
+          class="otp-digit" 
+          *ngFor="let digit of otpDigits; let i = index"
+          [class.filled]="digit !== ''">
+          {{ digit }}
+        </div>
+      </div>
+    </div>
+    
+    <div class="keypad-container">
+      <div class="keypad">
+        <div class="keypad-row" *ngFor="let row of keypadNumbers">
+          <button 
+            class="keypad-button" 
+            *ngFor="let num of row" 
+            (click)="onOtpKeypadPress(num)"
+            [disabled]="num === null">
+            <span *ngIf="num !== null">{{ num }}</span>
+          </button>
+        </div>
+        <div class="keypad-row">
+          <button class="keypad-button" disabled></button>
+          <button class="keypad-button" (click)="onOtpKeypadPress(0)">0</button>
+          <button class="keypad-button delete-button" (click)="onOtpDeletePress()">
+            <ion-icon name="backspace-outline"></ion-icon>
+          </button>
+        </div>
+      </div>
+      
+      <div class="verification-actions">
+        <ion-button 
+          fill="clear" 
+          class="resend-button"
+          (click)="resendOtp()">
+          Resend OTP
+        </ion-button>
+      </div>
+    </div>
+  </div>
+</ion-content>

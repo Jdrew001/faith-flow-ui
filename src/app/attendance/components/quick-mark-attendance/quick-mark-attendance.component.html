@@ -1,0 +1,181 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Quick Mark - {{ session.title }}</ion-title>
+    <ion-buttons slot="end">
+      <ion-button fill="clear" (click)="dismiss()">
+        <ion-icon name="close" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="quick-mark-content">
+  <!-- Session Info Header -->
+  <div class="session-info-header">
+    <div class="session-details">
+      <h3>{{ session.title }}</h3>
+      <p>{{ session.date | date:'fullDate' }} • {{ session.startTime }} - {{ session.endTime }}</p>
+    </div>
+    
+    <div class="attendance-summary">
+      <div class="summary-item present">
+        <div class="count">{{ getPresentCount() }}</div>
+        <div class="label">Present</div>
+      </div>
+      <div class="summary-item absent">
+        <div class="count">{{ getAbsentCount() }}</div>
+        <div class="label">Absent</div>
+      </div>
+      <div class="summary-item total">
+        <div class="count">{{ getMarkedCount() }}</div>
+        <div class="label">Marked</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Search and Actions -->
+  <div class="search-actions-section">
+    <ion-searchbar
+      [(ngModel)]="searchTerm"
+      (ionInput)="onSearchChange($event)"
+      placeholder="Search people..."
+      debounce="300"
+      showClearButton="focus"
+      class="people-searchbar">
+    </ion-searchbar>
+
+    <div class="quick-actions">
+      <ion-button 
+        fill="outline" 
+        size="small" 
+        color="success"
+        (click)="markAllPresent()">
+        <ion-icon name="checkmark-circle" slot="start"></ion-icon>
+        All Present
+      </ion-button>
+      
+      <ion-button 
+        fill="outline" 
+        size="small" 
+        color="danger"
+        (click)="markAllAbsent()">
+        <ion-icon name="close-circle" slot="start"></ion-icon>
+        All Absent
+      </ion-button>
+      
+      <ion-button 
+        fill="outline" 
+        size="small" 
+        color="medium"
+        (click)="clearAll()">
+        <ion-icon name="refresh" slot="start"></ion-icon>
+        Clear
+      </ion-button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <ion-skeleton-text animated style="width: 100%; height: 72px; margin-bottom: 12px;" *ngFor="let item of [1,2,3,4,5]"></ion-skeleton-text>
+  </div>
+
+  <!-- People List -->
+  <div *ngIf="!isLoading" class="people-list">
+    <ion-card 
+      *ngFor="let person of filteredPeople; trackBy: trackByPersonId" 
+      class="person-card"
+      [ngClass]="{'marked-present': getAttendanceStatus(person.id) === 'Present', 'marked-absent': getAttendanceStatus(person.id) === 'Absent'}">
+      
+      <ion-card-content>
+        <div class="person-content">
+          <!-- Person Info -->
+          <div class="person-info">
+            <ion-avatar class="person-avatar">
+              <img [src]="person.avatar || 'https://gravatar.com/avatar/' + person.id + '?d=mp'" [alt]="person.name">
+            </ion-avatar>
+            
+            <div class="person-details">
+              <div class="person-name">{{ person.name }}</div>
+              <div class="person-meta">
+                <div class="person-email" *ngIf="person.email">{{ person.email }}</div>
+                <div class="person-groups" *ngIf="person.groups && person.groups.length > 0">
+                  <ion-chip 
+                    *ngFor="let group of person.groups.slice(0, 2)" 
+                    color="light" 
+                    class="group-chip">
+                    {{ group }}
+                  </ion-chip>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Attendance Actions -->
+          <div class="attendance-actions">
+            <ion-button 
+              [fill]="getAttendanceStatus(person.id) === 'Present' ? 'solid' : 'outline'"
+              [color]="getAttendanceStatus(person.id) === 'Present' ? 'success' : 'medium'"
+              size="small"
+              (click)="markAttendance(person, 'Present')"
+              class="attendance-btn">
+              <ion-icon name="checkmark-circle" slot="start"></ion-icon>
+              Present
+            </ion-button>
+            
+            <ion-button 
+              [fill]="getAttendanceStatus(person.id) === 'Absent' ? 'solid' : 'outline'"
+              [color]="getAttendanceStatus(person.id) === 'Absent' ? 'danger' : 'medium'"
+              size="small"
+              (click)="markAttendance(person, 'Absent')"
+              class="attendance-btn">
+              <ion-icon name="close-circle" slot="start"></ion-icon>
+              Absent
+            </ion-button>
+          </div>
+
+          <!-- Status Indicator -->
+          <div class="status-indicator" *ngIf="getAttendanceStatus(person.id)">
+            <ion-icon 
+              [name]="getAttendanceStatus(person.id) === 'Present' ? 'checkmark-circle' : 'close-circle'"
+              [color]="getAttendanceStatus(person.id) === 'Present' ? 'success' : 'danger'"
+              class="status-icon">
+            </ion-icon>
+          </div>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && filteredPeople.length === 0" class="empty-state">
+    <ion-card>
+      <ion-card-content>
+        <div class="empty-content">
+          <ion-icon name="people" size="large" color="medium"></ion-icon>
+          <h3>No People Found</h3>
+          <p *ngIf="searchTerm">Try adjusting your search term.</p>
+          <p *ngIf="!searchTerm">No people are available for attendance marking.</p>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+</ion-content>
+
+<ion-footer class="quick-mark-footer">
+  <ion-toolbar>
+    <div class="footer-actions">
+      <ion-button fill="outline" (click)="dismiss()">
+        Cancel
+      </ion-button>
+      
+      <ion-button 
+        fill="solid" 
+        color="primary"
+        [disabled]="getMarkedCount() === 0"
+        (click)="saveAttendance()">
+        <ion-icon name="save" slot="start"></ion-icon>
+        Save ({{ getMarkedCount() }})
+      </ion-button>
+    </div>
+  </ion-toolbar>
+</ion-footer>

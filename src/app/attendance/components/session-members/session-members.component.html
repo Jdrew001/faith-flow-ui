@@ -1,0 +1,286 @@
+<div class="session-members-modal" 
+     [class.header-hidden]="headerHidden"
+     [class.selection-mode]="isSelectionMode"
+     appAutoHideHeader 
+     [scrollThreshold]="1"
+     [hideAfterScroll]="80"
+     [showNearTop]="40"
+     [hysteresis]="25"
+     (headerVisibilityChange)="onHeaderVisibilityChange($event)">
+  <ion-header [class.header-hidden]="headerHidden">
+    <ion-toolbar>
+      <ion-title>{{ session?.title }} - Members</ion-title>
+      <ion-buttons slot="end">
+        <ion-button (click)="dismiss()" fill="clear">
+          <ion-icon name="close" slot="icon-only"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+    
+    <!-- Selection Mode Header -->
+    <ion-toolbar *ngIf="isSelectionMode" class="selection-toolbar">
+      <ion-title>{{ selectedCount }} Selected</ion-title>
+      <ion-buttons slot="start">
+        <ion-button (click)="exitSelectionMode()" fill="clear">
+          <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+      <ion-buttons slot="end">
+        <ion-button (click)="selectAllVisible()" fill="clear" size="small">
+          <ion-icon name="checkmark-done-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+        <ion-button (click)="deselectAll()" fill="clear" size="small">
+          <ion-icon name="close-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+    
+    <!-- Session Info Header -->
+    <ion-toolbar class="session-info-toolbar">
+      <div class="session-summary">
+        <div class="session-details">
+          <h3>{{ session?.title }}</h3>
+          <div class="session-meta">
+            <span>{{ session?.date | date:'EEE, MMM d, y' }}</span>
+            <span>{{ session?.startTime }} - {{ session?.endTime }}</span>
+            <span>{{ session?.location }}</span>
+          </div>
+        </div>
+        
+        <div class="attendance-stats-summary">
+          <div class="stat-circle">
+            <div class="rate">{{ attendanceRate }}%</div>
+            <div class="label">Rate</div>
+          </div>
+        </div>
+      </div>
+    </ion-toolbar>
+  </ion-header>
+
+  <ion-content class="members-content" [class.has-sticky-actions]="isSelectionMode && selectedCount > 0" [scrollY]="true" [scrollEvents]="true">
+    <!-- Quick Actions Sticky Bar -->
+    <div class="quick-actions-bar" *ngIf="!isSelectionMode">
+      <div class="actions-container">
+        <ion-button 
+          (click)="markAllPresent()" 
+          fill="clear" 
+          size="small" 
+          color="success">
+          <ion-icon name="checkmark-circle" slot="start"></ion-icon>
+          All Present
+        </ion-button>
+        
+        <ion-button 
+          (click)="markAllAbsent()" 
+          fill="clear" 
+          size="small" 
+          color="danger">
+          <ion-icon name="close-circle" slot="start"></ion-icon>
+          All Absent
+        </ion-button>
+        
+        <ion-button 
+          (click)="clearAll()" 
+          fill="clear" 
+          size="small" 
+          color="medium">
+          <ion-icon name="refresh" slot="start"></ion-icon>
+          Clear All
+        </ion-button>
+      </div>
+    </div>
+
+    <!-- Long Press Hint -->
+    <div class="selection-hint-bar" *ngIf="!isSelectionMode && !isLoading && filteredMembers.length > 0">
+      <div class="hint-content">
+        <ion-icon name="hand-left-outline" class="hint-icon"></ion-icon>
+        <span class="hint-text">Hold any member to select multiple</span>
+      </div>
+    </div>
+
+    <!-- Search & Filter Bar -->
+    <div class="search-filter-bar">
+      <ion-searchbar 
+        [formControl]="searchControl"
+        placeholder="Search members..."
+        debounce="300"
+        showClearButton="focus"
+        class="member-searchbar">
+      </ion-searchbar>
+
+      <div class="filter-buttons">
+        <ion-button 
+          [fill]="selectedFilter === 'all' ? 'solid' : 'outline'"
+          [color]="selectedFilter === 'all' ? 'primary' : 'medium'"
+          size="small"
+          (click)="onFilterChange('all')">
+          All ({{ members.length }})
+        </ion-button>
+        
+        <ion-button 
+          [fill]="selectedFilter === 'unmarked' ? 'solid' : 'outline'"
+          [color]="selectedFilter === 'unmarked' ? 'warning' : 'medium'"
+          size="small"
+          (click)="onFilterChange('unmarked')">
+          Unmarked ({{ unmarkedCount }})
+        </ion-button>
+        
+        <ion-button 
+          [fill]="selectedFilter === 'present' ? 'solid' : 'outline'"
+          [color]="selectedFilter === 'present' ? 'success' : 'medium'"
+          size="small"
+          (click)="onFilterChange('present')">
+          Present ({{ presentCount }})
+        </ion-button>
+        
+        <ion-button 
+          [fill]="selectedFilter === 'absent' ? 'solid' : 'outline'"
+          [color]="selectedFilter === 'absent' ? 'danger' : 'medium'"
+          size="small"
+          (click)="onFilterChange('absent')">
+          Absent ({{ absentCount }})
+        </ion-button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-state">
+      <ion-spinner name="circular"></ion-spinner>
+      <p>Loading members...</p>
+    </div>
+
+    <!-- Members List with improved scrolling -->
+    <div *ngIf="!isLoading" class="members-list-container">
+      <div class="members-list">
+        <div 
+          *ngFor="let member of filteredMembers; trackBy: trackByMemberId; let index = index"
+          class="member-row"
+          [attr.data-member-id]="member.personId"
+          [class.selected]="member.selected"
+          [class.selection-mode]="isSelectionMode"
+          [class.has-long-press]="longPressActive"
+          (click)="handleMemberClick(member, $event)"
+          (touchstart)="onTouchStart(member, $event)"
+          (touchend)="onTouchEnd($event)"
+          (touchmove)="onTouchMove($event)">
+          
+          <!-- Selection Checkbox -->
+          <div class="member-selection" *ngIf="isSelectionMode">
+            <ion-checkbox 
+              [checked]="member.selected"
+              (ionChange)="toggleMemberSelection(member, $event)"
+              color="primary">
+            </ion-checkbox>
+          </div>
+          
+          <div class="member-avatar">
+            <div *ngIf="!member.avatar" class="avatar-initials">
+              {{ getInitials(member.personName) }}
+            </div>
+            <img *ngIf="member.avatar" [src]="member.avatar" [alt]="member.personName">
+          </div>
+          
+          <div class="member-info">
+            <div class="member-name">{{ member.personName }}</div>
+            <div class="member-status">
+              <ion-icon 
+                [name]="getStatusIcon(member.status)" 
+                [color]="getStatusColor(member.status)">
+              </ion-icon>
+              <span [class]="'status-text ' + member.status.toLowerCase()">
+                {{ member.status }}
+              </span>
+              <span *ngIf="member.timestamp" class="timestamp">
+                {{ member.timestamp | date:'shortTime' }}
+              </span>
+            </div>
+          </div>
+          
+          <div class="member-actions" *ngIf="!isSelectionMode">
+            <ion-button 
+              fill="clear" 
+              size="small"
+              [color]="getStatusColor(member.status)"
+              (click)="quickStatusToggle(member, $event)">
+              <ion-icon [name]="getStatusIcon(member.status)" slot="icon-only"></ion-icon>
+            </ion-button>
+          </div>
+          
+          <!-- Quick status indicator -->
+          <div class="status-indicator" [class]="member.status.toLowerCase()"></div>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="filteredMembers.length === 0" class="empty-members">
+        <ion-icon name="people-outline" class="empty-icon"></ion-icon>
+        <h3>No Members Found</h3>
+        <p>No members match your current search or filter.</p>
+      </div>
+      
+      <!-- Bottom padding to ensure last item is accessible -->
+      <div class="bottom-padding"></div>
+    </div>
+  </ion-content>
+
+  <!-- Sticky Bottom Bulk Actions Bar -->
+  <div class="sticky-bulk-actions" *ngIf="isSelectionMode && selectedCount > 0">
+    <div class="bulk-actions-container">
+      <div class="bulk-actions-grid">
+        <div class="primary-actions">
+          <ion-button 
+            (click)="markSelectedAs('Present')" 
+            expand="block"
+            fill="solid" 
+            size="default" 
+            color="success"
+            class="action-button">
+            <ion-icon name="checkmark-circle" slot="start"></ion-icon>
+            <div class="button-content">
+              <span class="action-label">Present</span>
+              <span class="action-count">{{ selectedCount }}</span>
+            </div>
+          </ion-button>
+          
+          <ion-button 
+            (click)="markSelectedAs('Absent')" 
+            expand="block"
+            fill="solid" 
+            size="default" 
+            color="danger"
+            class="action-button">
+            <ion-icon name="close-circle" slot="start"></ion-icon>
+            <div class="button-content">
+              <span class="action-label">Absent</span>
+              <span class="action-count">{{ selectedCount }}</span>
+            </div>
+          </ion-button>
+        </div>
+        
+        <div class="secondary-actions">
+          <ion-button 
+            (click)="markSelectedAs('Late')" 
+            expand="block"
+            fill="outline" 
+            size="small" 
+            color="warning"
+            class="secondary-button">
+            <ion-icon name="time" slot="start"></ion-icon>
+            Late
+          </ion-button>
+          
+          <ion-button 
+            (click)="markSelectedAs('Excused')" 
+            expand="block"
+            fill="outline" 
+            size="small" 
+            color="medium"
+            class="secondary-button">
+            <ion-icon name="information-circle" slot="start"></ion-icon>
+            Excused
+          </ion-button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

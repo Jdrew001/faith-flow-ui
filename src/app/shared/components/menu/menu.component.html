@@ -1,0 +1,121 @@
+<div *ngIf="currentUser; else loginPrompt" class="authenticated-menu">
+    
+  <!-- User Profile Section -->
+  <div class="user-profile-section">
+    <div class="user-avatar-container">
+      <div class="user-avatar">
+        <span class="avatar-initials" *ngIf="!currentUser.avatar">{{ getUserInitials() }}</span>
+        <img [src]="currentUser.avatar" *ngIf="currentUser.avatar" alt="Profile">
+      </div>
+      <div class="online-indicator"></div>
+    </div>
+    <div class="user-details">
+      <h3 class="user-name">{{ getUserDisplayName() }}</h3>
+      <p class="user-role">{{ getRoleDisplayName() }}</p>
+      <p class="user-church" *ngIf="currentUser.churchName">{{ currentUser.churchName }}</p>
+    </div>
+    <ion-button fill="clear" (click)="logout()" class="logout-button" size="small">
+      <ion-icon name="log-out-outline" slot="icon-only"></ion-icon>
+    </ion-button>
+  </div>
+
+  <!-- Main Navigation -->
+  <div class="main-navigation">
+    <div class="nav-section">
+      <h4 class="nav-header">Main Menu</h4>
+      <div class="nav-items">
+        <ion-menu-toggle auto-hide="false" *ngFor="let page of appPages">
+          <div class="nav-item" 
+                [routerLink]="[page.url]" 
+                routerLinkActive="active"
+                (click)="$event.stopPropagation()">
+            <div class="nav-item-icon">
+              <ion-icon [name]="page.icon + '-outline'"></ion-icon>
+            </div>
+            <div class="nav-item-content">
+              <span class="nav-item-title">{{ page.title }}</span>
+              <span class="nav-item-description">{{ page.description }}</span>
+            </div>
+            <div class="nav-item-arrow">
+              <ion-icon name="chevron-forward-outline"></ion-icon>
+            </div>
+          </div>
+        </ion-menu-toggle>
+      </div>
+    </div>
+
+    <!-- Quick Actions Section -->
+    <div class="nav-section">
+      <h4 class="nav-header">Quick Actions</h4>
+      <div class="quick-actions-grid">
+        <div class="quick-action-item" 
+              *ngFor="let action of quickActions"
+              (click)="handleQuickAction(action.action)">
+          <div class="quick-action-icon">
+            <ion-icon [name]="action.icon"></ion-icon>
+          </div>
+          <span class="quick-action-title">{{ action.title }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- App Info Footer -->
+  <div class="menu-footer">
+    <div class="app-info">
+      <div class="app-logo">
+        <ion-icon name="heart" class="logo-icon"></ion-icon>
+      </div>
+      <div class="app-details">
+        <h4>Faith Flow</h4>
+        <p>v1.0.0 • Connecting hearts</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Show login prompt when not authenticated -->
+<ng-template #loginPrompt>
+  <!-- <div class="login-prompt">
+    <div class="logo-section">
+      <div class="app-logo-large">
+        <ion-icon name="heart" class="logo-icon-large"></ion-icon>
+      </div>
+      <h2 class="app-title">Faith Flow</h2>
+      <p class="app-tagline">Connect with your spiritual community</p>
+    </div>
+    
+    <div class="login-actions">
+      <ion-button expand="block" 
+                  (click)="navigateToLogin()" 
+                  class="primary-login-btn"
+                  fill="solid">
+        <ion-icon name="log-in-outline" slot="start"></ion-icon>
+        Sign In
+      </ion-button>
+      
+      <ion-button expand="block" 
+                  fill="outline" 
+                  (click)="navigateToRegister()" 
+                  class="secondary-login-btn">
+        <ion-icon name="person-add-outline" slot="start"></ion-icon>
+        Create Account
+      </ion-button>
+    </div>
+
+    <div class="app-features">
+      <div class="feature-item">
+        <ion-icon name="shield-checkmark-outline" class="feature-icon"></ion-icon>
+        <span>Secure & Private</span>
+      </div>
+      <div class="feature-item">
+        <ion-icon name="people-outline" class="feature-icon"></ion-icon>
+        <span>Community Focused</span>
+      </div>
+      <div class="feature-item">
+        <ion-icon name="heart-outline" class="feature-icon"></ion-icon>
+        <span>Faith Centered</span>
+      </div>
+    </div>
+  </div> -->
+</ng-template>

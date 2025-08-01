@@ -1,0 +1,50 @@
+<div class="attendance-trends">
+  <div class="trends-header">
+    <h3>Attendance Trends</h3>
+    <ion-segment [value]="selectedPeriod" (ionChange)="onPeriodChange($event)">
+      <ion-segment-button value="week">
+        <ion-label>Week</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="month">
+        <ion-label>Month</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="year">
+        <ion-label>Year</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </div>
+  
+  <div class="chart-container">
+    <div class="chart-placeholder">
+      <ion-icon name="bar-chart" size="large" color="medium"></ion-icon>
+      <p>Trends chart will be implemented here</p>
+      <small>Integration with Chart.js or similar charting library needed</small>
+    </div>
+  </div>
+  
+  <div class="trend-insights" *ngIf="trends">
+    <div class="insight-item">
+      <ion-icon name="trending-up" color="success"></ion-icon>
+      <div class="insight-text">
+        <div class="insight-title">Best Day</div>
+        <div class="insight-value">{{ trends.bestDay || 'Sunday' }}</div>
+      </div>
+    </div>
+    
+    <div class="insight-item">
+      <ion-icon name="time" color="primary"></ion-icon>
+      <div class="insight-text">
+        <div class="insight-title">Peak Time</div>
+        <div class="insight-value">{{ trends.peakTime || '10:00 AM' }}</div>
+      </div>
+    </div>
+    
+    <div class="insight-item">
+      <ion-icon name="calendar" color="warning"></ion-icon>
+      <div class="insight-text">
+        <div class="insight-title">Avg Session Length</div>
+        <div class="insight-value">{{ trends.avgLength || '1.5 hours' }}</div>
+      </div>
+    </div>
+  </div>
+</div>

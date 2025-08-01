@@ -1,0 +1,411 @@
+// Dark theme menu styles
+.menu-content {
+  --background: #1c1c1e;
+  background: #1c1c1e;
+  color: #ffffff;
+}
+
+// Authenticated Menu Styles
+.authenticated-menu {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+// User Profile Section
+.user-profile-section {
+  background: linear-gradient(135deg, #2c2c2e 0%, #3a3a3c 100%);
+  padding: 24px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 1px solid #48484a;
+  position: relative;
+  
+  .user-avatar-container {
+    position: relative;
+    
+    .user-avatar {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #007aff 0%, #5856d6 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 3px solid #48484a;
+      
+      .avatar-initials {
+        color: #ffffff;
+        font-size: 20px;
+        font-weight: 600;
+      }
+      
+      img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
+      }
+    }
+    
+    .online-indicator {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      width: 14px;
+      height: 14px;
+      background: #34c759;
+      border: 2px solid #1c1c1e;
+      border-radius: 50%;
+    }
+  }
+  
+  .user-details {
+    flex: 1;
+    
+    .user-name {
+      color: #ffffff;
+      font-size: 18px;
+      font-weight: 600;
+      margin: 0 0 4px 0;
+      line-height: 1.2;
+    }
+    
+    .user-role {
+      color: #007aff;
+      font-size: 12px;
+      font-weight: 500;
+      margin: 0 0 2px 0;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .user-church {
+      color: #8e8e93;
+      font-size: 14px;
+      margin: 0;
+      line-height: 1.2;
+    }
+  }
+  
+  .logout-button {
+    --color: #8e8e93;
+    --padding-start: 8px;
+    --padding-end: 8px;
+    
+    &:hover {
+      --color: #ff3b30;
+    }
+    
+    ion-icon {
+      font-size: 20px;
+    }
+  }
+}
+
+// Main Navigation
+.main-navigation {
+  flex: 1;
+  padding: 20px 0;
+  overflow-y: auto;
+}
+
+.nav-section {
+  margin-bottom: 32px;
+  
+  .nav-header {
+    color: #8e8e93;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin: 0 0 16px 20px;
+  }
+}
+
+// Navigation Items
+.nav-items {
+  .nav-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 20px;
+    margin: 0 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+    
+    &.active {
+      background: linear-gradient(135deg, #007aff 0%, #5856d6 100%);
+      
+      .nav-item-icon ion-icon {
+        color: #ffffff;
+      }
+      
+      .nav-item-title {
+        color: #ffffff;
+        font-weight: 600;
+      }
+      
+      .nav-item-description {
+        color: rgba(255, 255, 255, 0.8);
+      }
+      
+      .nav-item-arrow ion-icon {
+        color: #ffffff;
+      }
+    }
+    
+    .nav-item-icon {
+      width: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      ion-icon {
+        font-size: 22px;
+        color: #8e8e93;
+        transition: color 0.2s ease;
+      }
+    }
+    
+    .nav-item-content {
+      flex: 1;
+      margin-left: 12px;
+      
+      .nav-item-title {
+        display: block;
+        color: #ffffff;
+        font-size: 16px;
+        font-weight: 500;
+        margin-bottom: 2px;
+        transition: all 0.2s ease;
+      }
+      
+      .nav-item-description {
+        display: block;
+        color: #8e8e93;
+        font-size: 12px;
+        transition: color 0.2s ease;
+      }
+    }
+    
+    .nav-item-arrow {
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      
+      ion-icon {
+        font-size: 16px;
+        color: #8e8e93;
+      }
+    }
+    
+    &:hover .nav-item-arrow {
+      opacity: 1;
+    }
+  }
+}
+
+// Quick Actions Grid
+.quick-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  padding: 0 20px;
+  
+  .quick-action-item {
+    background: #2c2c2e;
+    border: 1px solid #48484a;
+    border-radius: 12px;
+    padding: 16px 12px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background: #3a3a3c;
+      border-color: #007aff;
+      transform: translateY(-2px);
+    }
+    
+    .quick-action-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #007aff 0%, #5856d6 100%);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+      
+      ion-icon {
+        font-size: 20px;
+        color: #ffffff;
+      }
+    }
+    
+    .quick-action-title {
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 500;
+      line-height: 1.2;
+    }
+  }
+}
+
+// Menu Footer
+.menu-footer {
+  padding: 20px;
+  border-top: 1px solid #48484a;
+  
+  .app-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    
+    .app-logo {
+      width: 36px;
+      height: 36px;
+      background: linear-gradient(135deg, #ff3b30 0%, #ff9500 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      .logo-icon {
+        font-size: 18px;
+        color: #ffffff;
+      }
+    }
+    
+    .app-details {
+      h4 {
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: 600;
+        margin: 0 0 2px 0;
+      }
+      
+      p {
+        color: #8e8e93;
+        font-size: 12px;
+        margin: 0;
+      }
+    }
+  }
+}
+
+// Login Prompt Styles
+.login-prompt {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 40px 24px;
+  
+  .logo-section {
+    text-align: center;
+    margin-bottom: 40px;
+    
+    .app-logo-large {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #ff3b30 0%, #ff9500 100%);
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 24px auto;
+      
+      .logo-icon-large {
+        font-size: 40px;
+        color: #ffffff;
+      }
+    }
+    
+    .app-title {
+      color: #ffffff;
+      font-size: 28px;
+      font-weight: 700;
+      margin: 0 0 8px 0;
+    }
+    
+    .app-tagline {
+      color: #8e8e93;
+      font-size: 16px;
+      margin: 0;
+      line-height: 1.4;
+    }
+  }
+  
+  .login-actions {
+    margin-bottom: 40px;
+    
+    .primary-login-btn {
+      --background: linear-gradient(135deg, #007aff 0%, #5856d6 100%);
+      --color: #ffffff;
+      --border-radius: 12px;
+      height: 50px;
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+    
+    .secondary-login-btn {
+      --color: #007aff;
+      --border-color: #48484a;
+      --border-radius: 12px;
+      height: 50px;
+      font-size: 16px;
+      font-weight: 500;
+    }
+  }
+  
+  .app-features {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      
+      .feature-icon {
+        font-size: 20px;
+        color: #007aff;
+      }
+      
+      span {
+        color: #8e8e93;
+        font-size: 14px;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .quick-actions-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .user-profile-section {
+    padding: 20px 16px;
+  }
+  
+  .nav-items .nav-item {
+    margin: 0 8px;
+    padding: 10px 16px;
+  }
+}

@@ -1,0 +1,406 @@
+.dashboard-container {
+  --background: #2c2c2e;
+  background: #2c2c2e;
+  color: #ffffff;
+}
+
+.dashboard-content {
+  --background: #2c2c2e;
+  background: #2c2c2e;
+  padding: 0;
+}
+
+.welcome-section {
+  padding: 20px 20px 10px 20px;
+  
+  h2 {
+    color: #ffffff;
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+  }
+  
+  .welcome-subtitle {
+    color: #8e8e93;
+    font-size: 16px;
+    margin: 0;
+  }
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  padding: 10px 20px 20px 20px;
+}
+
+// Card base styles
+ion-card {
+  --background: #3a3a3c;
+  --color: #ffffff;
+  border-radius: 12px;
+  margin: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  border: 1px solid #48484a;
+  
+  ion-card-header {
+    padding: 16px 16px 8px 16px;
+  }
+  
+  ion-card-content {
+    padding: 8px 16px 16px 16px;
+  }
+  
+  ion-card-title {
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+  }
+  
+  ion-card-subtitle {
+    color: #8e8e93;
+    font-size: 14px;
+    margin: 4px 0 0 0;
+  }
+}
+
+// Attendance Card
+.attendance-card {
+  .stat-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    
+    .stat-icon {
+      font-size: 24px;
+      color: #007aff;
+    }
+    
+    .stat-title-section {
+      flex: 1;
+    }
+    
+    .trend-chip {
+      --background: transparent;
+      font-size: 14px;
+      font-weight: 600;
+      
+      ion-icon {
+        margin-right: 4px;
+      }
+    }
+  }
+  
+  .attendance-stats {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    margin-top: 16px;
+    
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      
+      .stat-number {
+        font-size: 28px;
+        font-weight: 700;
+        line-height: 1;
+        
+        &.present {
+          color: #34c759;
+        }
+        
+        &.absent {
+          color: #ff9500;
+        }
+      }
+      
+      .stat-label {
+        color: #8e8e93;
+        font-size: 12px;
+        margin-top: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+    }
+    
+    .stat-divider {
+      width: 1px;
+      height: 40px;
+      background: #48484a;
+    }
+  }
+}
+
+// List Cards (Follow-up & sessions)
+.list-card {
+  .list-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    
+    .list-title-section {
+      flex: 1;
+    }
+    
+    ion-button {
+      --color: #007aff;
+      font-size: 14px;
+      font-weight: 500;
+    }
+  }
+}
+
+.followup-card {
+  .followup-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    
+    .followup-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #48484a;
+      
+      &:last-child {
+        border-bottom: none;
+      }
+      
+      .followup-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex: 1;
+        
+        ion-icon {
+          font-size: 20px;
+        }
+        
+        .followup-details {
+          display: flex;
+          flex-direction: column;
+          
+          .followup-name {
+            color: #ffffff;
+            font-weight: 500;
+            font-size: 16px;
+          }
+          
+          .followup-type {
+            color: #8e8e93;
+            font-size: 12px;
+            margin-top: 2px;
+          }
+        }
+      }
+      
+      .followup-time {
+        color: #8e8e93;
+        font-size: 12px;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+.sessions-card {
+  .sessions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    
+    .event-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 0;
+      border-bottom: 1px solid #48484a;
+      
+      &:last-child {
+        border-bottom: none;
+      }
+      
+      .event-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex: 1;
+        
+        ion-icon {
+          font-size: 20px;
+        }
+        
+        .event-details {
+          display: flex;
+          flex-direction: column;
+          
+          .event-title {
+            color: #ffffff;
+            font-weight: 500;
+            font-size: 16px;
+          }
+          
+          .event-time {
+            color: #8e8e93;
+            font-size: 12px;
+            margin-top: 2px;
+          }
+        }
+      }
+      
+      .event-date {
+        color: #007aff;
+        font-size: 12px;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+// Engagement Chart Card
+.engagement-card {
+  .chart-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    
+    .chart-title-section {
+      flex: 1;
+    }
+    
+    .current-metric {
+      color: #007aff;
+      font-size: 18px;
+      font-weight: 600;
+    }
+  }
+  
+  .mini-chart {
+    .chart-container {
+      height: 80px;
+      margin: 16px 0 12px 0;
+      
+      .trend-chart {
+        width: 100%;
+        height: 100%;
+      }
+    }
+    
+    .chart-labels {
+      display: flex;
+      justify-content: space-between;
+      
+      .chart-label {
+        color: #8e8e93;
+        font-size: 10px;
+        text-align: center;
+      }
+    }
+  }
+}
+
+// Workflow Card
+.workflow-card {
+  .workflow-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    
+    .workflow-title-section {
+      flex: 1;
+    }
+    
+    ion-button {
+      --color: #007aff;
+      
+      ion-icon {
+        font-size: 20px;
+      }
+    }
+  }
+  
+  .workflow-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 16px;
+    
+    .workflow-count {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      
+      .workflow-number {
+        font-size: 32px;
+        font-weight: 700;
+        color: #007aff;
+        line-height: 1;
+      }
+      
+      .workflow-label {
+        color: #8e8e93;
+        font-size: 12px;
+        margin-top: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+    }
+    
+    .workflow-sync {
+      .sync-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        justify-content: center;
+        
+        ion-icon {
+          font-size: 16px;
+        }
+        
+        .sync-text {
+          color: #8e8e93;
+          font-size: 12px;
+        }
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (min-width: 768px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    padding: 20px 40px;
+    
+    .attendance-card {
+      grid-column: 1 / -1;
+    }
+  }
+}
+
+@media (min-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr 1fr 1fr;
+    
+    .attendance-card {
+      grid-column: 1 / 2;
+    }
+    
+    .engagement-card {
+      grid-column: 2 / -1;
+    }
+  }
+}
+
+// Dark theme consistency
+:host {
+  --ion-background-color: #2c2c2e;
+  --ion-text-color: #ffffff;
+}

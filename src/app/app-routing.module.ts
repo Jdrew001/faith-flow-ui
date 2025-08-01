@@ -1,15 +1,41 @@
-import { NgModule } from '@angular/core';
-import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
+import { inject, NgModule } from '@angular/core';
+import { CanMatchFn, PreloadAllModules, RouterModule, Routes, UrlTree } from '@angular/router';
+import { AuthGuard } from './guards/auth.guard';
 
 const routes: Routes = [
   {
     path: '',
-    redirectTo: 'folder/inbox',
+    redirectTo: 'summary',
     pathMatch: 'full'
   },
   {
-    path: 'folder/:id',
-    loadChildren: () => import('./folder/folder.module').then( m => m.FolderPageModule)
+    path: 'auth',
+    loadChildren: () => import('./auth/auth.module').then(m => m.AuthModule)
+  },
+  {
+    path: 'summary',
+    loadChildren: () => import('./summary/summary.module').then(m => m.SummaryModule),
+    canActivate: [AuthGuard]
+  },
+  // {
+  //   path: 'events',
+  //   loadChildren: () => import('./events/events.module').then(m => m.EventsPageModule),
+  //   canActivate: [AuthGuard]
+  // },
+  {
+    path: 'events',
+    redirectTo: '/attendance',
+    pathMatch: 'full'
+  },
+  {
+    path: 'followups',
+    loadChildren: () => import('./followups/followups.module').then(m => m.FollowupsPageModule),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'attendance',
+    loadChildren: () => import('./attendance/attendance.module').then(m => m.AttendancePageModule),
+    canActivate: [AuthGuard]
   }
 ];
 

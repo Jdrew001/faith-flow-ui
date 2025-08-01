@@ -10,28 +10,264 @@
  */
 
 /* Core CSS required for Ionic components to work properly */
-@import "@ionic/angular/css/core.css";
+@import '@ionic/angular/css/core.css';
 
 /* Basic CSS for apps built with Ionic */
-@import "@ionic/angular/css/normalize.css";
-@import "@ionic/angular/css/structure.css";
-@import "@ionic/angular/css/typography.css";
-@import "@ionic/angular/css/display.css";
+@import '@ionic/angular/css/normalize.css';
+@import '@ionic/angular/css/structure.css';
+@import '@ionic/angular/css/typography.css';
 
 /* Optional CSS utils that can be commented out */
-@import "@ionic/angular/css/padding.css";
-@import "@ionic/angular/css/float-elements.css";
-@import "@ionic/angular/css/text-alignment.css";
-@import "@ionic/angular/css/text-transformation.css";
-@import "@ionic/angular/css/flex-utils.css";
+@import '@ionic/angular/css/padding.css';
+@import '@ionic/angular/css/float-elements.css';
+@import '@ionic/angular/css/text-alignment.css';
+@import '@ionic/angular/css/text-transformation.css';
+@import '@ionic/angular/css/flex-utils.css';
+@import '@ionic/angular/css/display.css';
 
 /**
- * Ionic Dark Mode
+ * Ionic Dark Palette
  * -----------------------------------------------------
- * For more info, please see:
+ * For more information, please see:
  * https://ionicframework.com/docs/theming/dark-mode
  */
 
-/* @import "@ionic/angular/css/palettes/dark.always.css"; */
-/* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import "@ionic/angular/css/palettes/dark.system.css";
+@import '@ionic/angular/css/palettes/dark.always.css';
+/* @import '@ionic/angular/css/palettes/dark.class.css'; */
+/* @import '@ionic/angular/css/palettes/dark.system.css'; */
+
+// Custom Auth Styles
+.auth-page {
+  ion-content {
+    --background: #2c2c2e;
+  }
+}
+
+// Toast Custom Styles
+.toast-success {
+  --background: #34c759;
+  --color: #ffffff;
+}
+
+.toast-danger {
+  --background: #ff3b30;
+  --color: #ffffff;
+}
+
+// Global Header Styles - Match Card Colors
+ion-app ion-header {
+  ion-toolbar {
+    --background: #3a3a3c !important;
+    --color: #ffffff !important;
+    --border-color: #48484a !important;
+  }
+  
+  // Ensure all titles are white
+  ion-title {
+    color: #ffffff !important;
+    --color: #ffffff !important;
+  }
+  
+  // Ensure all buttons and their content are white
+  ion-button {
+    --color: #ffffff !important;
+    color: #ffffff !important;
+    
+    // Target button inner content
+    .button-native {
+      color: #ffffff !important;
+    }
+    
+    // Target any icons within buttons
+    ion-icon {
+      color: #ffffff !important;
+      --color: #ffffff !important;
+    }
+  }
+  
+  // Target any standalone icons
+  ion-icon {
+    color: #ffffff !important;
+    --color: #ffffff !important;
+  }
+  
+  // Target buttons in ion-buttons containers
+  ion-buttons {
+    ion-button {
+      --color: #ffffff !important;
+      color: #ffffff !important;
+      
+      .button-native {
+        color: #ffffff !important;
+      }
+      
+      ion-icon {
+        color: #ffffff !important;
+        --color: #ffffff !important;
+      }
+    }
+  }
+}
+
+// Ensure menu buttons are white and visible across all platforms
+ion-app ion-menu-button {
+  --color: #ffffff !important;
+  color: #ffffff !important;
+}
+
+// Override Ionic's button-native color for menu buttons
+ion-app ion-menu-button .button-native {
+  color: #ffffff !important;
+}
+
+// Ensure menu button icons are white
+ion-app ion-menu-button ion-icon {
+  color: #ffffff !important;
+  --color: #ffffff !important;
+}
+
+::ng-deep .button-inner {
+  color: #ffffff !important;
+}
+
+// Ensure all header buttons are visible across all platforms
+ion-app ion-header ion-button {
+  --color: #ffffff !important;
+  color: #ffffff !important;
+  
+  // Target button inner content
+  .button-native {
+    color: #ffffff !important;
+  }
+  
+  // Target any icons
+  ion-icon {
+    color: #ffffff !important;
+    --color: #ffffff !important;
+  }
+}
+
+// Override any theme-specific toolbar styles
+:root.ios ion-app ion-header ion-toolbar,
+:root.md ion-app ion-header ion-toolbar {
+  --background: #3a3a3c !important;
+  --color: #ffffff !important;
+  --border-color: #48484a !important;
+  
+  // Ensure titles are white on all platforms
+  ion-title {
+    color: #ffffff !important;
+    --color: #ffffff !important;
+  }
+  
+  // Ensure buttons and icons are white on all platforms
+  ion-button {
+    --color: #ffffff !important;
+    color: #ffffff !important;
+    
+    .button-native {
+      color: #ffffff !important;
+    }
+    
+    ion-icon {
+      color: #ffffff !important;
+      --color: #ffffff !important;
+    }
+  }
+  
+  // Target any standalone icons
+  ion-icon {
+    color: #ffffff !important;
+    --color: #ffffff !important;
+  }
+}
+
+// Additional high-specificity styles for top menu bar
+// Ensure all header elements are consistently white
+ion-header ion-toolbar ion-title,
+ion-modal ion-header ion-toolbar ion-title,
+ion-page ion-header ion-toolbar ion-title {
+  color: #ffffff !important;
+  --color: #ffffff !important;
+}
+
+ion-header ion-toolbar ion-button,
+ion-modal ion-header ion-toolbar ion-button,
+ion-page ion-header ion-toolbar ion-button {
+  --color: #ffffff !important;
+  color: #ffffff !important;
+}
+
+ion-header ion-toolbar ion-button ion-icon,
+ion-modal ion-header ion-toolbar ion-button ion-icon,
+ion-page ion-header ion-toolbar ion-button ion-icon {
+  color: #ffffff !important;
+  --color: #ffffff !important;
+}
+
+ion-header ion-toolbar ion-buttons ion-button,
+ion-modal ion-header ion-toolbar ion-buttons ion-button,
+ion-page ion-header ion-toolbar ion-buttons ion-button {
+  --color: #ffffff !important;
+  color: #ffffff !important;
+}
+
+ion-header ion-toolbar ion-buttons ion-button ion-icon,
+ion-modal ion-header ion-toolbar ion-buttons ion-button ion-icon,
+ion-page ion-header ion-toolbar ion-buttons ion-button ion-icon {
+  color: #ffffff !important;
+  --color: #ffffff !important;
+}
+
+// Override any deep styling that might interfere
+::ng-deep ion-header ion-toolbar {
+  --background: #3a3a3c !important;
+  --color: #ffffff !important;
+  
+  ion-title {
+    color: #ffffff !important;
+  }
+  
+  ion-button {
+    --color: #ffffff !important;
+    
+    ion-icon {
+      color: #ffffff !important;
+    }
+  }
+}
+
+// Status Bar styling for iOS
+@media (max-width: 767px) {
+  .ios {
+    .login-container {
+      padding-top: env(safe-area-inset-top);
+    }
+  }
+}
+
+// Session Members Modal - Full Screen Styling
+.session-members-fullscreen {
+  --width: 100vw;
+  --height: 100vh;
+  --min-width: 100vw;
+  --max-width: 100vw;
+  --min-height: 100vh;
+  --max-height: 100vh;
+  --border-radius: 0;
+  --box-shadow: none;
+  
+  .modal-wrapper {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    border-radius: 0;
+  }
+}
+
+:host(.checkbox-checked) .checkbox-icon, :host(.checkbox-indeterminate) .checkbox-icon {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
