@@ -9,7 +9,7 @@
     "build-prod": "ng build --configuration production",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test --coverage",
+    "test": "ng test --code-coverage",
     "lint": "ng lint"
   },
   "private": true,
