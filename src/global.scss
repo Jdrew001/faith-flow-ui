@@ -246,6 +246,154 @@ ion-page ion-header ion-toolbar ion-buttons ion-button ion-icon {
   }
 }
 
+/**
+ * iPhone Layout Fixes - Comprehensive Safe Area Support
+ * -----------------------------------------------------
+ * These styles address layout issues on iPhone devices where content
+ * is being cut off and headers/footers are not displayed properly.
+ * 
+ * Key Issues Addressed:
+ * 1. Safe area insets for iPhone X+ models with notches/dynamic islands
+ * 2. Dynamic viewport height handling for Safari's address bar behavior
+ * 3. Proper header positioning to avoid conflicts with iOS status bar
+ * 4. Content overflow prevention and proper scrolling boundaries
+ * 
+ * Technical Implementation:
+ * - Uses CSS environment variables (env()) for safe area insets
+ * - Implements dynamic viewport height calculations with fallbacks
+ * - Ensures headers and footers are positioned within visible areas
+ * - Provides responsive breakpoints for different iPhone screen sizes
+ */
+
+/* Root-level safe area variables for iPhone compatibility */
+:root {
+  /* Safe area inset variables with fallbacks for older devices */
+  --safe-area-inset-top: env(safe-area-inset-top, 0px);
+  --safe-area-inset-right: env(safe-area-inset-right, 0px);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-area-inset-left: env(safe-area-inset-left, 0px);
+  
+  /* Dynamic viewport height handling for iPhone Safari */
+  --viewport-height: 100vh;
+  --dynamic-viewport-height: 100dvh; /* Uses dynamic viewport when available */
+  --small-viewport-height: 100svh; /* Uses small viewport when available */
+}
+
+/* iPhone-specific safe area handling */
+@supports (padding: env(safe-area-inset-top)) {
+  :root {
+    --safe-area-inset-top: env(safe-area-inset-top);
+    --safe-area-inset-right: env(safe-area-inset-right);
+    --safe-area-inset-bottom: env(safe-area-inset-bottom);
+    --safe-area-inset-left: env(safe-area-inset-left);
+  }
+}
+
+/* Main app container with safe area support */
+ion-app {
+  /* Ensure app fills entire viewport including safe areas */
+  padding-top: var(--safe-area-inset-top);
+  padding-right: var(--safe-area-inset-right);
+  padding-bottom: var(--safe-area-inset-bottom);
+  padding-left: var(--safe-area-inset-left);
+  
+  /* Use dynamic viewport height when available, fallback to standard vh */
+  height: var(--dynamic-viewport-height, var(--viewport-height));
+  min-height: var(--small-viewport-height, var(--viewport-height));
+}
+
+/* Page-level safe area handling */
+.ion-page {
+  /* Ensure pages respect safe areas */
+  padding-top: 0; /* Reset default padding as app-level handles this */
+  padding-right: 0;
+  padding-bottom: 0;
+  padding-left: 0;
+  
+  /* Proper height calculation for iPhone viewport changes */
+  height: calc(100vh - var(--safe-area-inset-top) - var(--safe-area-inset-bottom));
+  min-height: calc(100vh - var(--safe-area-inset-top) - var(--safe-area-inset-bottom));
+  max-height: calc(100vh - var(--safe-area-inset-top) - var(--safe-area-inset-bottom));
+}
+
+/* Header positioning fixes for iPhone */
+ion-header {
+  /* Ensure headers don't get hidden behind notch or status bar */
+  position: relative;
+  z-index: 1000;
+  
+  /* Account for iPhone status bar and notch area */
+  ion-toolbar {
+    /* Add padding for iPhone notch/dynamic island */
+    padding-top: 0; /* Safe area already handled at app level */
+    min-height: 44px; /* iOS standard toolbar height */
+  }
+}
+
+/* Content area positioning and scrolling fixes */
+ion-content {
+  /* Ensure content doesn't overflow beyond visible area */
+  --offset-top: 0;
+  --offset-bottom: 0;
+  
+  /* Proper overflow handling for iPhone */
+  overflow: hidden;
+  
+  .inner-scroll {
+    /* Enable proper scrolling within safe areas */
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  }
+}
+
+/* Fixed elements positioning for iPhone */
+.ion-page [slot="fixed"] {
+  /* Ensure fixed elements respect safe areas */
+  bottom: calc(var(--safe-area-inset-bottom) + 16px);
+  right: calc(var(--safe-area-inset-right) + 16px);
+}
+
+/* iPhone-specific responsive breakpoints */
+/* iPhone SE and smaller devices */
+@media screen and (max-width: 375px) and (max-height: 667px) {
+  .ion-page {
+    font-size: 14px; /* Slightly smaller text for compact screens */
+  }
+  
+  ion-header ion-toolbar {
+    min-height: 40px; /* Slightly smaller toolbar for compact devices */
+  }
+}
+
+/* Standard iPhone sizes (iPhone 12, 13, 14) */
+@media screen and (min-width: 375px) and (max-width: 428px) and (min-height: 667px) {
+  .ion-page {
+    font-size: 16px;
+  }
+}
+
+/* iPhone Pro Max and larger devices */
+@media screen and (min-width: 428px) and (max-height: 932px) {
+  .ion-page {
+    font-size: 16px;
+  }
+}
+
+/* Landscape orientation handling */
+@media screen and (orientation: landscape) and (max-height: 430px) {
+  /* Adjust layout for iPhone landscape mode */
+  ion-header {
+    position: sticky;
+    top: 0;
+  }
+  
+  .ion-page {
+    /* Account for smaller height in landscape */
+    height: calc(100vh - var(--safe-area-inset-top) - var(--safe-area-inset-bottom));
+  }
+}
+
 // Session Members Modal - Full Screen Styling
 .session-members-fullscreen {
   --width: 100vw;
