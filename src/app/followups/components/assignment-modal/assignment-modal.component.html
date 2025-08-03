@@ -1,18 +1,18 @@
 <ion-modal [isOpen]="isOpen" (willDismiss)="closeModal()">
   <ng-template>
-    <ion-header>
+    <ion-header class="modal-header">
       <ion-toolbar>
         <ion-title>Assign Follow-up</ion-title>
         <ion-buttons slot="end">
-          <ion-button (click)="closeModal()" fill="clear">
+          <ion-button (click)="closeModal()" class="close-button">
             <ion-icon name="close"></ion-icon>
           </ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
     
-    <ion-content class="assignment-modal">
-      <div class="modal-content" *ngIf="followupItem">
+    <ion-content class="modal-content">
+      <div class="content-wrapper" *ngIf="followupItem">
         <!-- Follow-up Info Header -->
         <div class="followup-header">
           <div class="followup-info">
@@ -32,17 +32,23 @@
         </div>
 
         <!-- Assignment Form -->
-        <div class="assignment-form">
-          <h4>Assignment Details</h4>
+        <form [formGroup]="assignmentForm" class="form-section">
+          <h4 class="section-title">
+            <ion-icon name="settings-outline" class="section-icon"></ion-icon>
+            Assignment Details
+          </h4>
           
           <!-- Assignee Selection -->
-          <div class="form-section">
-            <ion-label class="section-label">Assign To</ion-label>
+          <div class="select-field">
+            <div class="select-header">
+              <ion-icon name="person-add-outline" class="field-icon"></ion-icon>
+              <label class="select-label">Assign To *</label>
+            </div>
             <div class="assignee-grid">
               <div 
                 *ngFor="let assignee of getAvailableAssignees()" 
                 class="assignee-card" 
-                [class.selected]="assignmentForm.assignedTo === assignee.value"
+                [class.selected]="assignedToControl?.value === assignee.value"
                 (click)="selectAssignee(assignee.value)">
                 <div class="assignee-avatar" [attr.data-color]="assignee.color">
                   {{ assignee.avatar }}
@@ -54,14 +60,14 @@
                 <ion-icon 
                   name="checkmark-circle" 
                   class="selection-icon"
-                  *ngIf="assignmentForm.assignedTo === assignee.value">
+                  *ngIf="assignedToControl?.value === assignee.value">
                 </ion-icon>
               </div>
               
               <!-- Unassigned Option -->
               <div 
                 class="assignee-card unassigned-card" 
-                [class.selected]="assignmentForm.assignedTo === ''"
+                [class.selected]="assignedToControl?.value === ''"
                 (click)="selectAssignee('')">
                 <div class="assignee-avatar unassigned">
                   <ion-icon name="person-outline"></ion-icon>
@@ -73,56 +79,61 @@
                 <ion-icon 
                   name="checkmark-circle" 
                   class="selection-icon"
-                  *ngIf="assignmentForm.assignedTo === ''">
+                  *ngIf="assignedToControl?.value === ''">
                 </ion-icon>
               </div>
+            </div>
+            <div class="error-message" *ngIf="assignedToControl?.invalid && assignedToControl?.touched">
+              Please select an assignee
             </div>
           </div>
 
           <!-- Priority Update -->
-          <div class="form-section">
-            <ion-item>
-              <ion-label>Priority Level</ion-label>
-              <ion-select [(ngModel)]="assignmentForm.priority" interface="popover">
-                <ion-select-option value="high">
-                  <span class="priority-option high">🔴 High Priority</span>
-                </ion-select-option>
-                <ion-select-option value="medium">
-                  <span class="priority-option medium">🟡 Medium Priority</span>
-                </ion-select-option>
-                <ion-select-option value="low">
-                  <span class="priority-option low">🟢 Low Priority</span>
-                </ion-select-option>
-              </ion-select>
-            </ion-item>
+          <div class="select-field">
+            <div class="select-header">
+              <ion-icon name="flag-outline" class="field-icon"></ion-icon>
+              <label class="select-label">Priority Level</label>
+            </div>
+            <ion-select 
+              formControlName="priority" 
+              interface="popover"
+              class="custom-select">
+              <ion-select-option value="high">High Priority</ion-select-option>
+              <ion-select-option value="medium">Medium Priority</ion-select-option>
+              <ion-select-option value="low">Low Priority</ion-select-option>
+            </ion-select>
           </div>
 
           <!-- Due Date -->
-          <div class="form-section">
-            <ion-item>
-              <ion-label>Due Date</ion-label>
+          <div class="datetime-section">
+            <div class="datetime-header">
+              <ion-icon name="calendar-outline" class="field-icon"></ion-icon>
+              <label class="datetime-label">Due Date</label>
+            </div>
+            <div class="datetime-wrapper">
               <ion-datetime 
-                [(ngModel)]="assignmentForm.dueDate" 
-                display-format="MMM DD, YYYY"
-                picker-format="YYYY-MM-DD"
-                placeholder="Select date">
+                formControlName="dueDate"
+                presentation="date"
+                [min]="getMinDate()"
+                class="full-width-datetime">
               </ion-datetime>
-            </ion-item>
+            </div>
           </div>
 
           <!-- Assignment Notes -->
-          <div class="form-section">
-            <ion-item>
-              <ion-label position="stacked">Assignment Notes</ion-label>
-              <ion-textarea 
-                [(ngModel)]="assignmentForm.notes"
-                placeholder="Add any special instructions or context..."
+          <div class="form-field" [class.has-value]="notesControl?.value">
+            <div class="input-wrapper">
+              <ion-icon name="document-text-outline" class="field-icon"></ion-icon>
+              <textarea 
+                class="custom-textarea"
+                formControlName="notes"
                 rows="3"
-                auto-grow="true">
-              </ion-textarea>
-            </ion-item>
+                placeholder=" ">
+              </textarea>
+              <label class="floating-label">Assignment Notes</label>
+            </div>
           </div>
-        </div>
+        </form>
 
         <!-- Action Buttons -->
         <div class="modal-actions">
@@ -130,13 +141,14 @@
             expand="block" 
             fill="clear" 
             (click)="closeModal()"
-            color="medium">
+            class="cancel-button">
             Cancel
           </ion-button>
           <ion-button 
             expand="block" 
             (click)="saveAssignment()"
-            [disabled]="!assignmentForm.assignedTo">
+            [disabled]="!assignmentForm.valid"
+            class="save-button">
             <ion-icon name="checkmark-outline" slot="start"></ion-icon>
             Assign Follow-up
           </ion-button>

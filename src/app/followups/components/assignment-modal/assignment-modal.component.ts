@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, Output, OnInit, OnChanges } from '@angular/core';
-import { FollowUpItem } from '../followups.page';
+import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FollowUpItem } from '../../followups.page';
 
 export interface AssignmentForm {
   assignedTo: string;
@@ -29,33 +30,41 @@ export class AssignmentModalComponent implements OnInit, OnChanges {
   @Output() close = new EventEmitter<void>();
   @Output() save = new EventEmitter<AssignmentForm>();
 
-  assignmentForm: AssignmentForm = {
-    assignedTo: '',
-    notes: '',
-    dueDate: '',
-    priority: ''
-  };
+  assignmentForm!: FormGroup;
 
-  constructor() {}
+  constructor(private formBuilder: FormBuilder) {}
 
   ngOnInit() {
     this.initializeForm();
   }
 
   ngOnChanges() {
-    if (this.followupItem) {
-      this.initializeForm();
+    if (this.followupItem && this.assignmentForm) {
+      this.updateFormValues();
     }
   }
 
   initializeForm() {
+    this.assignmentForm = this.formBuilder.group({
+      assignedTo: ['', Validators.required],
+      notes: [''],
+      dueDate: [''],
+      priority: ['medium', Validators.required]
+    });
+
     if (this.followupItem) {
-      this.assignmentForm = {
+      this.updateFormValues();
+    }
+  }
+
+  updateFormValues() {
+    if (this.followupItem) {
+      this.assignmentForm.patchValue({
         assignedTo: this.followupItem.assignedTo || '',
         notes: this.followupItem.notes || '',
         dueDate: this.followupItem.dueDate ? this.formatDateForInput(this.followupItem.dueDate) : '',
-        priority: this.followupItem.priority
-      };
+        priority: this.followupItem.priority || 'medium'
+      });
     }
   }
 
@@ -69,17 +78,19 @@ export class AssignmentModalComponent implements OnInit, OnChanges {
   }
 
   saveAssignment() {
-    this.save.emit({ ...this.assignmentForm });
-    this.resetForm();
+    if (this.assignmentForm.valid) {
+      this.save.emit(this.assignmentForm.value);
+      this.resetForm();
+    }
   }
 
   resetForm() {
-    this.assignmentForm = {
+    this.assignmentForm.reset({
       assignedTo: '',
       notes: '',
       dueDate: '',
-      priority: ''
-    };
+      priority: 'medium'
+    });
   }
 
   getAvailableAssignees(): Assignee[] {
@@ -115,6 +126,26 @@ export class AssignmentModalComponent implements OnInit, OnChanges {
   }
 
   selectAssignee(assigneeValue: string) {
-    this.assignmentForm.assignedTo = assigneeValue;
+    this.assignmentForm.patchValue({ assignedTo: assigneeValue });
+  }
+
+  getMinDate(): string {
+    return new Date().toISOString().split('T')[0];
+  }
+
+  get assignedToControl() {
+    return this.assignmentForm.get('assignedTo');
+  }
+
+  get notesControl() {
+    return this.assignmentForm.get('notes');
+  }
+
+  get dueDateControl() {
+    return this.assignmentForm.get('dueDate');
+  }
+
+  get priorityControl() {
+    return this.assignmentForm.get('priority');
   }
 }

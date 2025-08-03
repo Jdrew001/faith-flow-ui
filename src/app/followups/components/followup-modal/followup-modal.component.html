@@ -1,0 +1,189 @@
+<ion-header class="modal-header">
+  <ion-toolbar>
+    <ion-title>{{ isEditing ? 'Edit' : 'Create' }} Follow-up</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="closeModal()" class="close-button">
+        <ion-icon name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content class="modal-content">
+  <form [formGroup]="followupForm" (ngSubmit)="saveFollowup()">
+    <div class="form-section">
+      <!-- Person Name Field -->
+      <div class="form-field" [class.has-value]="personNameControl?.value">
+        <div class="input-wrapper">
+          <ion-icon name="person-outline" class="field-icon"></ion-icon>
+          <input 
+            type="text"
+            class="custom-input"
+            formControlName="personName"
+            required>
+          <label class="floating-label">Person Name *</label>
+        </div>
+        <div class="error-message" *ngIf="personNameControl?.invalid && personNameControl?.touched">
+          Person name is required
+        </div>
+      </div>
+
+      <!-- Title Field -->
+      <div class="form-field" [class.has-value]="titleControl?.value">
+        <div class="input-wrapper">
+          <ion-icon name="create-outline" class="field-icon"></ion-icon>
+          <input 
+            type="text"
+            class="custom-input"
+            formControlName="title"
+            required>
+          <label class="floating-label">Title *</label>
+        </div>
+        <div class="error-message" *ngIf="titleControl?.invalid && titleControl?.touched">
+          Title is required
+        </div>
+      </div>
+
+      <!-- Description Field -->
+      <div class="form-field" [class.has-value]="descriptionControl?.value">
+        <div class="input-wrapper">
+          <ion-icon name="document-text-outline" class="field-icon"></ion-icon>
+          <textarea 
+            class="custom-textarea"
+            formControlName="description"
+            rows="3">
+          </textarea>
+          <label class="floating-label">Description</label>
+        </div>
+      </div>
+
+      <!-- Type Select -->
+      <div class="select-field">
+        <div class="select-header">
+          <ion-icon name="pricetag-outline" class="field-icon"></ion-icon>
+          <label class="select-label">Type *</label>
+        </div>
+        <ion-select 
+          formControlName="type"
+          interface="popover"
+          class="custom-select">
+          <ion-select-option value="New Visitor Follow-up">New Visitor</ion-select-option>
+          <ion-select-option value="Prayer Request Follow-up">Prayer Request</ion-select-option>
+          <ion-select-option value="Pastoral Care">Pastoral Care</ion-select-option>
+          <ion-select-option value="Volunteer Follow-up">Volunteer</ion-select-option>
+          <ion-select-option value="New Member Follow-up">New Member</ion-select-option>
+          <ion-select-option value="General Follow-up">General</ion-select-option>
+        </ion-select>
+        <div class="error-message" *ngIf="typeControl?.invalid && typeControl?.touched">
+          Type is required
+        </div>
+      </div>
+
+      <!-- Priority Select -->
+      <div class="select-field">
+        <div class="select-header">
+          <ion-icon name="flag-outline" class="field-icon"></ion-icon>
+          <label class="select-label">Priority</label>
+        </div>
+        <ion-select 
+          formControlName="priority"
+          interface="popover"
+          class="custom-select">
+          <ion-select-option value="high">High</ion-select-option>
+          <ion-select-option value="medium">Medium</ion-select-option>
+          <ion-select-option value="low">Low</ion-select-option>
+        </ion-select>
+      </div>
+
+      <!-- Assign To Select -->
+      <div class="select-field">
+        <div class="select-header">
+          <ion-icon name="person-add-outline" class="field-icon"></ion-icon>
+          <label class="select-label">Assign To</label>
+        </div>
+        <ion-select 
+          formControlName="assignedTo"
+          interface="popover"
+          class="custom-select">
+          <ion-select-option value="">Unassigned</ion-select-option>
+          <ion-select-option *ngFor="let assignee of getAssigneesList()" [value]="assignee.value">
+            {{ assignee.label }}
+          </ion-select-option>
+        </ion-select>
+      </div>
+
+      <!-- Status Select (only show when editing) -->
+      <div class="select-field" *ngIf="isEditing">
+        <div class="select-header">
+          <ion-icon name="stats-chart-outline" class="field-icon"></ion-icon>
+          <label class="select-label">Status</label>
+        </div>
+        <ion-select 
+          formControlName="status"
+          interface="popover"
+          class="custom-select">
+          <ion-select-option value="pending">Pending</ion-select-option>
+          <ion-select-option value="in-progress">In Progress</ion-select-option>
+          <ion-select-option value="completed">Completed</ion-select-option>
+        </ion-select>
+      </div>
+
+      <!-- Due Date -->
+      <div class="datetime-section">
+        <div class="datetime-header">
+          <ion-icon name="calendar-outline" class="field-icon"></ion-icon>
+          <label class="datetime-label">Due Date</label>
+        </div>
+        <div class="datetime-wrapper">
+          <ion-datetime 
+            formControlName="dueDate"
+            presentation="date"
+            [min]="getMinDate()"
+            class="full-width-datetime">
+          </ion-datetime>
+        </div>
+      </div>
+
+      <!-- Contact Information Section -->
+      <div class="contact-section" formGroupName="contactInfo">
+        <h4>
+          <ion-icon name="call-outline" class="section-icon"></ion-icon>
+          Contact Information
+        </h4>
+        
+        <!-- Phone Field -->
+        <div class="form-field" [class.has-value]="phoneControl?.value">
+          <div class="input-wrapper">
+            <ion-icon name="call-outline" class="field-icon"></ion-icon>
+            <input 
+              type="tel"
+              class="custom-input"
+              formControlName="phone">
+            <label class="floating-label">Phone</label>
+          </div>
+        </div>
+
+        <!-- Email Field -->
+        <div class="form-field" [class.has-value]="emailControl?.value">
+          <div class="input-wrapper">
+            <ion-icon name="mail-outline" class="field-icon"></ion-icon>
+            <input 
+              type="email"
+              class="custom-input"
+              formControlName="email">
+            <label class="floating-label">Email</label>
+          </div>
+          <div class="error-message" *ngIf="emailControl?.invalid && emailControl?.touched">
+            Please enter a valid email address
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <ion-button expand="block" type="submit" [disabled]="!isFormValid()">
+        <ion-icon name="save-outline" slot="start"></ion-icon>
+        {{ isEditing ? 'Update' : 'Create' }} Follow-up
+      </ion-button>
+    </div>
+  </form>
+</ion-content>

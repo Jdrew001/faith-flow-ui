@@ -1,7 +1,14 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run ionic:serve:*)"
+      "Bash(npm run ionic:serve:*)",
+      "Bash(move followup-modal.component.ts followup-modal )",
+      "Bash(move followup-modal.component.html followup-modal )",
+      "Bash(move followup-modal.component.scss followup-modal)",
+      "Bash(npm run build:*)",
+      "Bash(mkdir:*)",
+      "Bash(move:*)",
+      "Bash(mv:*)"
     ],
     "deny": []
   }

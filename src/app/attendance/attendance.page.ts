@@ -201,6 +201,14 @@ export class AttendancePage implements OnInit, OnDestroy {
     await this.showToast('Data refreshed', 'success');
   }
 
+  async doRefresh(event: any) {
+    await this.loadData();
+    // Complete the refresher after data is loaded
+    setTimeout(() => {
+      event.target.complete();
+    }, 500);
+  }
+
   clearAllFilters() {
     this.searchControl.setValue('');
     this.selectedTimeFilter = 'today';
