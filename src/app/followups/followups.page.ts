@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { NavController, MenuController, ViewDidEnter } from '@ionic/angular';
+import { NavController, MenuController, ViewDidEnter, ModalController } from '@ionic/angular';
 import { ActivatedRoute } from '@angular/router';
-import { AssignmentForm, Assignee } from './components/assignment-modal.component';
+import { AssignmentForm, Assignee } from './components/assignment-modal/assignment-modal.component';
+import { FollowupModalComponent } from './components/followup-modal/followup-modal.component';
 
 export interface FollowUpItem {
   id: string;
@@ -42,26 +43,8 @@ export class FollowupsPage implements ViewDidEnter {
   searchTerm: string = '';
   showFilterModal: boolean = false;
   showAssignModal: boolean = false;
-  showCreateModal: boolean = false;
   selectedFollowupForAssign: FollowUpItem | null = null;
-  editingFollowup: FollowUpItem | null = null;
   headerHidden = false;
-  
-  // Form data
-  followupForm = {
-    personName: '',
-    title: '',
-    description: '',
-    type: 'New Visitor Follow-up',
-    priority: 'medium' as 'high' | 'medium' | 'low',
-    status: 'pending' as 'pending' | 'in-progress' | 'completed',
-    assignedTo: '',
-    dueDate: '',
-    contactInfo: {
-      phone: '',
-      email: ''
-    }
-  };
 
   // Available filter options
   priorities = [
@@ -99,7 +82,8 @@ export class FollowupsPage implements ViewDidEnter {
   constructor(
     private navCtrl: NavController,
     private menuCtrl: MenuController,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private modalController: ModalController
   ) { }
 
   ionViewDidEnter() {
@@ -515,85 +499,53 @@ export class FollowupsPage implements ViewDidEnter {
     this.showAssignModal = true;
   }
   
-  openEditModal(followup: FollowUpItem) {
-    this.editingFollowup = followup;
-    this.followupForm = {
-      personName: followup.personName,
-      title: followup.title,
-      description: followup.description || '',
-      type: followup.type,
-      priority: followup.priority,
-      status: followup.status,
-      assignedTo: followup.assignedTo || '',
-      dueDate: followup.dueDate ? new Date(followup.dueDate).toISOString() : '',
-      contactInfo: {
-        phone: followup.contactInfo?.phone || '',
-        email: followup.contactInfo?.email || ''
+  async openEditModal(followup: FollowUpItem) {
+    const modal = await this.modalController.create({
+      component: FollowupModalComponent,
+      componentProps: {
+        followup: followup,
+        assignees: this.assignees
       }
-    };
-    this.showCreateModal = true;
-  }
-  
-  createNewFollowup() {
-    this.editingFollowup = null;
-    this.followupForm = {
-      personName: '',
-      title: '',
-      description: '',
-      type: 'New Visitor Follow-up',
-      priority: 'medium',
-      status: 'pending',
-      assignedTo: '',
-      dueDate: '',
-      contactInfo: {
-        phone: '',
-        email: ''
-      }
-    };
-    this.showCreateModal = true;
-  }
-  
-  closeCreateModal() {
-    this.showCreateModal = false;
-    this.editingFollowup = null;
-  }
-  
-  saveFollowup() {
-    if (!this.isFormValid()) return;
-    
-    if (this.editingFollowup) {
-      // Update existing followup
-      const index = this.followups.findIndex(f => f.id === this.editingFollowup!.id);
+    });
+
+    await modal.present();
+
+    const { data } = await modal.onDidDismiss();
+    if (data && data.followup) {
+      const index = this.followups.findIndex(f => f.id === followup.id);
       if (index > -1) {
         this.followups[index] = {
           ...this.followups[index],
-          ...this.followupForm,
-          dueDate: this.followupForm.dueDate ? new Date(this.followupForm.dueDate) : undefined
+          ...data.followup,
+          dueDate: data.followup.dueDate ? new Date(data.followup.dueDate) : undefined
         };
+        this.filterFollowups();
       }
-    } else {
-      // Create new followup
+    }
+  }
+  
+  async createNewFollowup() {
+    const modal = await this.modalController.create({
+      component: FollowupModalComponent,
+      componentProps: {
+        followup: null,
+        assignees: this.assignees
+      }
+    });
+
+    await modal.present();
+
+    const { data } = await modal.onDidDismiss();
+    if (data && data.followup) {
       const newFollowup: FollowUpItem = {
         id: Date.now().toString(),
-        ...this.followupForm,
-        status: 'pending',
+        ...data.followup,
         createdDate: new Date(),
-        dueDate: this.followupForm.dueDate ? new Date(this.followupForm.dueDate) : undefined
+        dueDate: data.followup.dueDate ? new Date(data.followup.dueDate) : undefined
       };
-      this.followups.unshift(newFollowup);
+      this.followups.push(newFollowup);
+      this.filterFollowups();
     }
-    
-    this.filterFollowups();
-    this.closeCreateModal();
-    // TODO: Call service to save to backend
-  }
-  
-  isFormValid(): boolean {
-    return !!(this.followupForm.personName && this.followupForm.title && this.followupForm.type);
-  }
-  
-  getMinDate(): string {
-    return new Date().toISOString();
   }
   
   getAssigneesList(): Assignee[] {
@@ -612,14 +564,5 @@ export class FollowupsPage implements ViewDidEnter {
       return 'Try adjusting your search or filters';
     }
     return 'Great work! No follow-ups pending.';
-  }
-  
-  // Form field focus/blur handlers
-  onFieldFocus(fieldName: string) {
-    // Optional: Add focus handling logic
-  }
-  
-  onFieldBlur(fieldName: string) {
-    // Optional: Add blur handling logic
   }
 }

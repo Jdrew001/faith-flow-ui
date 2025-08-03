@@ -1,0 +1,482 @@
+// Modal Styles - Match Create Session
+ion-header ion-toolbar {
+  --background: #2c2c2e;
+  --color: #ffffff;
+  --border-color: #3a3a3c;
+  border-bottom: 1px solid #3a3a3c;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  
+  ion-title {
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 1.2rem;
+    letter-spacing: -0.5px;
+  }
+  
+  ion-button {
+    --color: #8e8e93;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      --color: #ffffff;
+      transform: rotate(90deg);
+    }
+  }
+}
+
+.modal-content {
+  --background: #2c2c2e;
+  background: #2c2c2e;
+  color: #ffffff;
+  
+  .form-section {
+    padding: 24px 16px;
+    
+    // Custom form fields with floating labels
+    .form-field {
+      margin-bottom: 28px;
+      position: relative;
+      
+      .input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: flex-start;
+        
+        .field-icon {
+          position: absolute;
+          left: 16px;
+          top: 20px;
+          font-size: 1.2rem;
+          color: #8e8e93;
+          transition: all 0.3s ease;
+          z-index: 1;
+        }
+        
+        .custom-input,
+        .custom-textarea {
+          width: 100%;
+          background: #3a3a3c;
+          border: 2px solid #48484a;
+          border-radius: 12px;
+          padding: 20px 16px 20px 48px;
+          font-size: 1rem;
+          color: #ffffff;
+          transition: all 0.3s ease;
+          outline: none;
+          
+          &::placeholder {
+            color: transparent;
+          }
+          
+          &:focus {
+            border-color: #007aff;
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+            background: #404042;
+            
+            ~ .floating-label {
+              top: -10px;
+              left: 44px;
+              font-size: 0.85rem;
+              color: #007aff;
+              background: #2c2c2e;
+              padding: 0 8px;
+            }
+            
+            ~ .field-icon {
+              color: #007aff;
+            }
+          }
+        }
+        
+        .custom-textarea {
+          resize: vertical;
+          min-height: 100px;
+          font-family: inherit;
+        }
+        
+        .floating-label {
+          position: absolute;
+          left: 48px;
+          top: 20px;
+          font-size: 1rem;
+          color: #8e8e93;
+          transition: all 0.3s ease;
+          pointer-events: none;
+          background: transparent;
+          font-weight: 500;
+        }
+      }
+      
+      &.has-value {
+        .floating-label {
+          top: -10px;
+          left: 44px;
+          font-size: 0.85rem;
+          color: #8e8e93;
+          background: #2c2c2e;
+          padding: 0 8px;
+        }
+        
+        .custom-input,
+        .custom-textarea {
+          &::placeholder {
+            color: transparent;
+          }
+        }
+      }
+      
+      // When input has focus or value, hide placeholder
+      .custom-input:not(:placeholder-shown) ~ .floating-label,
+      .custom-textarea:not(:placeholder-shown) ~ .floating-label {
+        top: -10px;
+        left: 44px;
+        font-size: 0.85rem;
+        color: #8e8e93;
+        background: #2c2c2e;
+        padding: 0 8px;
+      }
+      
+      // Error message styling
+      .error-message {
+        color: #ff453a;
+        font-size: 0.75rem;
+        margin-top: 4px;
+        margin-left: 48px;
+      }
+    }
+    
+    // Select fields
+    .select-field {
+      margin-bottom: 28px;
+      
+      .select-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+        
+        .field-icon {
+          font-size: 1.2rem;
+          color: #007aff;
+          background: rgba(0, 122, 255, 0.1);
+          padding: 8px;
+          border-radius: 8px;
+        }
+        
+        .select-label {
+          font-weight: 600;
+          color: #ffffff;
+          font-size: 0.95rem;
+        }
+      }
+      
+      .custom-select {
+        --background: #3a3a3c;
+        --color: #ffffff;
+        --placeholder-color: #8e8e93;
+        --padding-start: 16px;
+        --padding-end: 16px;
+        border: 2px solid #48484a;
+        border-radius: 12px;
+        font-size: 1rem;
+        min-height: 52px;
+        transition: all 0.3s ease;
+        width: 100%;
+        
+        &:focus-within {
+          border-color: #007aff;
+          box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+          background: #404042;
+        }
+        
+        &.ng-invalid.ng-touched {
+          border-color: #ff453a;
+        }
+      }
+      
+      .error-message {
+        color: #ff453a;
+        font-size: 0.75rem;
+        margin-top: 4px;
+      }
+    }
+    
+    // DateTime field
+    .datetime-section {
+      margin-bottom: 28px;
+      
+      .datetime-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+        
+        .field-icon {
+          font-size: 1.2rem;
+          color: #007aff;
+          background: rgba(0, 122, 255, 0.1);
+          padding: 8px;
+          border-radius: 8px;
+        }
+        
+        .datetime-label {
+          font-weight: 600;
+          color: #ffffff;
+          font-size: 0.95rem;
+        }
+      }
+      
+      .datetime-wrapper {
+        background: #3a3a3c;
+        border: 2px solid #48484a;
+        border-radius: 12px;
+        padding: 0;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        width: 100%;
+        
+        &:focus-within {
+          border-color: #007aff;
+          box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+          background: #404042;
+        }
+        
+        .full-width-datetime {
+          --background: transparent;
+          --color: #ffffff;
+          width: 100%;
+          display: block;
+          padding: 0;
+          margin: 0;
+          
+          &::part(native) {
+            padding: 0;
+            margin: 0;
+            width: 100%;
+          }
+          
+          &::part(calendar-day) {
+            aspect-ratio: 1;
+          }
+          
+          &::part(time-button) {
+            min-height: 44px;
+          }
+        }
+      }
+    }
+    
+    .contact-section {
+      margin-top: 32px;
+      
+      h4 {
+        margin: 0 0 16px 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        
+        .section-icon {
+          font-size: 1.3rem;
+          color: #007aff;
+          background: rgba(0, 122, 255, 0.1);
+          padding: 8px;
+          border-radius: 8px;
+        }
+        
+        &::after {
+          content: '';
+          flex: 1;
+          height: 1px;
+          background: linear-gradient(90deg, #48484a 0%, transparent 100%);
+          margin-left: 8px;
+        }
+      }
+    }
+  }
+  
+  .modal-actions {
+    padding: 32px 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    
+    ion-button {
+      --border-radius: 14px;
+      --box-shadow: none;
+      font-weight: 600;
+      height: 52px;
+      font-size: 1rem;
+      
+      &[expand="block"] {
+        background: linear-gradient(135deg, #007aff, #0056d3);
+        color: white;
+        box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3);
+        margin: 0;
+        
+        &:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 24px rgba(0, 122, 255, 0.4);
+        }
+        
+        &:active:not(:disabled) {
+          transform: translateY(0);
+          box-shadow: 0 2px 12px rgba(0, 122, 255, 0.3);
+        }
+        
+        &:disabled {
+          background: #48484a;
+          color: #8e8e93;
+          box-shadow: none;
+          cursor: not-allowed;
+          opacity: 1;
+        }
+      }
+    }
+  }
+}
+
+// Enhanced DateTime styling
+ion-datetime {
+  --background: transparent;
+  --color: #ffffff;
+  --color-selected: #007aff;
+  --color-hover: rgba(0, 122, 255, 0.2);
+  width: 100%;
+  max-width: none;
+  
+  &.ios,
+  &.md {
+    width: 100%;
+    max-width: none;
+  }
+  
+  .calendar-wrapper {
+    width: 100%;
+    padding: 12px;
+  }
+  
+  .calendar-body {
+    width: 100%;
+  }
+  
+  .calendar-week-days,
+  .calendar-month-grid {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0;
+  }
+  
+  .datetime-header {
+    color: #ffffff;
+    padding: 12px;
+  }
+  
+  .calendar-month-year {
+    color: #ffffff;
+    font-weight: 600;
+    font-size: 1.1rem;
+  }
+  
+  .calendar-day {
+    color: #ffffff;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    min-height: 40px;
+    min-width: 40px;
+    border-radius: 50%;
+    margin: 2px;
+    
+    &.calendar-day-today {
+      color: #007aff;
+      font-weight: 700;
+      border: 2px solid #007aff;
+    }
+    
+    &.calendar-day-active {
+      background: #007aff !important;
+      color: #ffffff !important;
+      font-weight: 600;
+    }
+    
+    &:hover:not(.calendar-day-disabled) {
+      background: rgba(0, 122, 255, 0.2);
+    }
+    
+    &.calendar-day-disabled {
+      color: #48484a;
+    }
+  }
+  
+  .time-body {
+    padding: 12px;
+  }
+  
+  .time-picker-columns {
+    gap: 8px;
+  }
+  
+  .time-item {
+    color: #ffffff;
+    min-height: 44px;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    &.time-item-active {
+      background: #007aff;
+      color: #ffffff;
+      border-radius: 8px;
+    }
+    
+    &:hover {
+      background: rgba(0, 122, 255, 0.2);
+    }
+  }
+  
+  .calendar-action-buttons {
+    ion-button {
+      --color: #007aff;
+      font-size: 0.9rem;
+    }
+  }
+  
+  .month-year-picker {
+    .picker-item {
+      color: #ffffff;
+      
+      &.picker-item-active {
+        color: #007aff;
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+// Ion Select styling
+ion-select {
+  &::part(icon) {
+    color: #8e8e93;
+  }
+  
+  &::part(text) {
+    color: #ffffff;
+  }
+}
+
+ion-select-option {
+  --background: #3a3a3c;
+  --color: #ffffff;
+  
+  &[aria-checked="true"] {
+    --background: #007aff;
+    --color: #ffffff;
+  }
+}
