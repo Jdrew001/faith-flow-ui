@@ -757,3 +757,54 @@ ion-tab-bar {
   background-color: var(--primary);
   border-color: var(--primary);
 }
+
+// iOS PWA Navigation Fixes
+@media (display-mode: standalone) {
+  // Prevent weird sliding animations on iOS
+  ion-router-outlet {
+    contain: size layout style;
+  }
+  
+  // Smooth page transitions
+  .ion-page {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    contain: layout size style;
+  }
+  
+  // Fix for iOS Safari navigation gestures
+  .ios {
+    ion-router-outlet {
+      overflow: hidden;
+    }
+    
+    // Disable swipe back gesture that might conflict
+    ion-nav {
+      --swipe-back: false;
+    }
+  }
+}
+
+// Additional iOS navigation fixes
+.ios {
+  // Prevent iOS rubber band scrolling that might trigger navigation
+  ion-content {
+    --overflow: hidden;
+    
+    &::part(scroll) {
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+  
+  // Ensure menu toggle doesn't trigger weird animations
+  ion-menu-toggle {
+    touch-action: manipulation;
+  }
+  
+  // Fix for iOS Safari swipe gestures
+  body {
+    overscroll-behavior-x: none;
+  }
+}

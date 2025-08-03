@@ -13,13 +13,19 @@ import { PwaService } from './pwa-install/pwa.service';
 import { PwaInstallModule } from './pwa-install/pwa-install.module';
 import { MenuModule } from './shared/components/menu/menu.module';
 import { CoreModule } from './core/core.module';
+import { customNavAnimation } from './animations/nav-animation';
 
 @NgModule({
   declarations: [AppComponent],
   imports: [
     BrowserModule, 
     HttpClientModule,
-    IonicModule.forRoot(), 
+    IonicModule.forRoot({
+      animated: true,
+      navAnimation: customNavAnimation,
+      mode: 'ios',
+      swipeBackEnabled: false
+    }), 
     AppRoutingModule, 
     SharedModule,
     PwaInstallModule,

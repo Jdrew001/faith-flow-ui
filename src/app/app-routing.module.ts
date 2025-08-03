@@ -1,6 +1,7 @@
 import { inject, NgModule } from '@angular/core';
 import { CanMatchFn, PreloadAllModules, RouterModule, Routes, UrlTree } from '@angular/router';
 import { AuthGuard } from './guards/auth.guard';
+import { IonicRouteStrategy } from '@ionic/angular';
 
 const routes: Routes = [
   {
