@@ -6,13 +6,15 @@ import { IonicModule } from '@ionic/angular';
 import { FollowupsPage } from './followups.page';
 import { FollowupsPageRoutingModule } from './followups-routing.module';
 import { AssignmentModalComponent } from './components/assignment-modal.component';
+import { AutoHideHeaderDirective } from '../shared/directives/auto-hide-header.directive';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,
     IonicModule,
-    FollowupsPageRoutingModule
+    FollowupsPageRoutingModule,
+    AutoHideHeaderDirective
   ],
   declarations: [
     FollowupsPage,

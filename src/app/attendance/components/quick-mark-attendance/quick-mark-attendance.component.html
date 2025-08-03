@@ -59,7 +59,7 @@
         size="small" 
         color="danger"
         (click)="markAllAbsent()">
-        <ion-icon name="close-circle" slot="start"></ion-icon>
+        <ion-icon name="remove-circle" slot="start"></ion-icon>
         All Absent
       </ion-button>
       
@@ -128,7 +128,7 @@
               size="small"
               (click)="markAttendance(person, 'Absent')"
               class="attendance-btn">
-              <ion-icon name="close-circle" slot="start"></ion-icon>
+              <ion-icon name="remove-circle" slot="start"></ion-icon>
               Absent
             </ion-button>
           </div>
@@ -136,7 +136,7 @@
           <!-- Status Indicator -->
           <div class="status-indicator" *ngIf="getAttendanceStatus(person.id)">
             <ion-icon 
-              [name]="getAttendanceStatus(person.id) === 'Present' ? 'checkmark-circle' : 'close-circle'"
+              [name]="getAttendanceStatus(person.id) === 'Present' ? 'checkmark-circle' : 'remove-circle'"
               [color]="getAttendanceStatus(person.id) === 'Present' ? 'success' : 'danger'"
               class="status-icon">
             </ion-icon>

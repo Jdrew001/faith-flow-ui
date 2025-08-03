@@ -8,6 +8,7 @@ export interface AttendanceStats {
   present: number;
   absent: number;
   trend: 'up' | 'down' | 'stable';
+  rate?: number;
 }
 
 export interface FollowUpItem {

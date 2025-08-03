@@ -31,6 +31,7 @@ export class FollowupsPage implements ViewDidEnter {
   followups: FollowUpItem[] = [];
   filteredFollowups: FollowUpItem[] = [];
   showBackButton: boolean = false; // Control back button visibility
+  isLoading: boolean = false;
   
   // Filter and sort options
   selectedPriority: string = 'all';
@@ -41,7 +42,26 @@ export class FollowupsPage implements ViewDidEnter {
   searchTerm: string = '';
   showFilterModal: boolean = false;
   showAssignModal: boolean = false;
+  showCreateModal: boolean = false;
   selectedFollowupForAssign: FollowUpItem | null = null;
+  editingFollowup: FollowUpItem | null = null;
+  headerHidden = false;
+  
+  // Form data
+  followupForm = {
+    personName: '',
+    title: '',
+    description: '',
+    type: 'New Visitor Follow-up',
+    priority: 'medium' as 'high' | 'medium' | 'low',
+    status: 'pending' as 'pending' | 'in-progress' | 'completed',
+    assignedTo: '',
+    dueDate: '',
+    contactInfo: {
+      phone: '',
+      email: ''
+    }
+  };
 
   // Available filter options
   priorities = [
@@ -95,8 +115,10 @@ export class FollowupsPage implements ViewDidEnter {
   }
 
   loadFollowups() {
+    this.isLoading = true;
     // TODO: Replace with actual service call
-    this.followups = [
+    setTimeout(() => {
+      this.followups = [
       {
         id: '1',
         personName: 'Sarah Johnson',
@@ -178,9 +200,11 @@ export class FollowupsPage implements ViewDidEnter {
           email: 'maria.g@email.com'
         }
       }
-    ];
+      ];
 
-    this.filterFollowups();
+      this.filterFollowups();
+      this.isLoading = false;
+    }, 1000);
   }
 
   filterFollowups() {
@@ -382,7 +406,7 @@ export class FollowupsPage implements ViewDidEnter {
     }
   }
 
-  isOverdue(dueDate: Date): boolean {
+  isOverdue(dueDate: Date | undefined): boolean {
     if (!dueDate) return false;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -398,5 +422,204 @@ export class FollowupsPage implements ViewDidEnter {
 
   goBack() {
     this.navCtrl.back();
+  }
+  
+  // New methods for the redesigned UI
+  refreshData() {
+    this.loadFollowups();
+  }
+  
+  onHeaderVisibilityChange(isHidden: boolean) {
+    this.headerHidden = isHidden;
+  }
+  
+  getTotalCount(): number {
+    return this.followups.length;
+  }
+  
+  getPendingCount(): number {
+    return this.followups.filter(f => f.status === 'pending').length;
+  }
+  
+  getOverdueCount(): number {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return this.followups.filter(f => {
+      if (!f.dueDate || f.status === 'completed') return false;
+      const due = new Date(f.dueDate);
+      due.setHours(0, 0, 0, 0);
+      return due < today;
+    }).length;
+  }
+  
+  onStatusChange(event: any) {
+    this.selectedStatus = event.detail.value;
+    this.filterFollowups();
+  }
+  
+  setPriority(priority: string) {
+    this.selectedPriority = priority;
+    this.filterFollowups();
+  }
+  
+  trackByFollowupId(index: number, item: FollowUpItem): string {
+    return item.id;
+  }
+  
+  openFollowupDetail(followup: FollowUpItem) {
+    // Open edit modal when clicking on card
+    this.openEditModal(followup);
+  }
+  
+  getInitials(name: string): string {
+    const parts = name.split(' ');
+    if (parts.length >= 2) {
+      return parts[0].charAt(0) + parts[parts.length - 1].charAt(0);
+    }
+    return name.charAt(0);
+  }
+  
+  formatDueDate(date: Date | undefined): string {
+    if (!date) return 'No due date';
+    
+    const today = new Date();
+    const dueDate = new Date(date);
+    const diffTime = dueDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 0) {
+      return `${Math.abs(diffDays)} days overdue`;
+    } else if (diffDays === 0) {
+      return 'Due today';
+    } else if (diffDays === 1) {
+      return 'Due tomorrow';
+    } else if (diffDays <= 7) {
+      return `Due in ${diffDays} days`;
+    } else {
+      return dueDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
+  }
+  
+  toggleComplete(followup: FollowUpItem) {
+    if (followup.status === 'completed') {
+      followup.status = 'pending';
+    } else {
+      followup.status = 'completed';
+    }
+    this.filterFollowups();
+    // TODO: Call service to update backend
+  }
+  
+  openAssignModal(followup: FollowUpItem) {
+    this.selectedFollowupForAssign = followup;
+    this.showAssignModal = true;
+  }
+  
+  openEditModal(followup: FollowUpItem) {
+    this.editingFollowup = followup;
+    this.followupForm = {
+      personName: followup.personName,
+      title: followup.title,
+      description: followup.description || '',
+      type: followup.type,
+      priority: followup.priority,
+      status: followup.status,
+      assignedTo: followup.assignedTo || '',
+      dueDate: followup.dueDate ? new Date(followup.dueDate).toISOString() : '',
+      contactInfo: {
+        phone: followup.contactInfo?.phone || '',
+        email: followup.contactInfo?.email || ''
+      }
+    };
+    this.showCreateModal = true;
+  }
+  
+  createNewFollowup() {
+    this.editingFollowup = null;
+    this.followupForm = {
+      personName: '',
+      title: '',
+      description: '',
+      type: 'New Visitor Follow-up',
+      priority: 'medium',
+      status: 'pending',
+      assignedTo: '',
+      dueDate: '',
+      contactInfo: {
+        phone: '',
+        email: ''
+      }
+    };
+    this.showCreateModal = true;
+  }
+  
+  closeCreateModal() {
+    this.showCreateModal = false;
+    this.editingFollowup = null;
+  }
+  
+  saveFollowup() {
+    if (!this.isFormValid()) return;
+    
+    if (this.editingFollowup) {
+      // Update existing followup
+      const index = this.followups.findIndex(f => f.id === this.editingFollowup!.id);
+      if (index > -1) {
+        this.followups[index] = {
+          ...this.followups[index],
+          ...this.followupForm,
+          dueDate: this.followupForm.dueDate ? new Date(this.followupForm.dueDate) : undefined
+        };
+      }
+    } else {
+      // Create new followup
+      const newFollowup: FollowUpItem = {
+        id: Date.now().toString(),
+        ...this.followupForm,
+        status: 'pending',
+        createdDate: new Date(),
+        dueDate: this.followupForm.dueDate ? new Date(this.followupForm.dueDate) : undefined
+      };
+      this.followups.unshift(newFollowup);
+    }
+    
+    this.filterFollowups();
+    this.closeCreateModal();
+    // TODO: Call service to save to backend
+  }
+  
+  isFormValid(): boolean {
+    return !!(this.followupForm.personName && this.followupForm.title && this.followupForm.type);
+  }
+  
+  getMinDate(): string {
+    return new Date().toISOString();
+  }
+  
+  getAssigneesList(): Assignee[] {
+    return this.assignees.filter(a => a.value !== 'all' && a.value !== 'unassigned');
+  }
+  
+  getEmptyStateTitle(): string {
+    if (this.searchTerm || this.hasActiveFilters()) {
+      return 'No matching follow-ups';
+    }
+    return 'All caught up!';
+  }
+  
+  getEmptyStateMessage(): string {
+    if (this.searchTerm || this.hasActiveFilters()) {
+      return 'Try adjusting your search or filters';
+    }
+    return 'Great work! No follow-ups pending.';
+  }
+  
+  // Form field focus/blur handlers
+  onFieldFocus(fieldName: string) {
+    // Optional: Add focus handling logic
+  }
+  
+  onFieldBlur(fieldName: string) {
+    // Optional: Add blur handling logic
   }
 }

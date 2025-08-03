@@ -16,12 +16,12 @@ export class MenuComponent implements OnInit, OnDestroy {
   private authSubscription?: Subscription;
 
   public appPages = [
-    { title: 'Dashboard', url: '/summary', icon: 'grid', description: 'Overview & metrics' },
-    { title: 'Attendance', url: '/attendance', icon: 'people', description: 'Sessions & participation' },
-    { title: 'Follow-ups', url: '/followups', icon: 'heart', description: 'Member care' },
-    { title: 'Workflows', url: '/workflows', icon: 'repeat', description: 'Automated processes' },
-    { title: 'Reports', url: '/reports', icon: 'analytics', description: 'Insights & trends' },
-    { title: 'Settings', url: '/settings', icon: 'settings', description: 'Configure app' }
+    { title: 'Dashboard', url: '/summary', icon: 'grid' },
+    { title: 'Attendance', url: '/attendance', icon: 'people' },
+    { title: 'Follow-ups', url: '/followups', icon: 'heart' },
+    { title: 'Workflows', url: '/workflows', icon: 'git-branch' },
+    { title: 'Reports', url: '/reports', icon: 'analytics' },
+    { title: 'Settings', url: '/settings', icon: 'settings' }
   ];
 
   public quickActions = [

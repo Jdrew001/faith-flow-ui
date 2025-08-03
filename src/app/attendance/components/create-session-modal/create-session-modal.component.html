@@ -1,8 +1,8 @@
-<ion-header>
+<ion-header class="modal-header">
   <ion-toolbar>
     <ion-title>Create New Session</ion-title>
     <ion-buttons slot="end">
-      <ion-button fill="clear" (click)="dismiss()">
+      <ion-button fill="clear" (click)="dismiss()" class="close-button">
         <ion-icon name="close" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
@@ -14,173 +14,269 @@
     <div class="session-form">
 
       <!-- Session Details -->
-      <div class="form-section">
-        <h4 class="section-title">Session Details</h4>
+      <div class="form-section fade-in">
+        <h4 class="section-title">
+          <ion-icon name="information-circle-outline" class="section-icon"></ion-icon>
+          Session Details
+        </h4>
         
         <!-- Session Name -->
-        <ion-item class="form-item" [class.error]="hasFieldError('name')">
-          <ion-label position="stacked">Session Name *</ion-label>
-          <ion-input 
-            formControlName="name"
-            placeholder="Enter session name"
-            fill="outline">
-          </ion-input>
-        </ion-item>
-        <div class="error-message" *ngIf="hasFieldError('name')">
-          {{ getFieldError('name') }}
+        <div class="form-field" [class.error]="hasFieldError('name')" [class.has-value]="sessionForm.get('name')?.value">
+          <div class="input-wrapper">
+            <ion-icon name="text-outline" class="field-icon"></ion-icon>
+            <input 
+              type="text"
+              formControlName="name"
+              class="custom-input"
+              id="session-name"
+              required>
+            <label for="session-name" class="floating-label">Session Name *</label>
+          </div>
+          <div class="error-message" *ngIf="hasFieldError('name')">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            {{ getFieldError('name') }}
+          </div>
         </div>
 
         <!-- Description -->
-        <ion-item class="form-item">
-          <ion-label position="stacked">Description</ion-label>
-          <ion-textarea 
-            formControlName="description"
-            placeholder="Optional description..."
-            rows="3"
-            fill="outline">
-          </ion-textarea>
-        </ion-item>
+        <div class="form-field" [class.has-value]="sessionForm.get('description')?.value">
+          <div class="input-wrapper">
+            <ion-icon name="document-text-outline" class="field-icon"></ion-icon>
+            <textarea 
+              formControlName="description"
+              class="custom-textarea"
+              id="session-description"
+              rows="3"></textarea>
+            <label for="session-description" class="floating-label">Description (Optional)</label>
+          </div>
+        </div>
 
         <!-- Date and Time -->
-        <div class="datetime-section">
-          <ion-label class="datetime-label">Date & Time *</ion-label>
-          <ion-datetime 
-            formControlName="datetime"
-            [min]="getMinDateTime()"
-            presentation="date-time"
-            class="full-width-datetime">
-          </ion-datetime>
+        <div class="datetime-section" [class.error]="hasFieldError('datetime')">
+          <div class="datetime-header">
+            <ion-icon name="calendar-outline" class="field-icon"></ion-icon>
+            <ion-label class="datetime-label">Date & Time *</ion-label>
+          </div>
+          <div class="datetime-wrapper">
+            <ion-datetime 
+              formControlName="datetime"
+              [min]="getMinDateTime()"
+              presentation="date-time"
+              class="full-width-datetime"
+              [showDefaultButtons]="true"
+              [showClearButton]="false"
+              size="cover"
+              [preferWheel]="false">
+              <ion-buttons slot="buttons">
+                <ion-button (click)="clearDateTime()">Clear</ion-button>
+                <ion-button (click)="confirmDateTime()">Done</ion-button>
+              </ion-buttons>
+            </ion-datetime>
+          </div>
           <div class="error-message" *ngIf="hasFieldError('datetime')">
+            <ion-icon name="alert-circle-outline"></ion-icon>
             {{ getFieldError('datetime') }}
           </div>
         </div>
 
         <!-- Location -->
-        <ion-item class="form-item" [class.error]="hasFieldError('location')">
-          <ion-label position="stacked">Location *</ion-label>
-          <ion-input 
-            formControlName="location"
-            placeholder="Enter location"
-            fill="outline">
-          </ion-input>
-        </ion-item>
-        <div class="error-message" *ngIf="hasFieldError('location')">
-          {{ getFieldError('location') }}
+        <div class="form-field" [class.error]="hasFieldError('location')" [class.has-value]="sessionForm.get('location')?.value">
+          <div class="input-wrapper">
+            <ion-icon name="location-outline" class="field-icon"></ion-icon>
+            <input 
+              type="text"
+              formControlName="location"
+              class="custom-input"
+              id="session-location"
+              required>
+            <label for="session-location" class="floating-label">Location *</label>
+          </div>
+          <div class="error-message" *ngIf="hasFieldError('location')">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            {{ getFieldError('location') }}
+          </div>
         </div>
 
         <!-- Session Type -->
-        <ion-item class="form-item">
-          <ion-label position="stacked">Session Type</ion-label>
+        <div class="form-field select-field">
+          <div class="select-header">
+            <ion-icon name="bookmark-outline" class="field-icon"></ion-icon>
+            <ion-label class="select-label">Session Type</ion-label>
+          </div>
           <ion-select 
             formControlName="type"
             placeholder="Select session type"
-            fill="outline">
-            <ion-select-option value="service">Service</ion-select-option>
-            <ion-select-option value="meeting">Meeting</ion-select-option>
-            <ion-select-option value="class">Class</ion-select-option>
-            <ion-select-option value="event">Event</ion-select-option>
+            fill="outline"
+            class="custom-select">
+            <ion-select-option value="service">
+              <span class="option-content">
+                <ion-icon name="people-outline"></ion-icon>
+                Service
+              </span>
+            </ion-select-option>
+            <ion-select-option value="meeting">
+              <span class="option-content">
+                <ion-icon name="chatbubbles-outline"></ion-icon>
+                Meeting
+              </span>
+            </ion-select-option>
+            <ion-select-option value="class">
+              <span class="option-content">
+                <ion-icon name="school-outline"></ion-icon>
+                Class
+              </span>
+            </ion-select-option>
+            <ion-select-option value="event">
+              <span class="option-content">
+                <ion-icon name="calendar-outline"></ion-icon>
+                Event
+              </span>
+            </ion-select-option>
           </ion-select>
-        </ion-item>
+        </div>
 
         <!-- Leader Assignment -->
-        <ion-item class="form-item">
-          <ion-label position="stacked">Session Leader</ion-label>
-          <ion-input 
-            formControlName="leader"
-            placeholder="Enter leader name (optional)"
-            fill="outline">
-          </ion-input>
-        </ion-item>
+        <div class="form-field" [class.has-value]="sessionForm.get('leader')?.value">
+          <div class="input-wrapper">
+            <ion-icon name="person-outline" class="field-icon"></ion-icon>
+            <input 
+              type="text"
+              formControlName="leader"
+              class="custom-input"
+              id="session-leader">
+            <label for="session-leader" class="floating-label">Session Leader (Optional)</label>
+          </div>
+        </div>
       </div>
 
       <!-- Occurrence Pattern -->
-      <div class="form-section">
-        <h4 class="section-title">Occurrence</h4>
+      <div class="form-section fade-in-delayed">
+        <h4 class="section-title">
+          <ion-icon name="repeat-outline" class="section-icon"></ion-icon>
+          Occurrence Pattern
+        </h4>
         <div class="occurrence-grid">
           <div 
-            *ngFor="let option of occurrenceOptions" 
+            *ngFor="let option of occurrenceOptions; let i = index" 
             class="occurrence-card" 
             [class.selected]="sessionForm.get('occurrence')?.value === option.value"
+            [style.animation-delay]="(i * 0.1) + 's'"
             (click)="selectOccurrence(option.value)">
-            <div class="occurrence-icon">
-              <ion-icon [name]="option.icon"></ion-icon>
+            <div class="occurrence-content">
+              <div class="occurrence-icon" [class.rotate]="sessionForm.get('occurrence')?.value === option.value">
+                <ion-icon [name]="option.icon"></ion-icon>
+              </div>
+              <div class="occurrence-info">
+                <div class="occurrence-label">{{ option.label }}</div>
+                <div class="occurrence-description">{{ option.description }}</div>
+              </div>
             </div>
-            <div class="occurrence-info">
-              <div class="occurrence-label">{{ option.label }}</div>
+            <div class="selection-indicator" *ngIf="sessionForm.get('occurrence')?.value === option.value">
+              <ion-icon name="checkmark-circle" class="selection-icon"></ion-icon>
             </div>
-            <ion-icon 
-              name="checkmark-circle" 
-              class="selection-icon"
-              *ngIf="sessionForm.get('occurrence')?.value === option.value">
-            </ion-icon>
           </div>
         </div>
       </div>
 
       <!-- Session Preview -->
-      <div class="form-section" *ngIf="sessionForm.get('name')?.value && sessionForm.get('datetime')?.value">
-        <h4 class="section-title">Preview</h4>
-        <div class="session-preview">
+      <div class="form-section preview-section fade-in-preview" *ngIf="sessionForm.get('name')?.value && sessionForm.get('datetime')?.value">
+        <h4 class="section-title">
+          <ion-icon name="eye-outline" class="section-icon"></ion-icon>
+          Live Preview
+        </h4>
+        <div class="session-preview animated-card">
           <div class="preview-header">
-            <div class="preview-icon">
-              <ion-icon name="calendar"></ion-icon>
+            <div class="preview-icon pulse">
+              <ion-icon [name]="getTypeIcon(sessionForm.get('type')?.value)"></ion-icon>
             </div>
             <div class="preview-info">
               <h5 class="preview-title">{{ sessionForm.get('name')?.value }}</h5>
-              <p class="preview-type">{{ sessionForm.get('type')?.value | titlecase }} Session</p>
+              <p class="preview-type">
+                <ion-icon name="bookmark"></ion-icon>
+                {{ sessionForm.get('type')?.value | titlecase }} Session
+              </p>
+            </div>
+            <div class="preview-badge">
+              <span class="badge-text">New</span>
             </div>
           </div>
           
+          <div class="preview-divider"></div>
+          
           <div class="preview-details">
-            <div class="preview-item">
-              <ion-icon name="calendar"></ion-icon>
-              <span>{{ formatDateTime(sessionForm.get('datetime')?.value) }}</span>
+            <div class="preview-item slide-in">
+              <div class="preview-item-icon">
+                <ion-icon name="calendar"></ion-icon>
+              </div>
+              <div class="preview-item-content">
+                <span class="preview-label">Date & Time</span>
+                <span class="preview-value">{{ formatDateTime(sessionForm.get('datetime')?.value) }}</span>
+              </div>
             </div>
             
-            <div class="preview-item" *ngIf="sessionForm.get('location')?.value">
-              <ion-icon name="location"></ion-icon>
-              <span>{{ sessionForm.get('location')?.value }}</span>
+            <div class="preview-item slide-in" *ngIf="sessionForm.get('location')?.value">
+              <div class="preview-item-icon">
+                <ion-icon name="location"></ion-icon>
+              </div>
+              <div class="preview-item-content">
+                <span class="preview-label">Location</span>
+                <span class="preview-value">{{ sessionForm.get('location')?.value }}</span>
+              </div>
             </div>
             
-            <div class="preview-item" *ngIf="sessionForm.get('type')?.value">
-              <ion-icon name="bookmark"></ion-icon>
-              <span>{{ sessionForm.get('type')?.value | titlecase }} session</span>
+            <div class="preview-item slide-in" *ngIf="sessionForm.get('leader')?.value">
+              <div class="preview-item-icon">
+                <ion-icon name="person"></ion-icon>
+              </div>
+              <div class="preview-item-content">
+                <span class="preview-label">Session Leader</span>
+                <span class="preview-value">{{ sessionForm.get('leader')?.value }}</span>
+              </div>
             </div>
             
-            <div class="preview-item" *ngIf="sessionForm.get('leader')?.value">
-              <ion-icon name="person"></ion-icon>
-              <span>Led by {{ sessionForm.get('leader')?.value }}</span>
+            <div class="preview-item slide-in">
+              <div class="preview-item-icon">
+                <ion-icon name="repeat"></ion-icon>
+              </div>
+              <div class="preview-item-content">
+                <span class="preview-label">Recurrence</span>
+                <span class="preview-value">{{ sessionForm.get('occurrence')?.value | titlecase }}</span>
+              </div>
             </div>
-            
-            <div class="preview-item">
-              <ion-icon name="refresh"></ion-icon>
-              <span>{{ sessionForm.get('occurrence')?.value | titlecase }} occurrence</span>
-            </div>
+          </div>
+          
+          <div class="preview-footer" *ngIf="sessionForm.get('description')?.value">
+            <p class="preview-description">
+              <ion-icon name="information-circle-outline"></ion-icon>
+              {{ sessionForm.get('description')?.value }}
+            </p>
           </div>
         </div>
       </div>
 
       <!-- Action Buttons - Inside scrollable content -->
       <div class="form-actions">
-        <ion-button 
-          expand="block" 
-          fill="clear" 
+        <button 
+          type="button"
           (click)="dismiss()"
-          color="medium"
-          class="cancel-btn">
-          Cancel
-        </ion-button>
+          class="action-btn cancel-btn">
+          <ion-icon name="close-circle-outline"></ion-icon>
+          <span>Cancel</span>
+        </button>
         
-        <ion-button 
-          expand="block" 
+        <button 
           type="submit"
           [disabled]="!sessionForm.valid || isLoading"
-          class="create-btn"
+          class="action-btn create-btn"
+          [class.loading]="isLoading"
           (click)="createSession()">
-          <ion-spinner *ngIf="isLoading" slot="start"></ion-spinner>
-          <ion-icon name="add-circle" slot="start" *ngIf="!isLoading"></ion-icon>
-          {{ isLoading ? 'Creating...' : 'Create Session' }}
-        </ion-button>
+          <div class="btn-content">
+            <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+            <ion-icon name="add-circle" *ngIf="!isLoading"></ion-icon>
+            <span>{{ isLoading ? 'Creating...' : 'Create Session' }}</span>
+          </div>
+          <div class="btn-ripple"></div>
+        </button>
       </div>
       
       <!-- Bottom padding for safe scrolling -->

@@ -18,7 +18,8 @@ export class SummaryComponent implements ViewDidEnter {
     percentage: 0,
     present: 0,
     absent: 0,
-    trend: 'stable'
+    trend: 'stable',
+    rate: 0
   };
 
   followUpItems: FollowUpItem[] = [];
@@ -36,12 +37,15 @@ export class SummaryComponent implements ViewDidEnter {
     pendingActions: 0
   };
 
+  recentActivities: any[] = [];
+
   isLoading = false;
   isLoadingAttendance = true;
   isLoadingFollowUps = true;
   isLoadingsessions = true;
   isLoadingEngagement = true;
   isLoadingWorkflows = true;
+  isLoadingActivity = true;
 
   constructor(
     private authService: AuthService,
@@ -57,6 +61,7 @@ export class SummaryComponent implements ViewDidEnter {
     this.menuCtrl.close();
     
     this.loadDashboardData();
+    this.loadActivityData();
   }
 
   private loadDashboardData() {
@@ -312,6 +317,127 @@ export class SummaryComponent implements ViewDidEnter {
     if (diffMins < 60) return `${diffMins}m ago`;
     if (diffHours < 24) return `${diffHours}h ago`;
     return syncDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  refreshData() {
+    this.loadDashboardData();
+  }
+
+  getTodayDate(): string {
+    const today = new Date();
+    return today.toLocaleDateString('en-US', { 
+      weekday: 'long', 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  }
+
+  getTotalMembers(): number {
+    // TODO: Get from service
+    return 127;
+  }
+
+  onGoToAttendance() {
+    this.router.navigate(['/attendance']);
+  }
+
+  onViewFollowUp(item: FollowUpItem) {
+    // Navigate to follow-up detail
+    console.log('View follow-up:', item);
+  }
+
+  onViewReports() {
+    // Navigate to reports page
+    console.log('Navigate to reports');
+  }
+
+  getEventDay(date: Date | string): string {
+    const eventDate = typeof date === 'string' ? new Date(date) : date;
+    return eventDate.getDate().toString();
+  }
+
+  getEventMonth(date: Date | string): string {
+    const eventDate = typeof date === 'string' ? new Date(date) : date;
+    return eventDate.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
+  }
+
+  getGrowthRate(): number {
+    // TODO: Calculate from service data
+    return 12;
+  }
+
+  getAvgAttendance(): number {
+    // TODO: Calculate from service data
+    return 85;
+  }
+
+  getNewMembers(): number {
+    // TODO: Get from service data
+    return 8;
+  }
+
+  refreshActivity() {
+    this.loadActivityData();
+  }
+
+  getActivityIcon(type: string): string {
+    switch (type) {
+      case 'attendance': return 'people';
+      case 'followup': return 'heart';
+      case 'workflow': return 'git-branch';
+      default: return 'pulse';
+    }
+  }
+
+  formatActivityTime(timestamp: Date | string): string {
+    const now = new Date();
+    const activityDate = typeof timestamp === 'string' ? new Date(timestamp) : timestamp;
+    
+    if (isNaN(activityDate.getTime())) {
+      return 'Unknown';
+    }
+    
+    const diffMs = now.getTime() - activityDate.getTime();
+    const diffMins = Math.floor(diffMs / (1000 * 60));
+    const diffHours = Math.floor(diffMins / 60);
+    const diffDays = Math.floor(diffHours / 24);
+    
+    if (diffMins < 60) return `${diffMins} minutes ago`;
+    if (diffHours < 24) return `${diffHours} hours ago`;
+    if (diffDays < 7) return `${diffDays} days ago`;
+    
+    return activityDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  private loadActivityData() {
+    this.isLoadingActivity = true;
+    // TODO: Replace with actual service call
+    setTimeout(() => {
+      this.recentActivities = [
+        {
+          type: 'attendance',
+          description: 'John Smith marked present in Sunday Service',
+          timestamp: new Date(Date.now() - 1000 * 60 * 30)
+        },
+        {
+          type: 'followup',
+          description: 'New follow-up created for Sarah Johnson',
+          timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2)
+        },
+        {
+          type: 'workflow',
+          description: 'Welcome workflow triggered for 3 new members',
+          timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5)
+        },
+        {
+          type: 'attendance',
+          description: 'Attendance recorded for Youth Meeting',
+          timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24)
+        }
+      ];
+      this.isLoadingActivity = false;
+    }, 1000);
   }
 
 }

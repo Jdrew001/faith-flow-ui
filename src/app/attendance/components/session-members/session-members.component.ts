@@ -40,8 +40,6 @@ export class SessionMembersComponent implements OnInit, OnDestroy {
   longPressTimer: any;
   touchStartTime = 0;
   
-  // Header visibility state (managed by directive)
-  headerHidden = false;
   
   // Stats
   presentCount = 0;
@@ -50,6 +48,14 @@ export class SessionMembersComponent implements OnInit, OnDestroy {
   excusedCount = 0;
   unmarkedCount = 0;
   attendanceRate = 0;
+  
+  // UI State
+  viewMode: 'grid' | 'list' = 'grid';
+  showFilters = true;
+  activeFilterCount = 0;
+  lastUpdated: Date = new Date();
+  showSuccessAnimation = false;
+  successMessage = '';
 
   constructor(
     private modalCtrl: ModalController,
@@ -59,6 +65,12 @@ export class SessionMembersComponent implements OnInit, OnDestroy {
   ) {}
 
   async ngOnInit() {
+    // Load saved preferences
+    const savedViewMode = localStorage.getItem('attendanceViewMode');
+    if (savedViewMode === 'grid' || savedViewMode === 'list') {
+      this.viewMode = savedViewMode;
+    }
+    
     await this.loadMembers();
     this.setupSearch();
   }
@@ -163,6 +175,13 @@ export class SessionMembersComponent implements OnInit, OnDestroy {
   onFilterChange(filter: string) {
     this.selectedFilter = filter;
     this.filterMembers();
+    this.updateActiveFilterCount();
+  }
+  
+  updateActiveFilterCount() {
+    this.activeFilterCount = 0;
+    if (this.selectedFilter !== 'all') this.activeFilterCount++;
+    if (this.searchControl.value) this.activeFilterCount++;
   }
 
   async toggleMemberStatus(member: MemberAttendance) {
@@ -204,7 +223,13 @@ export class SessionMembersComponent implements OnInit, OnDestroy {
     await actionSheet.present();
   }
 
-  async updateMemberStatus(member: MemberAttendance, status: 'Present' | 'Absent' | 'Late' | 'Excused' | 'Unmarked') {
+  async updateMemberStatus(member: MemberAttendance, status: 'Present' | 'Absent' | 'Late' | 'Excused' | 'Unmarked', event?: Event) {
+    if (event) {
+      event.stopPropagation();
+    }
+    
+    const previousStatus = member.status;
+    
     try {
       member.status = status;
       
@@ -220,10 +245,22 @@ export class SessionMembersComponent implements OnInit, OnDestroy {
       
       this.calculateStats();
       this.filterMembers();
+      this.lastUpdated = new Date();
       
-      await this.showToast(`${member.personName} marked as ${status}`, 'success');
+      // Show success animation for bulk actions
+      if (this.isSelectionMode && this.selectedCount > 1) {
+        this.successMessage = `${this.selectedCount} members marked as ${status}`;
+        this.showSuccessAnimation = true;
+        setTimeout(() => {
+          this.showSuccessAnimation = false;
+          this.exitSelectionMode();
+        }, 2000);
+      } else {
+        await this.showToast(`${member.personName} marked as ${status}`, 'success');
+      }
     } catch (error) {
       console.error('Error updating attendance:', error);
+      member.status = previousStatus; // Revert on error
       await this.showToast('Error updating attendance', 'danger');
     }
   }
@@ -363,6 +400,44 @@ export class SessionMembersComponent implements OnInit, OnDestroy {
   get selectedCount(): number {
     return this.selectedMembers.size;
   }
+  
+  toggleViewMode() {
+    this.viewMode = this.viewMode === 'grid' ? 'list' : 'grid';
+    // Save preference
+    localStorage.setItem('attendanceViewMode', this.viewMode);
+  }
+  
+  toggleFilterView() {
+    this.showFilters = !this.showFilters;
+  }
+  
+  enterSelectionMode() {
+    this.isSelectionMode = true;
+  }
+  
+  exportAttendance() {
+    // Export functionality would go here
+    this.showToast('Export feature coming soon!', 'primary');
+  }
+  
+  openSettings() {
+    // Settings functionality
+    this.showToast('Settings coming soon!', 'primary');
+  }
+  
+  getTimeSinceUpdate(): string {
+    const now = new Date();
+    const diff = now.getTime() - this.lastUpdated.getTime();
+    const minutes = Math.floor(diff / 60000);
+    
+    if (minutes < 1) return 'just now';
+    if (minutes === 1) return '1 minute ago';
+    if (minutes < 60) return `${minutes} minutes ago`;
+    
+    const hours = Math.floor(minutes / 60);
+    if (hours === 1) return '1 hour ago';
+    return `${hours} hours ago`;
+  }
 
   // Handle member row clicks - either select or show status menu
   async handleMemberClick(member: MemberAttendance, event: Event) {
@@ -485,7 +560,7 @@ export class SessionMembersComponent implements OnInit, OnDestroy {
   getStatusIcon(status: string): string {
     switch (status) {
       case 'Present': return 'checkmark-circle';
-      case 'Absent': return 'close-circle';
+      case 'Absent': return 'remove-circle';
       case 'Late': return 'time';
       case 'Excused': return 'information-circle';
       default: return 'help-circle-outline';
@@ -528,6 +603,11 @@ export class SessionMembersComponent implements OnInit, OnDestroy {
     });
   }
 
+  showMemberOptions(member: MemberAttendance, event: Event) {
+    event.stopPropagation();
+    this.toggleMemberStatus(member);
+  }
+  
   async autoMarkUnmarkedAsAbsent() {
     // Check if the session has ended (compare current time with session end time)
     const sessionEndTime = this.getSessionEndDateTime();
@@ -626,8 +706,4 @@ export class SessionMembersComponent implements OnInit, OnDestroy {
     await toast.present();
   }
 
-  // Handler for auto-hide header directive
-  onHeaderVisibilityChange(isHidden: boolean) {
-    this.headerHidden = isHidden;
-  }
 }

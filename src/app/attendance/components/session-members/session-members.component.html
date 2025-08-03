@@ -1,18 +1,16 @@
-<div class="session-members-modal" 
-     [class.header-hidden]="headerHidden"
-     [class.selection-mode]="isSelectionMode"
-     appAutoHideHeader 
-     [scrollThreshold]="1"
-     [hideAfterScroll]="80"
-     [showNearTop]="40"
-     [hysteresis]="25"
-     (headerVisibilityChange)="onHeaderVisibilityChange($event)">
-  <ion-header [class.header-hidden]="headerHidden">
-    <ion-toolbar>
-      <ion-title>{{ session?.title }} - Members</ion-title>
-      <ion-buttons slot="end">
+<div class="session-members-page" 
+     [class.selection-mode]="isSelectionMode">
+  <ion-header>
+    <ion-toolbar class="main-toolbar">
+      <ion-buttons slot="start">
         <ion-button (click)="dismiss()" fill="clear">
-          <ion-icon name="close" slot="icon-only"></ion-icon>
+          <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+      <ion-title>{{ session?.title }}</ion-title>
+      <ion-buttons slot="end">
+        <ion-button (click)="toggleViewMode()" fill="clear">
+          <ion-icon [name]="viewMode === 'grid' ? 'list-outline' : 'grid-outline'" slot="icon-only"></ion-icon>
         </ion-button>
       </ion-buttons>
     </ion-toolbar>
@@ -35,111 +33,107 @@
       </ion-buttons>
     </ion-toolbar>
     
-    <!-- Session Info Header -->
-    <ion-toolbar class="session-info-toolbar">
-      <div class="session-summary">
-        <div class="session-details">
-          <h3>{{ session?.title }}</h3>
-          <div class="session-meta">
-            <span>{{ session?.date | date:'EEE, MMM d, y' }}</span>
-            <span>{{ session?.startTime }} - {{ session?.endTime }}</span>
-            <span>{{ session?.location }}</span>
-          </div>
-        </div>
-        
-        <div class="attendance-stats-summary">
-          <div class="stat-circle">
-            <div class="rate">{{ attendanceRate }}%</div>
-            <div class="label">Rate</div>
-          </div>
-        </div>
+    <!-- Compact Stats Bar -->
+    <div class="stats-bar">
+      <div class="stat-item present" (click)="onFilterChange('present')">
+        <span class="stat-value">{{ presentCount }}</span>
+        <span class="stat-label">Present</span>
       </div>
-    </ion-toolbar>
+      <div class="stat-item absent" (click)="onFilterChange('absent')">
+        <span class="stat-value">{{ absentCount }}</span>
+        <span class="stat-label">Absent</span>
+      </div>
+      <div class="stat-item late" (click)="onFilterChange('late')">
+        <span class="stat-value">{{ lateCount }}</span>
+        <span class="stat-label">Late</span>
+      </div>
+      <div class="stat-item unmarked" (click)="onFilterChange('unmarked')">
+        <span class="stat-value">{{ unmarkedCount }}</span>
+        <span class="stat-label">Unmarked</span>
+      </div>
+      <div class="stat-item rate">
+        <span class="stat-value">{{ attendanceRate }}%</span>
+        <span class="stat-label">Rate</span>
+      </div>
+    </div>
   </ion-header>
 
-  <ion-content class="members-content" [class.has-sticky-actions]="isSelectionMode && selectedCount > 0" [scrollY]="true" [scrollEvents]="true">
-    <!-- Quick Actions Sticky Bar -->
-    <div class="quick-actions-bar" *ngIf="!isSelectionMode">
-      <div class="actions-container">
-        <ion-button 
-          (click)="markAllPresent()" 
-          fill="clear" 
-          size="small" 
-          color="success">
-          <ion-icon name="checkmark-circle" slot="start"></ion-icon>
-          All Present
-        </ion-button>
-        
-        <ion-button 
-          (click)="markAllAbsent()" 
-          fill="clear" 
-          size="small" 
-          color="danger">
-          <ion-icon name="close-circle" slot="start"></ion-icon>
-          All Absent
-        </ion-button>
-        
-        <ion-button 
-          (click)="clearAll()" 
-          fill="clear" 
-          size="small" 
-          color="medium">
-          <ion-icon name="refresh" slot="start"></ion-icon>
-          Clear All
-        </ion-button>
+  <ion-content class="members-content" 
+               [class.has-sticky-actions]="isSelectionMode && selectedCount > 0" 
+               [scrollY]="true" 
+               [scrollEvents]="true">
+
+    <!-- Enhanced Info Bar -->
+    <div class="info-bar" *ngIf="!isLoading && filteredMembers.length > 0">
+      <div class="info-content">
+        <div class="member-count">
+          <span class="count-value">{{ filteredMembers.length }}</span>
+          <span class="count-label">{{ selectedFilter === 'all' ? 'Total Members' : (selectedFilter | titlecase) }}</span>
+        </div>
+        <div class="last-updated" *ngIf="lastUpdated">
+          <ion-icon name="sync-outline"></ion-icon>
+          <span>Updated {{ getTimeSinceUpdate() }}</span>
+        </div>
       </div>
     </div>
 
-    <!-- Long Press Hint -->
-    <div class="selection-hint-bar" *ngIf="!isSelectionMode && !isLoading && filteredMembers.length > 0">
-      <div class="hint-content">
-        <ion-icon name="hand-left-outline" class="hint-icon"></ion-icon>
-        <span class="hint-text">Hold any member to select multiple</span>
+    <!-- Enhanced Search & Filter Bar -->
+    <div class="search-filter-section">
+      <div class="search-container">
+        <ion-searchbar 
+          [formControl]="searchControl"
+          placeholder="Search by name..."
+          debounce="300"
+          showClearButton="focus"
+          class="enhanced-searchbar">
+        </ion-searchbar>
+        <button class="filter-toggle" (click)="toggleFilterView()" [class.active]="showFilters">
+          <ion-icon name="funnel-outline"></ion-icon>
+          <span>Filters</span>
+          <ion-badge *ngIf="activeFilterCount > 0" color="primary">{{ activeFilterCount }}</ion-badge>
+        </button>
       </div>
-    </div>
 
-    <!-- Search & Filter Bar -->
-    <div class="search-filter-bar">
-      <ion-searchbar 
-        [formControl]="searchControl"
-        placeholder="Search members..."
-        debounce="300"
-        showClearButton="focus"
-        class="member-searchbar">
-      </ion-searchbar>
-
-      <div class="filter-buttons">
-        <ion-button 
-          [fill]="selectedFilter === 'all' ? 'solid' : 'outline'"
+      <div class="filter-chips" *ngIf="showFilters">
+        <ion-chip 
           [color]="selectedFilter === 'all' ? 'primary' : 'medium'"
-          size="small"
+          [outline]="selectedFilter !== 'all'"
           (click)="onFilterChange('all')">
-          All ({{ members.length }})
-        </ion-button>
+          <ion-icon name="people-outline"></ion-icon>
+          <ion-label>All ({{ members.length }})</ion-label>
+        </ion-chip>
         
-        <ion-button 
-          [fill]="selectedFilter === 'unmarked' ? 'solid' : 'outline'"
-          [color]="selectedFilter === 'unmarked' ? 'warning' : 'medium'"
-          size="small"
-          (click)="onFilterChange('unmarked')">
-          Unmarked ({{ unmarkedCount }})
-        </ion-button>
-        
-        <ion-button 
-          [fill]="selectedFilter === 'present' ? 'solid' : 'outline'"
+        <ion-chip 
           [color]="selectedFilter === 'present' ? 'success' : 'medium'"
-          size="small"
+          [outline]="selectedFilter !== 'present'"
           (click)="onFilterChange('present')">
-          Present ({{ presentCount }})
-        </ion-button>
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+          <ion-label>Present ({{ presentCount }})</ion-label>
+        </ion-chip>
         
-        <ion-button 
-          [fill]="selectedFilter === 'absent' ? 'solid' : 'outline'"
+        <ion-chip 
           [color]="selectedFilter === 'absent' ? 'danger' : 'medium'"
-          size="small"
+          [outline]="selectedFilter !== 'absent'"
           (click)="onFilterChange('absent')">
-          Absent ({{ absentCount }})
-        </ion-button>
+          <ion-icon name="close-circle-outline"></ion-icon>
+          <ion-label>Absent ({{ absentCount }})</ion-label>
+        </ion-chip>
+        
+        <ion-chip 
+          [color]="selectedFilter === 'late' ? 'warning' : 'medium'"
+          [outline]="selectedFilter !== 'late'"
+          (click)="onFilterChange('late')">
+          <ion-icon name="time-outline"></ion-icon>
+          <ion-label>Late ({{ lateCount }})</ion-label>
+        </ion-chip>
+        
+        <ion-chip 
+          [color]="selectedFilter === 'unmarked' ? 'tertiary' : 'medium'"
+          [outline]="selectedFilter !== 'unmarked'"
+          (click)="onFilterChange('unmarked')">
+          <ion-icon name="help-circle-outline"></ion-icon>
+          <ion-label>Unmarked ({{ unmarkedCount }})</ion-label>
+        </ion-chip>
       </div>
     </div>
 
@@ -149,23 +143,23 @@
       <p>Loading members...</p>
     </div>
 
-    <!-- Members List with improved scrolling -->
-    <div *ngIf="!isLoading" class="members-list-container">
-      <div class="members-list">
+    <!-- Enhanced Members List -->
+    <div *ngIf="!isLoading" class="members-container">
+      <!-- Grid View -->
+      <div class="members-grid" *ngIf="viewMode === 'grid'">
         <div 
-          *ngFor="let member of filteredMembers; trackBy: trackByMemberId; let index = index"
-          class="member-row"
+          *ngFor="let member of filteredMembers; trackBy: trackByMemberId"
+          class="member-card"
           [attr.data-member-id]="member.personId"
           [class.selected]="member.selected"
           [class.selection-mode]="isSelectionMode"
-          [class.has-long-press]="longPressActive"
           (click)="handleMemberClick(member, $event)"
           (touchstart)="onTouchStart(member, $event)"
           (touchend)="onTouchEnd($event)"
           (touchmove)="onTouchMove($event)">
           
-          <!-- Selection Checkbox -->
-          <div class="member-selection" *ngIf="isSelectionMode">
+          <!-- Card Selection Overlay -->
+          <div class="card-selection-overlay" *ngIf="isSelectionMode">
             <ion-checkbox 
               [checked]="member.selected"
               (ionChange)="toggleMemberSelection(member, $event)"
@@ -173,21 +167,20 @@
             </ion-checkbox>
           </div>
           
-          <div class="member-avatar">
-            <div *ngIf="!member.avatar" class="avatar-initials">
-              {{ getInitials(member.personName) }}
+          <!-- Card Content -->
+          <div class="card-avatar-section">
+            <div class="member-avatar" [class]="member.status.toLowerCase()">
+              <div *ngIf="!member.avatar" class="avatar-initials">
+                {{ getInitials(member.personName) }}
+              </div>
+              <img *ngIf="member.avatar" [src]="member.avatar" [alt]="member.personName">
             </div>
-            <img *ngIf="member.avatar" [src]="member.avatar" [alt]="member.personName">
           </div>
           
-          <div class="member-info">
-            <div class="member-name">{{ member.personName }}</div>
-            <div class="member-status">
-              <ion-icon 
-                [name]="getStatusIcon(member.status)" 
-                [color]="getStatusColor(member.status)">
-              </ion-icon>
-              <span [class]="'status-text ' + member.status.toLowerCase()">
+          <div class="card-info">
+            <h3 class="member-name">{{ member.personName }}</h3>
+            <div class="member-status-text">
+              <span [class]="'status-label ' + member.status.toLowerCase()">
                 {{ member.status }}
               </span>
               <span *ngIf="member.timestamp" class="timestamp">
@@ -196,18 +189,76 @@
             </div>
           </div>
           
-          <div class="member-actions" *ngIf="!isSelectionMode">
-            <ion-button 
-              fill="clear" 
-              size="small"
-              [color]="getStatusColor(member.status)"
-              (click)="quickStatusToggle(member, $event)">
-              <ion-icon [name]="getStatusIcon(member.status)" slot="icon-only"></ion-icon>
-            </ion-button>
+          <!-- Quick Actions -->
+          <div class="card-quick-actions" *ngIf="!isSelectionMode">
+            <button class="action-button present" 
+                    [class.active]="member.status === 'Present'"
+                    (click)="updateMemberStatus(member, 'Present', $event)">
+              <ion-icon name="checkmark"></ion-icon>
+            </button>
+            <button class="action-button absent" 
+                    [class.active]="member.status === 'Absent'"
+                    (click)="updateMemberStatus(member, 'Absent', $event)">
+              <ion-icon name="close-outline"></ion-icon>
+            </button>
+            <button class="action-button more" 
+                    (click)="showMemberOptions(member, $event)">
+              <ion-icon name="ellipsis-horizontal"></ion-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- List View -->
+      <div class="members-list" *ngIf="viewMode === 'list'">
+        <div 
+          *ngFor="let member of filteredMembers; trackBy: trackByMemberId"
+          class="member-list-item"
+          [attr.data-member-id]="member.personId"
+          [class.selected]="member.selected"
+          [class.selection-mode]="isSelectionMode"
+          (click)="handleMemberClick(member, $event)"
+          (touchstart)="onTouchStart(member, $event)"
+          (touchend)="onTouchEnd($event)"
+          (touchmove)="onTouchMove($event)">
+          
+          <!-- Selection Checkbox -->
+          <div class="list-selection" *ngIf="isSelectionMode">
+            <ion-checkbox 
+              [checked]="member.selected"
+              (ionChange)="toggleMemberSelection(member, $event)"
+              color="primary">
+            </ion-checkbox>
           </div>
           
-          <!-- Quick status indicator -->
-          <div class="status-indicator" [class]="member.status.toLowerCase()"></div>
+          <div class="list-avatar">
+            <div *ngIf="!member.avatar" class="avatar-initials" [class]="member.status.toLowerCase()">
+              {{ getInitials(member.personName) }}
+            </div>
+            <img *ngIf="member.avatar" [src]="member.avatar" [alt]="member.personName">
+          </div>
+          
+          <div class="list-content">
+            <div class="list-header">
+              <h4 class="member-name">{{ member.personName }}</h4>
+              <div class="status-indicator" [class]="member.status.toLowerCase()">
+                <ion-icon [name]="getStatusIcon(member.status)"></ion-icon>
+                <span>{{ member.status }}</span>
+              </div>
+            </div>
+            <div class="list-meta" *ngIf="member.timestamp">
+              <ion-icon name="time-outline"></ion-icon>
+              <span>Marked at {{ member.timestamp | date:'shortTime' }}</span>
+            </div>
+          </div>
+          
+          <div class="list-actions" *ngIf="!isSelectionMode">
+            <button class="quick-toggle" 
+                    [class]="member.status.toLowerCase()"
+                    (click)="quickStatusToggle(member, $event)">
+              <ion-icon [name]="getStatusIcon(member.status)"></ion-icon>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -223,64 +274,47 @@
     </div>
   </ion-content>
 
-  <!-- Sticky Bottom Bulk Actions Bar -->
-  <div class="sticky-bulk-actions" *ngIf="isSelectionMode && selectedCount > 0">
-    <div class="bulk-actions-container">
-      <div class="bulk-actions-grid">
-        <div class="primary-actions">
-          <ion-button 
-            (click)="markSelectedAs('Present')" 
-            expand="block"
-            fill="solid" 
-            size="default" 
-            color="success"
-            class="action-button">
-            <ion-icon name="checkmark-circle" slot="start"></ion-icon>
-            <div class="button-content">
-              <span class="action-label">Present</span>
-              <span class="action-count">{{ selectedCount }}</span>
-            </div>
-          </ion-button>
-          
-          <ion-button 
-            (click)="markSelectedAs('Absent')" 
-            expand="block"
-            fill="solid" 
-            size="default" 
-            color="danger"
-            class="action-button">
-            <ion-icon name="close-circle" slot="start"></ion-icon>
-            <div class="button-content">
-              <span class="action-label">Absent</span>
-              <span class="action-count">{{ selectedCount }}</span>
-            </div>
-          </ion-button>
-        </div>
-        
-        <div class="secondary-actions">
-          <ion-button 
-            (click)="markSelectedAs('Late')" 
-            expand="block"
-            fill="outline" 
-            size="small" 
-            color="warning"
-            class="secondary-button">
-            <ion-icon name="time" slot="start"></ion-icon>
-            Late
-          </ion-button>
-          
-          <ion-button 
-            (click)="markSelectedAs('Excused')" 
-            expand="block"
-            fill="outline" 
-            size="small" 
-            color="medium"
-            class="secondary-button">
-            <ion-icon name="information-circle" slot="start"></ion-icon>
-            Excused
-          </ion-button>
-        </div>
+  <!-- Enhanced Floating Action Bar -->
+  <div class="floating-action-bar" *ngIf="isSelectionMode && selectedCount > 0">
+    <div class="selection-info">
+      <div class="selection-count">
+        <span class="count">{{ selectedCount }}</span>
+        <span class="label">Selected</span>
       </div>
+      <button class="clear-selection" (click)="exitSelectionMode()">
+        <ion-icon name="close"></ion-icon>
+      </button>
+    </div>
+    
+    <div class="action-buttons">
+      <button class="fab-action present" (click)="markSelectedAs('Present')">
+        <ion-icon name="checkmark-circle"></ion-icon>
+        <span>Present</span>
+      </button>
+      
+      <button class="fab-action absent" (click)="markSelectedAs('Absent')">
+        <ion-icon name="remove-circle"></ion-icon>
+        <span>Absent</span>
+      </button>
+      
+      <button class="fab-action late" (click)="markSelectedAs('Late')">
+        <ion-icon name="time"></ion-icon>
+        <span>Late</span>
+      </button>
+      
+      <button class="fab-action excused" (click)="markSelectedAs('Excused')">
+        <ion-icon name="information-circle"></ion-icon>
+        <span>Excused</span>
+      </button>
+    </div>
+  </div>
+  
+  <!-- Success Animation Overlay -->
+  <div class="success-overlay" *ngIf="showSuccessAnimation">
+    <div class="success-content">
+      <ion-icon name="checkmark-circle" class="success-icon"></ion-icon>
+      <h2>Attendance Updated!</h2>
+      <p>{{ successMessage }}</p>
     </div>
   </div>
 </div>
