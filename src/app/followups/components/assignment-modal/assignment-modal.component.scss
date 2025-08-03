@@ -281,7 +281,7 @@ ion-header ion-toolbar {
         border-radius: 12px;
         padding: 0;
         transition: all 0.3s ease;
-        overflow: hidden;
+        overflow: visible; // Changed from hidden to visible
         width: 100%;
         
         &:focus-within {
@@ -297,6 +297,12 @@ ion-header ion-toolbar {
           display: block;
           padding: 0;
           margin: 0;
+          
+          // Force full width on iOS
+          &.ios {
+            width: 100% !important;
+            max-width: 100% !important;
+          }
           
           &::part(native) {
             padding: 0;
@@ -453,86 +459,112 @@ ion-header ion-toolbar {
   }
 }
 
-// Enhanced DateTime styling
+// Enhanced DateTime styling for iOS compatibility
 ion-datetime {
   --background: transparent;
   --color: #ffffff;
   --color-selected: #007aff;
-  --color-hover: rgba(0, 122, 255, 0.2);
   width: 100%;
-  max-width: none;
   
-  &.ios,
-  &.md {
-    width: 100%;
-    max-width: none;
+  // Fix for iOS calendar display
+  &.ios {
+    // Ensure proper spacing on iOS
+    --padding-top: 8px;
+    --padding-bottom: 8px;
+    --padding-start: 8px;
+    --padding-end: 8px;
+    
+    // Fix calendar grid on iOS
+    .calendar-month-grid {
+      padding: 0 8px;
+    }
   }
   
-  .calendar-wrapper {
-    width: 100%;
-    padding: 12px;
-  }
+  // Use Ionic's CSS variables for consistent theming
+  --ion-color-primary: #007aff;
+  --ion-color-primary-contrast: #ffffff;
   
-  .calendar-body {
-    width: 100%;
-  }
+  // These are the actual CSS custom properties that ion-datetime uses
+  --highlight-color-selected: #007aff;
+  --highlight-color-focused: rgba(0, 122, 255, 0.2);
   
-  .calendar-week-days,
-  .calendar-month-grid {
-    width: 100%;
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 0;
-  }
-  
+  // For the calendar header
   .datetime-header {
     color: #ffffff;
-    padding: 12px;
   }
   
-  .calendar-month-year {
+  // Style the calendar days using Ionic's shadow parts
+  &::part(calendar-day) {
+    color: #ffffff;
+    font-size: 0.9rem;
+    
+    &:hover {
+      background: rgba(0, 122, 255, 0.1);
+    }
+  }
+  
+  &::part(calendar-day-active) {
+    background: #007aff;
     color: #ffffff;
     font-weight: 600;
-    font-size: 1.1rem;
   }
   
-  .calendar-day {
+  &::part(calendar-day-today) {
+    color: #007aff;
+    font-weight: 700;
+    border: 2px solid #007aff;
+  }
+  
+  &::part(calendar-day-disabled) {
+    color: #48484a;
+  }
+  
+  // Month/Year text
+  &::part(month-year) {
     color: #ffffff;
-    aspect-ratio: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.95rem;
-    min-height: 40px;
-    min-width: 40px;
-    border-radius: 50%;
-    margin: 2px;
-    
-    &.calendar-day-today {
-      color: #007aff;
-      font-weight: 700;
-      border: 2px solid #007aff;
-    }
-    
-    &.calendar-day-active {
-      background: #007aff !important;
-      color: #ffffff !important;
-      font-weight: 600;
-    }
-    
-    &:hover:not(.calendar-day-disabled) {
-      background: rgba(0, 122, 255, 0.2);
-    }
-    
-    &.calendar-day-disabled {
-      color: #48484a;
-    }
+    font-weight: 600;
   }
   
-  .calendar-action-buttons {
-    ion-button {
-      --color: #007aff;
-      font-size: 0.9rem;
+  // Navigation buttons
+  &::part(navigation-button) {
+    color: #007aff;
+  }
+  
+  // Time picker if used
+  &::part(time-button) {
+    color: #ffffff;
+    min-height: 44px;
+  }
+}
+
+// Additional iOS-specific fixes
+.ios {
+  ion-datetime {
+    // Fix for iOS calendar day cells
+    .calendar-day-cell {
+      padding: 2px;
+      
+      button {
+        width: 100%;
+        height: 100%;
+        min-width: 32px;
+        min-height: 32px;
+      }
+    }
+    
+    // Ensure month grid has proper spacing
+    .calendar-month {
+      padding: 0 4px;
+    }
+    
+    // Fix week days header
+    .calendar-week-days {
+      padding: 0 4px;
+      
+      .calendar-day-of-week {
+        font-size: 0.75rem;
+        color: #8e8e93;
+      }
     }
   }
 }

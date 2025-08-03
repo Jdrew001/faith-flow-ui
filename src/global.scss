@@ -49,6 +49,185 @@
   --color: #ffffff;
 }
 
+// Global iOS DateTime Fixes
+ion-datetime {
+  // Ensure proper display on all platforms
+  width: 100% !important;
+  max-width: 100% !important;
+  
+  // iOS-specific calendar fixes
+  &.ios {
+    // Ensure full width
+    width: 100% !important;
+    max-width: 100% !important;
+    
+    // Remove default padding that might constrain width
+    --padding-top: 0;
+    --padding-bottom: 0;
+    --padding-start: 0;
+    --padding-end: 0;
+    
+    // Fix the internal structure to expand fully
+    .datetime-calendar {
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+    
+    .datetime-body {
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+    
+    .calendar-body {
+      width: 100% !important;
+      max-width: 100% !important;
+      padding: 8px !important;
+    }
+    
+    // Fix the calendar month container
+    .calendar-month {
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+    
+    // Fix the calendar grid layout
+    .calendar-month-grid {
+      display: grid !important;
+      grid-template-columns: repeat(7, 1fr) !important;
+      gap: 4px !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      padding: 0 !important;
+    }
+    
+    // Fix individual day cells
+    .calendar-day {
+      width: 100% !important;
+      height: auto !important;
+      aspect-ratio: 1 !important;
+      min-width: unset !important;
+      min-height: unset !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      margin: 0 !important;
+      padding: 8px !important;
+      font-size: 0.9rem !important;
+    }
+    
+    // Ensure week header is visible and full width
+    .calendar-week-days {
+      display: grid !important;
+      grid-template-columns: repeat(7, 1fr) !important;
+      gap: 4px !important;
+      width: 100% !important;
+      padding: 0 0 8px 0 !important;
+      
+      .calendar-day-of-week {
+        text-align: center !important;
+        font-size: 0.75rem !important;
+        color: var(--ion-color-medium) !important;
+        width: 100% !important;
+      }
+    }
+    
+    // Fix month header
+    .calendar-header {
+      padding: 12px 16px !important;
+      width: 100% !important;
+      
+      .calendar-month-year {
+        font-size: 1rem !important;
+        font-weight: 600 !important;
+      }
+    }
+    
+    // Navigation buttons
+    .calendar-navigation {
+      width: 100% !important;
+      
+      .calendar-next-prev {
+        ion-button {
+          --padding-start: 8px;
+          --padding-end: 8px;
+        }
+      }
+    }
+    
+    // Ensure picker columns are full width
+    ion-picker-column-internal {
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+  }
+  
+  // Android/MD specific adjustments if needed
+  &.md {
+    width: 100% !important;
+    max-width: 100% !important;
+    
+    .calendar-month-grid {
+      padding: 0 4px;
+    }
+  }
+}
+
+// Additional fixes for datetime wrappers
+.datetime-wrapper {
+  width: 100% !important;
+  max-width: 100% !important;
+  
+  ion-datetime {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+// Fix for modal datetime containers
+ion-modal {
+  .datetime-section {
+    width: 100% !important;
+    
+    .datetime-wrapper {
+      width: 100% !important;
+      
+      ion-datetime {
+        width: 100% !important;
+        max-width: 100% !important;
+      }
+    }
+  }
+}
+
+// iOS-specific datetime full-width fix using CSS variables
+.ios ion-datetime {
+  --width: 100% !important;
+  --max-width: 100% !important;
+  --min-width: 100% !important;
+  
+  // Override any constraining widths
+  &[presentation="date"] {
+    --width: 100% !important;
+    --max-width: 100% !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+}
+
+// Ensure modals don't constrain datetime width
+ion-modal {
+  --width: 100%;
+  
+  ion-content {
+    --width: 100%;
+    
+    .datetime-wrapper {
+      width: 100% !important;
+      max-width: 100% !important;
+    }
+  }
+}
+
 .toast-danger {
   --background: #ff3b30;
   --color: #ffffff;

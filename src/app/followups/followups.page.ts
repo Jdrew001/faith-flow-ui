@@ -412,6 +412,14 @@ export class FollowupsPage implements ViewDidEnter {
   refreshData() {
     this.loadFollowups();
   }
+
+  doRefresh(event: any) {
+    this.loadFollowups();
+    // Complete the refresher after data is loaded
+    setTimeout(() => {
+      event.target.complete();
+    }, 1000);
+  }
   
   onHeaderVisibilityChange(isHidden: boolean) {
     this.headerHidden = isHidden;

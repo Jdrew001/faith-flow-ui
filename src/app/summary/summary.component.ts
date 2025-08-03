@@ -323,6 +323,14 @@ export class SummaryComponent implements ViewDidEnter {
     this.loadDashboardData();
   }
 
+  doRefresh(event: any) {
+    this.loadDashboardData();
+    // Complete the refresher after data is loaded
+    setTimeout(() => {
+      event.target.complete();
+    }, 1000);
+  }
+
   getTodayDate(): string {
     const today = new Date();
     return today.toLocaleDateString('en-US', { 

@@ -14,11 +14,6 @@
           color="light">
         </ion-back-button>
       </ion-buttons>
-      <ion-buttons slot="end">
-        <ion-button fill="clear" color="light" (click)="refreshData()">
-          <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
-        </ion-button>
-      </ion-buttons>
     </ion-toolbar>
 
     <!-- Welcome Banner Style Stats -->
@@ -41,6 +36,15 @@
   </ion-header>
 
   <ion-content class="followups-content">
+    <!-- Pull to Refresh -->
+    <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+      <ion-refresher-content
+        pullingIcon="chevron-down-circle-outline"
+        pullingText="Pull to refresh"
+        refreshingSpinner="circles"
+        refreshingText="Refreshing...">
+      </ion-refresher-content>
+    </ion-refresher>
     <!-- Filter Tabs -->
     <div class="filter-section">
       <ion-segment 
