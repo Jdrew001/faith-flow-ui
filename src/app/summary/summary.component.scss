@@ -1,400 +1,673 @@
-.dashboard-container {
+// Refined Dashboard - Clean & Modern Design
+// Consistent with app theme and attendance page styling
+
+// Base Layout
+.ion-page {
   --background: #2c2c2e;
-  background: #2c2c2e;
+  background: var(--background);
   color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
+// Header
+.dashboard-header {
+  position: relative;
+  z-index: 100;
+  flex-shrink: 0;
+}
+
+// Content
 .dashboard-content {
   --background: #2c2c2e;
-  background: #2c2c2e;
-  padding: 0;
+  --padding-start: 0;
+  --padding-end: 0;
+  flex: 1;
+  overflow: hidden;
 }
 
-.welcome-section {
-  padding: 20px 20px 10px 20px;
+// Welcome Banner
+.welcome-banner {
+  background: #3a3a3c;
+  padding: 20px;
+  border-bottom: 1px solid #48484a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
   
-  h2 {
-    color: #ffffff;
-    font-size: 24px;
-    font-weight: 600;
-    margin: 0 0 8px 0;
+  .welcome-content {
+    h1 {
+      font-size: 24px;
+      font-weight: 600;
+      color: #ffffff;
+      margin: 0 0 4px 0;
+    }
+    
+    p {
+      font-size: 14px;
+      color: #8e8e93;
+      margin: 0;
+    }
   }
   
-  .welcome-subtitle {
-    color: #8e8e93;
-    font-size: 16px;
-    margin: 0;
+  .welcome-stats {
+    .quick-stat {
+      text-align: center;
+      
+      .stat-number {
+        display: block;
+        font-size: 28px;
+        font-weight: 700;
+        color: #007aff;
+        line-height: 1;
+      }
+      
+      .stat-label {
+        display: block;
+        font-size: 12px;
+        color: #8e8e93;
+        margin-top: 4px;
+      }
+    }
   }
 }
 
+// Dashboard Grid
 .dashboard-grid {
   display: grid;
   grid-template-columns: 1fr;
   gap: 16px;
-  padding: 10px 20px 20px 20px;
+  padding: 16px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 100px;
 }
 
-// Card base styles
-ion-card {
-  --background: #3a3a3c;
-  --color: #ffffff;
-  border-radius: 12px;
-  margin: 0;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+// Dashboard Cards - Base Style
+.dashboard-card {
+  background: #3a3a3c;
+  border-radius: 16px;
   border: 1px solid #48484a;
+  overflow: hidden;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  animation: slideIn 0.3s ease-out;
   
-  ion-card-header {
-    padding: 16px 16px 8px 16px;
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
   }
   
-  ion-card-content {
-    padding: 8px 16px 16px 16px;
+  &:active {
+    transform: scale(0.98);
   }
   
-  ion-card-title {
-    color: #ffffff;
-    font-size: 18px;
-    font-weight: 600;
-    margin: 0;
-  }
-  
-  ion-card-subtitle {
-    color: #8e8e93;
-    font-size: 14px;
-    margin: 4px 0 0 0;
-  }
-}
-
-// Attendance Card
-.attendance-card {
-  .stat-header {
+  .card-header {
+    padding: 16px;
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 12px;
     
-    .stat-icon {
-      font-size: 24px;
-      color: #007aff;
-    }
-    
-    .stat-title-section {
-      flex: 1;
-    }
-    
-    .trend-chip {
-      --background: transparent;
-      font-size: 14px;
-      font-weight: 600;
+    .card-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(0, 122, 255, 0.1);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       
       ion-icon {
-        margin-right: 4px;
+        font-size: 24px;
+        color: #007aff;
+      }
+    }
+    
+    .card-badge {
+      background: #007aff;
+      color: #ffffff;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 12px;
+      min-width: 24px;
+      text-align: center;
+    }
+    
+    .card-actions {
+      display: flex;
+      gap: 8px;
+      
+      .icon-btn {
+        background: transparent;
+        border: none;
+        color: #8e8e93;
+        padding: 8px;
+        cursor: pointer;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        
+        &:hover {
+          background: rgba(255, 255, 255, 0.05);
+          color: #ffffff;
+        }
+        
+        ion-icon {
+          font-size: 20px;
+        }
+      }
+    }
+    
+    .trend-indicator {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 20px;
+      
+      &.up {
+        color: #34c759;
+        background: rgba(52, 199, 89, 0.1);
+      }
+      
+      &.down {
+        color: #ff3b30;
+        background: rgba(255, 59, 48, 0.1);
+      }
+      
+      ion-icon {
+        font-size: 16px;
       }
     }
   }
   
-  .attendance-stats {
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    margin-top: 16px;
+  .card-content {
+    padding: 0 16px 16px;
     
-    .stat-item {
+    .card-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #ffffff;
+      margin: 0 0 16px 0;
+    }
+  }
+}
+
+// Attendance Card Specific
+.attendance-card {
+  .attendance-metrics {
+    .metric-row {
       display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
+      justify-content: space-around;
+      margin-bottom: 20px;
       
-      .stat-number {
-        font-size: 28px;
-        font-weight: 700;
-        line-height: 1;
+      .metric {
+        text-align: center;
         
-        &.present {
-          color: #34c759;
+        .metric-value {
+          display: block;
+          font-size: 32px;
+          font-weight: 700;
+          color: #ffffff;
+          line-height: 1;
         }
         
-        &.absent {
-          color: #ff9500;
+        .metric-label {
+          display: block;
+          font-size: 12px;
+          color: #8e8e93;
+          margin-top: 4px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+      }
+    }
+    
+    .attendance-rate {
+      .rate-bar {
+        height: 4px;
+        background: #48484a;
+        border-radius: 2px;
+        overflow: hidden;
+        margin-bottom: 8px;
+        
+        .rate-fill {
+          height: 100%;
+          background: #34c759;
+          border-radius: 2px;
+          transition: width 0.3s ease;
         }
       }
       
-      .stat-label {
+      .rate-text {
+        font-size: 13px;
         color: #8e8e93;
-        font-size: 12px;
-        margin-top: 4px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        text-align: center;
+        display: block;
       }
     }
-    
-    .stat-divider {
-      width: 1px;
-      height: 40px;
-      background: #48484a;
-    }
   }
 }
 
-// List Cards (Follow-up & sessions)
-.list-card {
-  .list-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    
-    .list-title-section {
-      flex: 1;
-    }
-    
-    ion-button {
-      --color: #007aff;
-      font-size: 14px;
-      font-weight: 500;
-    }
-  }
-}
-
+// Follow-up Card Specific
 .followup-card {
   .followup-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    margin-bottom: 16px;
     
     .followup-item {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 8px 0;
+      gap: 12px;
+      padding: 12px 0;
       border-bottom: 1px solid #48484a;
+      transition: all 0.2s ease;
       
       &:last-child {
         border-bottom: none;
+      }
+      
+      &:hover {
+        padding-left: 8px;
+      }
+      
+      .followup-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: rgba(0, 122, 255, 0.2);
+        color: #007aff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 16px;
+        flex-shrink: 0;
+        
+        &.high {
+          background: rgba(255, 59, 48, 0.2);
+          color: #ff3b30;
+        }
+        
+        &.medium {
+          background: rgba(255, 149, 0, 0.2);
+          color: #ff9500;
+        }
       }
       
       .followup-info {
-        display: flex;
-        align-items: center;
-        gap: 12px;
         flex: 1;
+        min-width: 0;
         
-        ion-icon {
-          font-size: 20px;
+        .followup-name {
+          display: block;
+          font-size: 15px;
+          font-weight: 500;
+          color: #ffffff;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
         }
         
-        .followup-details {
-          display: flex;
-          flex-direction: column;
-          
-          .followup-name {
-            color: #ffffff;
-            font-weight: 500;
-            font-size: 16px;
-          }
-          
-          .followup-type {
-            color: #8e8e93;
-            font-size: 12px;
-            margin-top: 2px;
-          }
+        .followup-reason {
+          display: block;
+          font-size: 13px;
+          color: #8e8e93;
+          margin-top: 2px;
         }
       }
       
-      .followup-time {
+      .followup-days {
+        font-size: 13px;
         color: #8e8e93;
-        font-size: 12px;
         font-weight: 500;
       }
     }
   }
+  
+  .empty-followups {
+    text-align: center;
+    padding: 32px 0;
+    color: #8e8e93;
+    
+    ion-icon {
+      font-size: 48px;
+      color: #34c759;
+      margin-bottom: 12px;
+    }
+    
+    p {
+      margin: 0;
+      font-size: 14px;
+    }
+  }
 }
 
+// Sessions Card Specific
 .sessions-card {
   .sessions-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    margin-bottom: 16px;
     
-    .event-item {
+    .session-item {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      padding: 8px 0;
+      gap: 16px;
+      padding: 12px 0;
       border-bottom: 1px solid #48484a;
+      transition: all 0.2s ease;
       
       &:last-child {
         border-bottom: none;
       }
       
-      .event-info {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        flex: 1;
-        
-        ion-icon {
-          font-size: 20px;
-        }
-        
-        .event-details {
-          display: flex;
-          flex-direction: column;
-          
-          .event-title {
-            color: #ffffff;
-            font-weight: 500;
-            font-size: 16px;
-          }
-          
-          .event-time {
-            color: #8e8e93;
-            font-size: 12px;
-            margin-top: 2px;
-          }
-        }
+      &:hover {
+        padding-left: 8px;
       }
       
-      .event-date {
-        color: #007aff;
-        font-size: 12px;
-        font-weight: 500;
-      }
-    }
-  }
-}
-
-// Engagement Chart Card
-.engagement-card {
-  .chart-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    
-    .chart-title-section {
-      flex: 1;
-    }
-    
-    .current-metric {
-      color: #007aff;
-      font-size: 18px;
-      font-weight: 600;
-    }
-  }
-  
-  .mini-chart {
-    .chart-container {
-      height: 80px;
-      margin: 16px 0 12px 0;
-      
-      .trend-chart {
-        width: 100%;
-        height: 100%;
-      }
-    }
-    
-    .chart-labels {
-      display: flex;
-      justify-content: space-between;
-      
-      .chart-label {
-        color: #8e8e93;
-        font-size: 10px;
+      .session-date {
+        width: 44px;
         text-align: center;
+        flex-shrink: 0;
+        
+        .day {
+          display: block;
+          font-size: 20px;
+          font-weight: 700;
+          color: #007aff;
+          line-height: 1;
+        }
+        
+        .month {
+          display: block;
+          font-size: 11px;
+          color: #8e8e93;
+          text-transform: uppercase;
+          margin-top: 2px;
+        }
       }
-    }
-  }
-}
-
-// Workflow Card
-.workflow-card {
-  .workflow-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    
-    .workflow-title-section {
-      flex: 1;
-    }
-    
-    ion-button {
-      --color: #007aff;
       
-      ion-icon {
-        font-size: 20px;
+      .session-info {
+        flex: 1;
+        min-width: 0;
+        
+        .session-title {
+          display: block;
+          font-size: 15px;
+          font-weight: 500;
+          color: #ffffff;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+        
+        .session-time {
+          display: block;
+          font-size: 13px;
+          color: #8e8e93;
+          margin-top: 2px;
+        }
+      }
+      
+      .session-arrow {
+        color: #6e6e73;
+        font-size: 16px;
       }
     }
   }
   
-  .workflow-stats {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    margin-top: 16px;
+  .empty-sessions {
+    text-align: center;
+    padding: 32px 0;
+    color: #8e8e93;
     
-    .workflow-count {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-      
-      .workflow-number {
-        font-size: 32px;
-        font-weight: 700;
-        color: #007aff;
-        line-height: 1;
-      }
-      
-      .workflow-label {
-        color: #8e8e93;
-        font-size: 12px;
-        margin-top: 4px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-      }
+    ion-icon {
+      font-size: 48px;
+      margin-bottom: 12px;
     }
     
-    .workflow-sync {
-      .sync-info {
+    p {
+      margin: 0;
+      font-size: 14px;
+    }
+  }
+}
+
+// Stats Grid Card
+.stats-grid-card {
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    
+    .stat-item {
+      background: rgba(142, 142, 147, 0.1);
+      border-radius: 12px;
+      padding: 16px;
+      text-align: center;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      
+      &:hover {
+        background: rgba(0, 122, 255, 0.1);
+        transform: scale(1.02);
+      }
+      
+      .stat-icon {
+        font-size: 24px;
+        color: #8e8e93;
+        margin-bottom: 8px;
+        
+        &.up {
+          color: #34c759;
+        }
+      }
+      
+      .stat-value {
+        display: block;
+        font-size: 20px;
+        font-weight: 700;
+        color: #ffffff;
+        line-height: 1;
+        margin-bottom: 4px;
+      }
+      
+      .stat-label {
+        display: block;
+        font-size: 11px;
+        color: #8e8e93;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+      }
+    }
+  }
+}
+
+// Activity Card
+.activity-card {
+  .activity-list {
+    .activity-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 0;
+      position: relative;
+      
+      &:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        left: 18px;
+        top: 48px;
+        bottom: 0;
+        width: 1px;
+        background: #48484a;
+      }
+      
+      .activity-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
         display: flex;
         align-items: center;
-        gap: 8px;
         justify-content: center;
+        flex-shrink: 0;
+        background: #2c2c2e;
+        border: 2px solid #48484a;
         
-        ion-icon {
-          font-size: 16px;
+        &.attendance {
+          border-color: #007aff;
+          color: #007aff;
         }
         
-        .sync-text {
-          color: #8e8e93;
+        &.followup {
+          border-color: #34c759;
+          color: #34c759;
+        }
+        
+        &.workflow {
+          border-color: #ff9500;
+          color: #ff9500;
+        }
+        
+        ion-icon {
+          font-size: 18px;
+        }
+      }
+      
+      .activity-info {
+        flex: 1;
+        min-width: 0;
+        
+        .activity-text {
+          display: block;
+          font-size: 14px;
+          color: #ffffff;
+          line-height: 1.4;
+        }
+        
+        .activity-time {
+          display: block;
           font-size: 12px;
+          color: #8e8e93;
+          margin-top: 4px;
         }
       }
     }
   }
 }
 
-// Responsive design
+// View All Button
+.view-all-btn {
+  width: 100%;
+  background: transparent;
+  border: 1px solid #48484a;
+  color: #8e8e93;
+  padding: 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  margin-top: 12px;
+  
+  &:hover {
+    background: rgba(0, 122, 255, 0.05);
+    color: #007aff;
+    border-color: #007aff;
+  }
+  
+  ion-icon {
+    font-size: 16px;
+  }
+}
+
+// Loading Placeholder
+.loading-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+  
+  ion-spinner {
+    --color: #007aff;
+    width: 32px;
+    height: 32px;
+  }
+}
+
+// Animations
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+// Staggered animations
+.dashboard-card {
+  @for $i from 1 through 6 {
+    &:nth-child(#{$i}) {
+      animation-delay: #{$i * 0.05}s;
+    }
+  }
+}
+
+// Responsive Design
 @media (min-width: 768px) {
   .dashboard-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: repeat(2, 1fr);
     gap: 20px;
-    padding: 20px 40px;
-    
-    .attendance-card {
-      grid-column: 1 / -1;
-    }
+    padding: 20px;
+  }
+  
+  .welcome-banner {
+    padding: 24px 40px;
   }
 }
 
 @media (min-width: 1024px) {
   .dashboard-grid {
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .attendance-card {
+    grid-column: span 2;
+  }
+  
+  .stats-grid-card {
+    grid-column: span 2;
+  }
+}
+
+// iPhone SE and smaller
+@media screen and (max-width: 375px) {
+  .welcome-banner {
+    padding: 16px;
     
-    .attendance-card {
-      grid-column: 1 / 2;
+    .welcome-content h1 {
+      font-size: 20px;
     }
     
-    .engagement-card {
-      grid-column: 2 / -1;
+    .quick-stat .stat-number {
+      font-size: 24px;
+    }
+  }
+  
+  .dashboard-card {
+    .card-title {
+      font-size: 16px;
     }
   }
 }

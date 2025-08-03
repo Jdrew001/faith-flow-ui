@@ -36,6 +36,7 @@ export class AttendancePage implements OnInit, OnDestroy {
   selectedSessionType = 'all';
   currentDate = new Date();
   isLoading = false;
+  headerHidden = false;
 
   constructor(
     private attendanceService: AttendanceService,
@@ -266,6 +267,10 @@ export class AttendancePage implements OnInit, OnDestroy {
   // Track by functions for performance
   trackBySessionId(index: number, session: Session): string {
     return session.id;
+  }
+  
+  onHeaderVisibilityChange(isHidden: boolean) {
+    this.headerHidden = isHidden;
   }
 
   trackByTypeValue(index: number, type: any): string {

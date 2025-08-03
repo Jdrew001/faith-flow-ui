@@ -27,9 +27,24 @@ export class CreateSessionModalComponent implements OnInit {
   isLoading = false;
 
   occurrenceOptions = [
-    { value: 'once', label: 'One-time session', icon: 'calendar-outline' },
-    { value: 'weekly', label: 'Weekly recurring', icon: 'refresh-outline' },
-    { value: 'monthly', label: 'Monthly recurring', icon: 'calendar-clear-outline' }
+    { 
+      value: 'once', 
+      label: 'One-time session', 
+      description: 'Single occurrence only',
+      icon: 'calendar-outline' 
+    },
+    { 
+      value: 'weekly', 
+      label: 'Weekly recurring', 
+      description: 'Repeats every week',
+      icon: 'refresh-outline' 
+    },
+    { 
+      value: 'monthly', 
+      label: 'Monthly recurring', 
+      description: 'Repeats every month',
+      icon: 'calendar-clear-outline' 
+    }
   ];
 
   constructor(
@@ -173,5 +188,24 @@ export class CreateSessionModalComponent implements OnInit {
 
   getMinDateTime(): string {
     return new Date().toISOString();
+  }
+
+  getTypeIcon(type: string): string {
+    const icons: { [key: string]: string } = {
+      service: 'people-outline',
+      meeting: 'chatbubbles-outline',
+      class: 'school-outline',
+      event: 'calendar-outline'
+    };
+    return icons[type] || 'calendar-outline';
+  }
+
+  clearDateTime() {
+    this.sessionForm.patchValue({ datetime: '' });
+  }
+
+  confirmDateTime() {
+    // The datetime value is already bound via formControlName
+    // This method is here if you need to perform additional actions
   }
 }

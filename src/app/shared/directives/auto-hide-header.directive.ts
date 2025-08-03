@@ -1,240 +1,243 @@
-import { Directive, ElementRef, Input, Output, EventEmitter, OnInit, OnDestroy, Renderer2 } from '@angular/core';
+import { Directive, ElementRef, Input, Output, EventEmitter, OnInit, OnDestroy, Renderer2, NgZone, HostListener } from '@angular/core';
+import { fromEvent, Subject } from 'rxjs';
+import { throttleTime, takeUntil } from 'rxjs/operators';
 
 @Directive({
   selector: '[appAutoHideHeader]',
   standalone: true
 })
 export class AutoHideHeaderDirective implements OnInit, OnDestroy {
-  @Input() headerSelector = 'ion-header'; // CSS selector for the header element
-  @Input() scrollThreshold = 5; // Minimum scroll distance to trigger hide/show
-  @Input() hideAfterScroll = 60; // Hide header after scrolling this many pixels down
-  @Input() showNearTop = 30; // Show header when within this many pixels of top
-  @Input() hysteresis = 20; // Additional buffer to prevent jittering
-  @Output() headerVisibilityChange = new EventEmitter<boolean>(); // Emits true when hidden, false when shown
+  @Input() headerSelector = 'ion-header';
+  @Input() scrollThreshold = 10; // Minimum scroll distance to trigger
+  @Input() hideDelay = 150; // Delay before hiding (ms)
+  @Input() showDelay = 50; // Delay before showing (ms)
+  @Output() headerVisibilityChange = new EventEmitter<boolean>();
 
-  private lastScrollY = 0;
-  private ticking = false;
+  private destroy$ = new Subject<void>();
+  private scrollElement: HTMLElement | null = null;
   private headerElement: HTMLElement | null = null;
+  private lastScrollTop = 0;
   private isHeaderHidden = false;
-  private debounceTimeout: any;
-  private isTransitioning = false; // Prevent changes during transitions
-  private lastChangeTime = 0; // Track when last change occurred
+  private hideTimeout: any;
+  private showTimeout: any;
+  private ticking = false;
+  private scrollVelocity = 0;
+  private lastScrollTime = 0;
+  private touchStartY = 0;
+  private isTouching = false;
 
   constructor(
     private elementRef: ElementRef,
-    private renderer: Renderer2
+    private renderer: Renderer2,
+    private ngZone: NgZone
   ) {}
 
   ngOnInit() {
-    this.setupHeaderElement();
-    this.setupScrollListener();
+    // Run outside Angular zone for better performance
+    this.ngZone.runOutsideAngular(() => {
+      this.setupHeaderElement();
+      this.setupScrollListener();
+      this.setupTouchListeners();
+    });
   }
 
   ngOnDestroy() {
-    // Cleanup timeouts
-    if (this.debounceTimeout) {
-      clearTimeout(this.debounceTimeout);
-    }
+    this.destroy$.next();
+    this.destroy$.complete();
+    this.clearTimeouts();
   }
 
   private setupHeaderElement() {
-    // Find the header element within the directive's host element
     const hostElement = this.elementRef.nativeElement;
     this.headerElement = hostElement.querySelector(this.headerSelector);
     
     if (this.headerElement) {
-      // Add CSS styles for smooth animation
-      this.renderer.setStyle(this.headerElement, 'transition', 'transform 0.3s ease-out');
+      // Set initial styles for smooth transitions
+      this.renderer.setStyle(this.headerElement, 'transition', 'transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)');
       this.renderer.setStyle(this.headerElement, 'will-change', 'transform');
-      this.renderer.setStyle(this.headerElement, 'z-index', '100');
+      this.renderer.setStyle(this.headerElement, 'transform', 'translateY(0)');
     }
   }
 
   private setupScrollListener() {
-    const scrollableElement = this.findScrollableElement();
-    if (scrollableElement) {
-      // Handle both regular scroll events and Ionic scroll events
-      this.renderer.listen(scrollableElement, 'scroll', (event) => {
-        this.onScroll(event);
-      });
-      
-      // Also listen for Ionic's ionScroll event specifically
-      this.renderer.listen(scrollableElement, 'ionScroll', (event) => {
-        this.onIonicScroll(event);
-      });
+    this.scrollElement = this.findScrollableElement();
+    
+    if (this.scrollElement) {
+      // Use RxJS for better scroll handling
+      fromEvent(this.scrollElement, 'scroll', { passive: true })
+        .pipe(
+          throttleTime(16, undefined, { leading: true, trailing: true }), // ~60fps
+          takeUntil(this.destroy$)
+        )
+        .subscribe(() => {
+          if (!this.ticking && !this.isTouching) {
+            requestAnimationFrame(() => {
+              this.handleScroll();
+              this.ticking = false;
+            });
+            this.ticking = true;
+          }
+        });
     }
   }
 
+  private setupTouchListeners() {
+    const element = this.scrollElement || this.elementRef.nativeElement;
+    
+    // Touch start
+    this.renderer.listen(element, 'touchstart', (event: TouchEvent) => {
+      this.isTouching = true;
+      this.touchStartY = event.touches[0].clientY;
+      this.clearTimeouts();
+    });
+    
+    // Touch end
+    this.renderer.listen(element, 'touchend', () => {
+      this.isTouching = false;
+      // Handle any pending scroll after touch ends
+      setTimeout(() => {
+        this.handleScroll();
+      }, 100);
+    });
+  }
+
   private findScrollableElement(): HTMLElement | null {
-    // Look for ion-content or any element with scroll capability
     const hostElement = this.elementRef.nativeElement;
     
-    // Try to find ion-content first
+    // First try ion-content
     let scrollElement = hostElement.querySelector('ion-content');
-    
-    // If no ion-content, look for any element with overflow
-    if (!scrollElement) {
-      const elements = hostElement.querySelectorAll('*');
-      for (const el of Array.from(elements)) {
-        const computedStyle = window.getComputedStyle(el as Element);
-        if (computedStyle.overflowY === 'auto' || computedStyle.overflowY === 'scroll') {
-          scrollElement = el as HTMLElement;
-          break;
+    if (scrollElement) {
+      // For ion-content, we need to get the actual scroll element
+      const shadowRoot = (scrollElement as any).shadowRoot;
+      if (shadowRoot) {
+        const innerScroll = shadowRoot.querySelector('.inner-scroll');
+        if (innerScroll) {
+          return innerScroll as HTMLElement;
         }
       }
     }
     
-    return scrollElement || hostElement;
-  }
-
-  private onScroll(event: Event) {
-    if (!this.ticking) {
-      requestAnimationFrame(() => {
-        this.updateHeaderVisibility(event);
-        this.ticking = false;
-      });
-      this.ticking = true;
-    }
-  }
-
-  private updateHeaderVisibility(event: Event) {
-    if (!this.headerElement || this.isTransitioning) return;
-
-    let currentScrollY = 0;
-    
-    // Get scroll position from different possible sources
-    if (event.target instanceof HTMLElement) {
-      currentScrollY = event.target.scrollTop;
-    } else if ((event as any).detail?.scrollTop !== undefined) {
-      // Ionic scroll event
-      currentScrollY = (event as any).detail.scrollTop;
-    }
-
-    const scrollDelta = currentScrollY - this.lastScrollY;
-    
-    // Only process significant scroll changes
-    if (Math.abs(scrollDelta) > this.scrollThreshold) {
-      let shouldHide = false;
-      
-      // Use larger hysteresis and more conservative thresholds
-      const hideThreshold = this.isHeaderHidden ? this.hideAfterScroll - (this.hysteresis * 2) : this.hideAfterScroll;
-      const showThreshold = this.isHeaderHidden ? this.showNearTop + (this.hysteresis * 2) : this.showNearTop;
-      
-      // Only change state for more significant scroll movements
-      if (scrollDelta > this.scrollThreshold * 2 && currentScrollY > hideThreshold) {
-        // Scrolling down significantly - hide header
-        shouldHide = true;
-      } else if (scrollDelta < -(this.scrollThreshold * 2) || currentScrollY <= showThreshold) {
-        // Scrolling up significantly or at top - show header
-        shouldHide = false;
-      } else {
-        // In the neutral zone - don't change state
-        this.lastScrollY = currentScrollY;
-        return;
+    // Fallback to any scrollable element
+    const elements = hostElement.querySelectorAll('*');
+    for (const el of Array.from(elements)) {
+      const style = window.getComputedStyle(el as Element);
+      if (style.overflowY === 'auto' || style.overflowY === 'scroll') {
+        return el as HTMLElement;
       }
-      
-      this.applyVisibilityChange(shouldHide);
-      this.lastScrollY = currentScrollY;
     }
-  }
-
-  private onIonicScroll(event: any) {
-    if (!this.ticking) {
-      requestAnimationFrame(() => {
-        this.updateHeaderVisibilityFromIonic(event);
-        this.ticking = false;
-      });
-      this.ticking = true;
-    }
-  }
-
-  private updateHeaderVisibilityFromIonic(event: any) {
-    if (!this.headerElement || this.isTransitioning) return;
-
-    // Get scroll position from Ionic event detail
-    const currentScrollY = event.detail?.scrollTop || 0;
-    const scrollDelta = currentScrollY - this.lastScrollY;
     
-    // Only process significant scroll changes to prevent micro-scrolling issues
-    if (Math.abs(scrollDelta) > this.scrollThreshold) {
-      let shouldHide = false;
+    return hostElement;
+  }
+
+  private handleScroll() {
+    if (!this.scrollElement || !this.headerElement) return;
+    
+    const currentScrollTop = this.scrollElement.scrollTop;
+    const scrollDelta = currentScrollTop - this.lastScrollTop;
+    const currentTime = Date.now();
+    const timeDelta = currentTime - this.lastScrollTime;
+    
+    // Calculate scroll velocity
+    if (timeDelta > 0) {
+      this.scrollVelocity = Math.abs(scrollDelta) / timeDelta;
+    }
+    
+    // Determine if we should hide or show the header
+    if (Math.abs(scrollDelta) >= this.scrollThreshold) {
+      this.clearTimeouts();
       
-      // Use larger hysteresis and more conservative thresholds
-      const hideThreshold = this.isHeaderHidden ? this.hideAfterScroll - (this.hysteresis * 2) : this.hideAfterScroll;
-      const showThreshold = this.isHeaderHidden ? this.showNearTop + (this.hysteresis * 2) : this.showNearTop;
-      
-      // Only change state for more significant scroll movements
-      if (scrollDelta > this.scrollThreshold * 2 && currentScrollY > hideThreshold) {
-        // Scrolling down significantly - hide header
-        shouldHide = true;
-      } else if (scrollDelta < -(this.scrollThreshold * 2) || currentScrollY <= showThreshold) {
-        // Scrolling up significantly or at top - show header
-        shouldHide = false;
-      } else {
-        // In the neutral zone - don't change state, just update position
-        this.lastScrollY = currentScrollY;
-        return;
+      if (scrollDelta > 0 && currentScrollTop > 100) {
+        // Scrolling down - hide header
+        if (!this.isHeaderHidden) {
+          // Use velocity to determine delay
+          const delay = this.scrollVelocity > 0.5 ? 0 : this.hideDelay;
+          
+          this.hideTimeout = setTimeout(() => {
+            this.ngZone.run(() => {
+              this.hideHeader();
+            });
+          }, delay);
+        }
+      } else if (scrollDelta < 0 || currentScrollTop <= 50) {
+        // Scrolling up or near top - show header
+        if (this.isHeaderHidden) {
+          // Show immediately on scroll up
+          this.showTimeout = setTimeout(() => {
+            this.ngZone.run(() => {
+              this.showHeader();
+            });
+          }, this.showDelay);
+        }
       }
-      
-      this.applyVisibilityChange(shouldHide);
-      this.lastScrollY = currentScrollY;
     }
+    
+    // Always show header when at the very top
+    if (currentScrollTop === 0 && this.isHeaderHidden) {
+      this.clearTimeouts();
+      this.ngZone.run(() => {
+        this.showHeader();
+      });
+    }
+    
+    this.lastScrollTop = currentScrollTop;
+    this.lastScrollTime = currentTime;
   }
 
-  private applyVisibilityChange(shouldHide: boolean) {
-    // Prevent rapid state changes (minimum 500ms between changes)
-    const now = Date.now();
-    if (now - this.lastChangeTime < 500) {
-      return;
-    }
-    
-    // Clear any pending visibility change
-    if (this.debounceTimeout) {
-      clearTimeout(this.debounceTimeout);
-    }
-    
-    // Apply change immediately if it's different from current state
-    if (shouldHide !== this.isHeaderHidden && !this.isTransitioning) {
-      this.isTransitioning = true;
-      this.lastChangeTime = now;
-      
-      this.debounceTimeout = setTimeout(() => {
-        this.isHeaderHidden = shouldHide;
-        this.setHeaderVisibility(!shouldHide);
-        this.headerVisibilityChange.emit(shouldHide);
-        
-        // Allow new transitions after animation completes
-        setTimeout(() => {
-          this.isTransitioning = false;
-        }, 300); // Match the CSS transition duration
-      }, 100); // Increased debounce to prevent rapid toggling
-    }
-  }
-
-  private setHeaderVisibility(visible: boolean) {
-    if (!this.headerElement) return;
-    
-    if (visible) {
-      this.renderer.setStyle(this.headerElement, 'transform', 'translateY(0)');
-    } else {
+  private hideHeader() {
+    if (!this.isHeaderHidden && this.headerElement) {
+      this.isHeaderHidden = true;
       this.renderer.setStyle(this.headerElement, 'transform', 'translateY(-100%)');
+      this.headerVisibilityChange.emit(true);
+    }
+  }
+
+  private showHeader() {
+    if (this.isHeaderHidden && this.headerElement) {
+      this.isHeaderHidden = false;
+      this.renderer.setStyle(this.headerElement, 'transform', 'translateY(0)');
+      this.headerVisibilityChange.emit(false);
+    }
+  }
+
+  private clearTimeouts() {
+    if (this.hideTimeout) {
+      clearTimeout(this.hideTimeout);
+      this.hideTimeout = null;
+    }
+    if (this.showTimeout) {
+      clearTimeout(this.showTimeout);
+      this.showTimeout = null;
     }
   }
 
   // Public methods for manual control
-  public showHeader() {
-    this.isHeaderHidden = false;
-    this.setHeaderVisibility(true);
-    this.headerVisibilityChange.emit(false);
+  public forceShowHeader() {
+    this.clearTimeouts();
+    this.ngZone.run(() => {
+      this.showHeader();
+    });
   }
 
-  public hideHeader() {
-    this.isHeaderHidden = true;
-    this.setHeaderVisibility(false);
-    this.headerVisibilityChange.emit(true);
+  public forceHideHeader() {
+    this.clearTimeouts();
+    this.ngZone.run(() => {
+      this.hideHeader();
+    });
   }
 
-  public isHidden(): boolean {
-    return this.isHeaderHidden;
+  public toggleHeader() {
+    if (this.isHeaderHidden) {
+      this.forceShowHeader();
+    } else {
+      this.forceHideHeader();
+    }
+  }
+
+  // Handle window resize
+  @HostListener('window:resize')
+  onWindowResize() {
+    // Re-setup on resize in case layout changed
+    this.setupHeaderElement();
+    this.setupScrollListener();
   }
 }

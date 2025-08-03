@@ -1,206 +1,224 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-menu-button *ngIf="!showBackButton"></ion-menu-button>
-      <ion-back-button 
-        *ngIf="showBackButton" 
-        defaultHref="/summary">
-      </ion-back-button>
-    </ion-buttons>
-    <ion-title>Follow-ups</ion-title>
-    <ion-buttons slot="end">
-      <ion-button fill="clear" (click)="showFilterModal = true">
-        <ion-icon name="filter-outline"></ion-icon>
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-header>
+<div class="ion-page" id="main-content"
+     appAutoHideHeader
+     [scrollThreshold]="10"
+     [hideDelay]="150"
+     [showDelay]="50"
+     (headerVisibilityChange)="onHeaderVisibilityChange($event)">
+  <ion-header [translucent]="false" class="followups-header" [class.header-hidden]="headerHidden">
+    <ion-toolbar>
+      <ion-buttons slot="start">
+        <ion-menu-button *ngIf="!showBackButton" color="light"></ion-menu-button>
+        <ion-back-button 
+          *ngIf="showBackButton" 
+          defaultHref="/summary"
+          color="light">
+        </ion-back-button>
+      </ion-buttons>
+      <ion-buttons slot="end">
+        <ion-button fill="clear" color="light" (click)="refreshData()">
+          <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+      </ion-buttons>
+    </ion-toolbar>
 
-<ion-content [fullscreen]="true">
-  <!-- Search Bar -->
-  <ion-searchbar
-    [(ngModel)]="searchTerm"
-    (ionInput)="filterFollowups()"
-    placeholder="Search follow-ups..."
-    show-clear-button="focus">
-  </ion-searchbar>
+    <!-- Welcome Banner Style Stats -->
+    <div class="welcome-banner">
+      <div class="banner-content">
+        <h2>Follow-up Management</h2>
+        <p>Track and manage your congregation's needs</p>
+      </div>
+      <div class="banner-stats">
+        <div class="quick-stat">
+          <span class="stat-number">{{ getPendingCount() }}</span>
+          <span class="stat-label">Pending</span>
+        </div>
+        <div class="quick-stat accent">
+          <span class="stat-number">{{ getOverdueCount() }}</span>
+          <span class="stat-label">Overdue</span>
+        </div>
+      </div>
+    </div>
+  </ion-header>
 
-  <!-- Filter Pills -->
-  <div class="filter-pills" *ngIf="hasActiveFilters()">
-    <ion-chip *ngIf="selectedStatus !== 'all'" (click)="clearStatusFilter()" color="primary">
-      <ion-label>{{ selectedStatus | titlecase }}</ion-label>
-      <ion-icon name="close-circle"></ion-icon>
-    </ion-chip>
-    <ion-chip *ngIf="selectedPriority !== 'all'" (click)="clearPriorityFilter()" color="secondary">
-      <ion-label>{{ selectedPriority | titlecase }} Priority</ion-label>
-      <ion-icon name="close-circle"></ion-icon>
-    </ion-chip>
-    <ion-chip *ngIf="selectedAssignee !== 'all'" (click)="clearAssigneeFilter()" color="tertiary">
-      <ion-label>{{ selectedAssignee }}</ion-label>
-      <ion-icon name="close-circle"></ion-icon>
-    </ion-chip>
-  </div>
+  <ion-content class="followups-content">
+    <!-- Filter Tabs -->
+    <div class="filter-section">
+      <ion-segment 
+        [value]="selectedStatus" 
+        (ionChange)="onStatusChange($event)"
+        class="status-segment">
+        <ion-segment-button value="all">
+          <ion-label>All</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="pending">
+          <ion-label>Pending</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="in-progress">
+          <ion-label>In Progress</ion-label>
+        </ion-segment-button>
+        <ion-segment-button value="completed">
+          <ion-label>Completed</ion-label>
+        </ion-segment-button>
+      </ion-segment>
 
-  <!-- Sort Options -->
-  <div class="sort-options">
-    <ion-segment [(ngModel)]="sortBy" (ionChange)="sortFollowups()">
-      <ion-segment-button value="dueDate">
-        <ion-label>Due Date</ion-label>
-      </ion-segment-button>
-      <ion-segment-button value="priority">
-        <ion-label>Priority</ion-label>
-      </ion-segment-button>
-      <ion-segment-button value="createdDate">
-        <ion-label>Created</ion-label>
-      </ion-segment-button>
-    </ion-segment>
-  </div>
-
-  <!-- Follow-ups List -->
-  <div class="followups-container">
-    <div *ngIf="filteredFollowups.length === 0" class="empty-state">
-      <ion-icon name="checkmark-circle-outline" size="large"></ion-icon>
-      <h3>No follow-ups found</h3>
-      <p *ngIf="searchTerm || hasActiveFilters()">Try adjusting your search or filters</p>
-      <p *ngIf="!searchTerm && !hasActiveFilters()">All caught up! Great work.</p>
+      <!-- Priority Filter Pills -->
+      <div class="priority-filters">
+        <button 
+          class="priority-pill"
+          [class.active]="selectedPriority === 'all'"
+          (click)="setPriority('all')">
+          All Priorities
+        </button>
+        <button 
+          class="priority-pill high"
+          [class.active]="selectedPriority === 'high'"
+          (click)="setPriority('high')">
+          <span class="priority-dot"></span>
+          High
+        </button>
+        <button 
+          class="priority-pill medium"
+          [class.active]="selectedPriority === 'medium'"
+          (click)="setPriority('medium')">
+          <span class="priority-dot"></span>
+          Medium
+        </button>
+        <button 
+          class="priority-pill low"
+          [class.active]="selectedPriority === 'low'"
+          (click)="setPriority('low')">
+          <span class="priority-dot"></span>
+          Low
+        </button>
+      </div>
     </div>
 
-    <ion-card *ngFor="let followup of filteredFollowups" class="followup-card" [class]="'priority-' + followup.priority">
-      <ion-card-header>
-        <div class="card-header-content">
-          <div class="header-left">
-            <ion-card-subtitle>
-              <ion-icon [name]="getTypeIcon(followup.type)"></ion-icon>
-              {{ followup.type | titlecase }}
-            </ion-card-subtitle>
-            <ion-card-title>{{ followup.title }}</ion-card-title>
-          </div>
-          <div class="header-right">
-            <ion-chip [color]="getPriorityColor(followup.priority)" size="small">
-              {{ followup.priority | titlecase }}
-            </ion-chip>
-            <ion-chip [color]="getStatusColor(followup.status)" size="small">
-              {{ followup.status | titlecase }}
-            </ion-chip>
-          </div>
-        </div>
-      </ion-card-header>
+    <!-- Search Bar -->
+    <div class="search-section">
+      <ion-searchbar 
+        [(ngModel)]="searchTerm"
+        (ionInput)="filterFollowups()"
+        placeholder="Search by name, type, or description..."
+        debounce="300"
+        showClearButton="focus"
+        class="followup-searchbar">
+      </ion-searchbar>
+    </div>
 
-      <ion-card-content>
-        <p class="description">{{ followup.description }}</p>
-        
-        <div class="followup-details">
-          <div class="detail-row">
-            <ion-icon name="person-outline"></ion-icon>
-            <span>{{ followup.personName }}</span>
-          </div>
-          <div class="detail-row" *ngIf="followup.assignedTo">
-            <ion-icon name="people-outline"></ion-icon>
-            <span>Assigned to: </span>
-            <div class="assignee-badge">
-              <div class="assignee-avatar-small" [attr.data-color]="getAssigneeDetails(followup.assignedTo)?.color">
-                {{ getAssigneeDetails(followup.assignedTo)?.avatar }}
+    <!-- Follow-ups List -->
+    <div class="followups-container">
+      <div *ngIf="isLoading" class="loading-state">
+        <ion-spinner name="crescent"></ion-spinner>
+        <p>Loading follow-ups...</p>
+      </div>
+
+      <div *ngIf="!isLoading && filteredFollowups.length > 0" class="followup-cards">
+        <div 
+          *ngFor="let followup of filteredFollowups; trackBy: trackByFollowupId"
+          class="followup-card"
+          [class.overdue]="isOverdue(followup.dueDate)"
+          (click)="openFollowupDetail(followup)">
+          
+          <!-- Priority Indicator -->
+          <div class="priority-indicator" [class]="followup.priority"></div>
+          
+          <!-- Card Content -->
+          <div class="card-body">
+            <!-- Header Section -->
+            <div class="followup-header">
+              <div class="person-info">
+                <div class="person-avatar" [class]="followup.priority">
+                  {{ getInitials(followup.personName) }}
+                </div>
+                <div class="person-details">
+                  <h3 class="person-name">{{ followup.personName }}</h3>
+                  <div class="followup-type">
+                    <ion-icon [name]="getTypeIcon(followup.type)"></ion-icon>
+                    {{ followup.type }}
+                  </div>
+                </div>
               </div>
-              <span>{{ followup.assignedTo }}</span>
+              <div class="status-badge" [class]="followup.status">
+                <span class="status-dot"></span>
+                {{ followup.status | titlecase }}
+              </div>
+            </div>
+
+            <!-- Title & Description -->
+            <div class="followup-content">
+              <h4 class="followup-title">{{ followup.title }}</h4>
+              <p class="followup-description">{{ followup.description }}</p>
+            </div>
+
+            <!-- Footer Info -->
+            <div class="followup-footer">
+              <div class="footer-info">
+                <div class="info-item" *ngIf="followup.assignedTo">
+                  <ion-icon name="person-outline"></ion-icon>
+                  <span>{{ followup.assignedTo }}</span>
+                </div>
+                <div class="info-item" *ngIf="followup.dueDate">
+                  <ion-icon name="calendar-outline"></ion-icon>
+                  <span [class.overdue-text]="isOverdue(followup.dueDate)">
+                    {{ formatDueDate(followup.dueDate) }}
+                  </span>
+                </div>
+              </div>
+              
+              <!-- Quick Actions -->
+              <div class="quick-actions" (click)="$event.stopPropagation()">
+                <button 
+                  class="action-btn"
+                  [class.completed]="followup.status === 'completed'"
+                  (click)="toggleComplete(followup)"
+                  [disabled]="followup.status === 'completed'">
+                  <ion-icon [name]="followup.status === 'completed' ? 'checkmark-circle' : 'checkmark-circle-outline'"></ion-icon>
+                </button>
+                <button 
+                  class="action-btn"
+                  (click)="openAssignModal(followup)">
+                  <ion-icon name="person-add-outline"></ion-icon>
+                </button>
+                <button 
+                  class="action-btn"
+                  (click)="openEditModal(followup)">
+                  <ion-icon name="create-outline"></ion-icon>
+                </button>
+              </div>
             </div>
           </div>
-          <div class="detail-row">
-            <ion-icon name="calendar-outline"></ion-icon>
-            <span>Due: {{ followup.dueDate | date:'mediumDate' }}</span>
-            <ion-badge *ngIf="followup.dueDate && isOverdue(followup.dueDate)" color="danger" class="overdue-badge">
-              Overdue
-            </ion-badge>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="!isLoading && filteredFollowups.length === 0" class="empty-state">
+        <div class="empty-content">
+          <div class="empty-icon-wrapper">
+            <ion-icon name="checkmark-circle-outline"></ion-icon>
+          </div>
+          <h3>{{ getEmptyStateTitle() }}</h3>
+          <p>{{ getEmptyStateMessage() }}</p>
+          <div class="empty-actions">
+            <ion-button *ngIf="hasActiveFilters()" (click)="clearAllFilters()" fill="clear" size="small">
+              <ion-icon name="refresh-outline" slot="start"></ion-icon>
+              Clear Filters
+            </ion-button>
+            <ion-button (click)="createNewFollowup()" fill="solid" size="small">
+              <ion-icon name="add-outline" slot="start"></ion-icon>
+              Create Follow-up
+            </ion-button>
           </div>
         </div>
+      </div>
+    </div>
+  </ion-content>
 
-        <div class="action-buttons">
-          <ion-button 
-            fill="clear" 
-            size="small" 
-            (click)="markAsComplete(followup)"
-            [disabled]="followup.status === 'completed'">
-            <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
-            Complete
-          </ion-button>
-          <ion-button 
-            fill="clear" 
-            size="small" 
-            (click)="markAsInProgress(followup)"
-            [disabled]="followup.status === 'in-progress'">
-            <ion-icon name="time-outline" slot="start"></ion-icon>
-            In Progress
-          </ion-button>
-          <ion-button fill="clear" size="small" (click)="editFollowup(followup)">
-            <ion-icon name="create-outline" slot="start"></ion-icon>
-            Edit
-          </ion-button>
-          <ion-button fill="clear" size="small" (click)="assignFollowup(followup)">
-            <ion-icon name="person-add-outline" slot="start"></ion-icon>
-            Assign
-          </ion-button>
-        </div>
-      </ion-card-content>
-    </ion-card>
-  </div>
-
-  <!-- Filter Modal -->
-  <ion-modal [isOpen]="showFilterModal" (willDismiss)="showFilterModal = false">
-    <ng-template>
-      <ion-header>
-        <ion-toolbar>
-          <ion-title>Filter Follow-ups</ion-title>
-          <ion-buttons slot="end">
-            <ion-button (click)="showFilterModal = false">
-              <ion-icon name="close"></ion-icon>
-            </ion-button>
-          </ion-buttons>
-        </ion-toolbar>
-      </ion-header>
-      <ion-content>
-        <ion-list>
-          <ion-item>
-            <ion-label>Status</ion-label>
-            <ion-select [(ngModel)]="selectedStatus" (ionChange)="filterFollowups()">
-              <ion-select-option value="all">All</ion-select-option>
-              <ion-select-option value="pending">Pending</ion-select-option>
-              <ion-select-option value="in-progress">In Progress</ion-select-option>
-              <ion-select-option value="completed">Completed</ion-select-option>
-            </ion-select>
-          </ion-item>
-
-          <ion-item>
-            <ion-label>Priority</ion-label>
-            <ion-select [(ngModel)]="selectedPriority" (ionChange)="filterFollowups()">
-              <ion-select-option value="all">All</ion-select-option>
-              <ion-select-option value="high">High</ion-select-option>
-              <ion-select-option value="medium">Medium</ion-select-option>
-              <ion-select-option value="low">Low</ion-select-option>
-            </ion-select>
-          </ion-item>
-
-          <ion-item>
-            <ion-label>Assignee</ion-label>
-            <ion-select [(ngModel)]="selectedAssignee" (ionChange)="filterFollowups()">
-              <ion-select-option value="all">All</ion-select-option>
-              <ion-select-option value="Pastor John">Pastor John</ion-select-option>
-              <ion-select-option value="Sarah Wilson">Sarah Wilson</ion-select-option>
-              <ion-select-option value="Mike Johnson">Mike Johnson</ion-select-option>
-              <ion-select-option value="Unassigned">Unassigned</ion-select-option>
-            </ion-select>
-          </ion-item>
-        </ion-list>
-
-        <div class="modal-actions">
-          <ion-button expand="block" fill="clear" (click)="clearAllFilters()">
-            Clear All Filters
-          </ion-button>
-          <ion-button expand="block" (click)="showFilterModal = false">
-            Apply Filters
-          </ion-button>
-        </div>
-      </ion-content>
-    </ng-template>
-  </ion-modal>
+  <!-- Floating Action Button -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button color="primary" (click)="createNewFollowup()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 
   <!-- Assignment Modal Component -->
   <app-assignment-modal
@@ -211,10 +229,206 @@
     (save)="saveAssignment($event)">
   </app-assignment-modal>
 
-  <!-- Floating Action Button -->
-  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button (click)="addNewFollowup()">
-      <ion-icon name="add"></ion-icon>
-    </ion-fab-button>
-  </ion-fab>
-</ion-content>
+  <!-- Create/Edit Follow-up Modal -->
+  <ion-modal [isOpen]="showCreateModal" (willDismiss)="closeCreateModal()" [backdropDismiss]="false">
+    <ng-template>
+      <ion-header class="modal-header">
+        <ion-toolbar>
+          <ion-title>{{ editingFollowup ? 'Edit' : 'Create' }} Follow-up</ion-title>
+          <ion-buttons slot="end">
+            <ion-button (click)="closeCreateModal()" class="close-button">
+              <ion-icon name="close"></ion-icon>
+            </ion-button>
+          </ion-buttons>
+        </ion-toolbar>
+      </ion-header>
+      <ion-content class="modal-content">
+        <form (ngSubmit)="saveFollowup()">
+          <div class="form-section">
+            <!-- Person Name Field -->
+            <div class="form-field" [class.has-value]="followupForm.personName">
+              <div class="input-wrapper">
+                <ion-icon name="person-outline" class="field-icon"></ion-icon>
+                <input 
+                  type="text"
+                  class="custom-input"
+                  [(ngModel)]="followupForm.personName" 
+                  name="personName"
+                  (focus)="onFieldFocus('personName')"
+                  (blur)="onFieldBlur('personName')"
+                  required>
+                <label class="floating-label">Person Name *</label>
+              </div>
+            </div>
+
+            <!-- Title Field -->
+            <div class="form-field" [class.has-value]="followupForm.title">
+              <div class="input-wrapper">
+                <ion-icon name="create-outline" class="field-icon"></ion-icon>
+                <input 
+                  type="text"
+                  class="custom-input"
+                  [(ngModel)]="followupForm.title" 
+                  name="title"
+                  (focus)="onFieldFocus('title')"
+                  (blur)="onFieldBlur('title')"
+                  required>
+                <label class="floating-label">Title *</label>
+              </div>
+            </div>
+
+            <!-- Description Field -->
+            <div class="form-field" [class.has-value]="followupForm.description">
+              <div class="input-wrapper">
+                <ion-icon name="document-text-outline" class="field-icon"></ion-icon>
+                <textarea 
+                  class="custom-textarea"
+                  [(ngModel)]="followupForm.description" 
+                  name="description"
+                  (focus)="onFieldFocus('description')"
+                  (blur)="onFieldBlur('description')"
+                  rows="3">
+                </textarea>
+                <label class="floating-label">Description</label>
+              </div>
+            </div>
+
+            <!-- Type Select -->
+            <div class="select-field">
+              <div class="select-header">
+                <ion-icon name="pricetag-outline" class="field-icon"></ion-icon>
+                <label class="select-label">Type *</label>
+              </div>
+              <ion-select 
+                [(ngModel)]="followupForm.type" 
+                name="type" 
+                interface="popover"
+                class="custom-select">
+                <ion-select-option value="New Visitor Follow-up">New Visitor</ion-select-option>
+                <ion-select-option value="Prayer Request Follow-up">Prayer Request</ion-select-option>
+                <ion-select-option value="Pastoral Care">Pastoral Care</ion-select-option>
+                <ion-select-option value="Volunteer Follow-up">Volunteer</ion-select-option>
+                <ion-select-option value="New Member Follow-up">New Member</ion-select-option>
+                <ion-select-option value="General Follow-up">General</ion-select-option>
+              </ion-select>
+            </div>
+
+            <!-- Priority Select -->
+            <div class="select-field">
+              <div class="select-header">
+                <ion-icon name="flag-outline" class="field-icon"></ion-icon>
+                <label class="select-label">Priority</label>
+              </div>
+              <ion-select 
+                [(ngModel)]="followupForm.priority" 
+                name="priority" 
+                interface="popover"
+                class="custom-select">
+                <ion-select-option value="high">High</ion-select-option>
+                <ion-select-option value="medium">Medium</ion-select-option>
+                <ion-select-option value="low">Low</ion-select-option>
+              </ion-select>
+            </div>
+
+            <!-- Assign To Select -->
+            <div class="select-field">
+              <div class="select-header">
+                <ion-icon name="person-add-outline" class="field-icon"></ion-icon>
+                <label class="select-label">Assign To</label>
+              </div>
+              <ion-select 
+                [(ngModel)]="followupForm.assignedTo" 
+                name="assignedTo" 
+                interface="popover"
+                class="custom-select">
+                <ion-select-option value="">Unassigned</ion-select-option>
+                <ion-select-option *ngFor="let assignee of getAssigneesList()" [value]="assignee.value">
+                  {{ assignee.label }}
+                </ion-select-option>
+              </ion-select>
+            </div>
+
+            <!-- Status Select (only show when editing) -->
+            <div class="select-field" *ngIf="editingFollowup">
+              <div class="select-header">
+                <ion-icon name="stats-chart-outline" class="field-icon"></ion-icon>
+                <label class="select-label">Status</label>
+              </div>
+              <ion-select 
+                [(ngModel)]="followupForm.status" 
+                name="status" 
+                interface="popover"
+                class="custom-select">
+                <ion-select-option value="pending">Pending</ion-select-option>
+                <ion-select-option value="in-progress">In Progress</ion-select-option>
+                <ion-select-option value="completed">Completed</ion-select-option>
+              </ion-select>
+            </div>
+
+            <!-- Due Date -->
+            <div class="datetime-section">
+              <div class="datetime-header">
+                <ion-icon name="calendar-outline" class="field-icon"></ion-icon>
+                <label class="datetime-label">Due Date</label>
+              </div>
+              <div class="datetime-wrapper">
+                <ion-datetime 
+                  [(ngModel)]="followupForm.dueDate" 
+                  name="dueDate"
+                  presentation="date"
+                  [min]="getMinDate()"
+                  class="full-width-datetime">
+                </ion-datetime>
+              </div>
+            </div>
+
+            <!-- Contact Information Section -->
+            <div class="contact-section">
+              <h4>
+                <ion-icon name="call-outline" class="section-icon"></ion-icon>
+                Contact Information
+              </h4>
+              
+              <!-- Phone Field -->
+              <div class="form-field" [class.has-value]="followupForm.contactInfo.phone">
+                <div class="input-wrapper">
+                  <ion-icon name="call-outline" class="field-icon"></ion-icon>
+                  <input 
+                    type="tel"
+                    class="custom-input"
+                    [(ngModel)]="followupForm.contactInfo.phone" 
+                    name="phone"
+                    (focus)="onFieldFocus('phone')"
+                    (blur)="onFieldBlur('phone')">
+                  <label class="floating-label">Phone</label>
+                </div>
+              </div>
+
+              <!-- Email Field -->
+              <div class="form-field" [class.has-value]="followupForm.contactInfo.email">
+                <div class="input-wrapper">
+                  <ion-icon name="mail-outline" class="field-icon"></ion-icon>
+                  <input 
+                    type="email"
+                    class="custom-input"
+                    [(ngModel)]="followupForm.contactInfo.email" 
+                    name="email"
+                    (focus)="onFieldFocus('email')"
+                    (blur)="onFieldBlur('email')">
+                  <label class="floating-label">Email</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <ion-button expand="block" type="submit" [disabled]="!isFormValid()">
+              <ion-icon name="save-outline" slot="start"></ion-icon>
+              {{ editingFollowup ? 'Update' : 'Create' }} Follow-up
+            </ion-button>
+          </div>
+        </form>
+      </ion-content>
+    </ng-template>
+  </ion-modal>
+</div>
