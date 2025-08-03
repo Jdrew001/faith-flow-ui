@@ -291,12 +291,6 @@ ion-page ion-header ion-toolbar ion-buttons ion-button ion-icon {
 
 /* Main app container with safe area support */
 ion-app {
-  /* Ensure app fills entire viewport including safe areas */
-  padding-top: var(--safe-area-inset-top);
-  padding-right: var(--safe-area-inset-right);
-  padding-bottom: var(--safe-area-inset-bottom);
-  padding-left: var(--safe-area-inset-left);
-  
   /* Use dynamic viewport height when available, fallback to standard vh */
   height: var(--dynamic-viewport-height, var(--viewport-height));
   min-height: var(--small-viewport-height, var(--viewport-height));
@@ -305,15 +299,15 @@ ion-app {
 /* Page-level safe area handling */
 .ion-page {
   /* Ensure pages respect safe areas */
-  padding-top: 0; /* Reset default padding as app-level handles this */
-  padding-right: 0;
-  padding-bottom: 0;
-  padding-left: 0;
+  padding-top: var(--safe-area-inset-top);
+  padding-right: var(--safe-area-inset-right);
+  padding-bottom: var(--safe-area-inset-bottom);
+  padding-left: var(--safe-area-inset-left);
   
-  /* Proper height calculation for iPhone viewport changes */
-  height: calc(100vh - var(--safe-area-inset-top) - var(--safe-area-inset-bottom));
-  min-height: calc(100vh - var(--safe-area-inset-top) - var(--safe-area-inset-bottom));
-  max-height: calc(100vh - var(--safe-area-inset-top) - var(--safe-area-inset-bottom));
+  /* Standard height calculation without double-applying safe areas */
+  height: 100vh;
+  min-height: 100vh;
+  max-height: 100vh;
 }
 
 /* Header positioning fixes for iPhone */
@@ -389,8 +383,8 @@ ion-content {
   }
   
   .ion-page {
-    /* Account for smaller height in landscape */
-    height: calc(100vh - var(--safe-area-inset-top) - var(--safe-area-inset-bottom));
+    /* Standard height calculation in landscape */
+    height: 100vh;
   }
 }
 
