@@ -32,7 +32,7 @@ export class FollowupService {
       
       if (filters) {
         Object.entries(filters).forEach(([key, value]) => {
-          if (value !== undefined && value !== null && value !== 'all') {
+          if (value !== undefined && value !== null && value !== 'all' && value !== '') {
             params = params.append(key, value.toString());
           }
         });
@@ -239,7 +239,7 @@ export class FollowupService {
       
       if (filters) {
         Object.entries(filters).forEach(([key, value]) => {
-          if (value !== undefined && value !== null && value !== 'all') {
+          if (value !== undefined && value !== null && value !== 'all' && value !== '') {
             params = params.append(key, value.toString());
           }
         });

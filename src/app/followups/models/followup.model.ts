@@ -6,6 +6,7 @@ export interface FollowupContact {
 export interface FollowupDto {
   id?: string;
   personName: string;
+  memberId?: string;  // Reference to member
   title: string;
   description?: string;
   type: string;
@@ -20,6 +21,7 @@ export interface FollowupDto {
 
 export interface CreateFollowupDto {
   personName: string;
+  memberId?: string;  // Reference to member
   title: string;
   description?: string;
   type: string;
@@ -32,6 +34,7 @@ export interface CreateFollowupDto {
 
 export interface UpdateFollowupDto {
   personName?: string;
+  memberId?: string;  // Reference to member
   title?: string;
   description?: string;
   type?: string;

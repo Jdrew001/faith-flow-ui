@@ -459,81 +459,47 @@ ion-header ion-toolbar {
   }
 }
 
-// Enhanced DateTime styling for iOS compatibility
+// Calendar wrapper spacing fix
+:host ::ng-deep .calendar-day-wrapper {
+  -webkit-padding-start: 4px !important;
+  padding-inline-start: 4px !important;
+  -webkit-padding-end: 4px !important;
+  padding-inline-end: 4px !important;
+  padding-top: 20px !important;
+  padding-bottom: 20px !important;
+  height: 0 !important;
+  min-height: 1rem !important;
+}
+
+// Minimal DateTime styling for assignment modal - most styles now in global.scss
 ion-datetime {
-  --background: transparent;
+  --background: rgba(255, 255, 255, 0.05);
   --color: #ffffff;
-  --color-selected: #007aff;
-  width: 100%;
+  --color-selected: var(--ion-color-primary, #007aff);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   
-  // Fix for iOS calendar display
-  &.ios {
-    // Ensure proper spacing on iOS
-    --padding-top: 8px;
-    --padding-bottom: 8px;
-    --padding-start: 8px;
-    --padding-end: 8px;
-    
-    // Fix calendar grid on iOS
-    .calendar-month-grid {
-      padding: 0 8px;
-    }
-  }
-  
-  // Use Ionic's CSS variables for consistent theming
-  --ion-color-primary: #007aff;
-  --ion-color-primary-contrast: #ffffff;
-  
-  // These are the actual CSS custom properties that ion-datetime uses
-  --highlight-color-selected: #007aff;
-  --highlight-color-focused: rgba(0, 122, 255, 0.2);
-  
-  // For the calendar header
-  .datetime-header {
-    color: #ffffff;
-  }
-  
-  // Style the calendar days using Ionic's shadow parts
+  // Dark theme specific overrides
   &::part(calendar-day) {
     color: #ffffff;
-    font-size: 0.9rem;
+  }
+  
+  &::part(month-year) {
+    color: #ffffff;
+  }
+  
+  &::part(navigation-button) {
+    color: #007aff;
+    background: rgba(255, 255, 255, 0.1);
     
     &:hover {
-      background: rgba(0, 122, 255, 0.1);
+      background: rgba(255, 255, 255, 0.2);
     }
   }
   
-  &::part(calendar-day-active) {
-    background: #007aff;
-    color: #ffffff;
-    font-weight: 600;
-  }
-  
-  &::part(calendar-day-today) {
-    color: #007aff;
-    font-weight: 700;
-    border: 2px solid #007aff;
-  }
-  
-  &::part(calendar-day-disabled) {
-    color: #48484a;
-  }
-  
-  // Month/Year text
-  &::part(month-year) {
-    color: #ffffff;
-    font-weight: 600;
-  }
-  
-  // Navigation buttons
-  &::part(navigation-button) {
-    color: #007aff;
-  }
-  
-  // Time picker if used
-  &::part(time-button) {
-    color: #ffffff;
-    min-height: 44px;
+  &::part(calendar-day-of-week) {
+    color: rgba(255, 255, 255, 0.7);
   }
 }
 

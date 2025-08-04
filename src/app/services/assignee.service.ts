@@ -14,11 +14,24 @@ export interface Assignee {
   isActive?: boolean;
 }
 
+interface BackendUser {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  initials: string;
+}
+
+interface AssignableUsersResponse {
+  success: boolean;
+  data: BackendUser[];
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class AssigneeService {
-  private apiUrl = `${environment.apiUrl}/assignees`;
+  private apiUrl = `${environment.apiUrl}/users/assignable`;
   private assigneesSubject = new BehaviorSubject<Assignee[]>([]);
   public assignees$ = this.assigneesSubject.asObservable();
 
@@ -32,9 +45,19 @@ export class AssigneeService {
    */
   async getAssignees(): Promise<Assignee[]> {
     try {
-      const assignees = await firstValueFrom(
-        this.http.get<Assignee[]>(this.apiUrl)
+      const response = await firstValueFrom(
+        this.http.get<AssignableUsersResponse>(this.apiUrl)
       );
+      
+      // Transform backend data to frontend format
+      const assignees = response.data.map((user: BackendUser) => ({
+        value: user.id,
+        label: user.name,
+        role: user.role,
+        avatar: user.initials,
+        email: user.email,
+        isActive: true
+      }));
       
       this.assigneesSubject.next(assignees);
       return assignees;
@@ -110,6 +133,7 @@ export class AssigneeService {
   getAssigneeColorClass(assignee: Assignee): string {
     return `ion-color-${assignee.color || 'primary'}`;
   }
+
 
   /**
    * Mock data fallback

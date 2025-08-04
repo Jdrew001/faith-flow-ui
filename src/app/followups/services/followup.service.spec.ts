@@ -331,10 +331,10 @@ describe('FollowupService - Backend Integration', () => {
       };
 
       // Mock DOM elements for CSV download
-      const mockLink = jasmine.createSpyObj('a', ['click']);
-      spyOn(document, 'createElement').and.returnValue(mockLink);
-      spyOn(window.URL, 'createObjectURL').and.returnValue('blob:mock-url');
-      spyOn(window.URL, 'revokeObjectURL');
+      const mockLink = { click: vi.fn() };
+      vi.spyOn(document, 'createElement').mockReturnValue(mockLink as any);
+      window.URL.createObjectURL = vi.fn().mockReturnValue('blob:mock-url');
+      window.URL.revokeObjectURL = vi.fn();
 
       const mockResponse = {
         success: true,
@@ -363,7 +363,7 @@ describe('FollowupService - Backend Integration', () => {
       const req = httpMock.expectOne(apiUrl);
       req.error(new ErrorEvent('Network error'));
 
-      await expectAsync(promise).toBeRejected();
+      await expect(promise).rejects.toThrow();
     });
 
     it('should handle 404 errors', async () => {
@@ -375,7 +375,7 @@ describe('FollowupService - Backend Integration', () => {
         { status: 404, statusText: 'Not Found' }
       );
 
-      await expectAsync(promise).toBeRejected();
+      await expect(promise).rejects.toThrow();
     });
 
     it('should handle validation errors on create', async () => {
@@ -394,7 +394,7 @@ describe('FollowupService - Backend Integration', () => {
         { status: 400, statusText: 'Bad Request' }
       );
 
-      await expectAsync(promise).toBeRejected();
+      await expect(promise).rejects.toThrow();
     });
 
     it('should handle 500 server errors', async () => {
@@ -406,7 +406,7 @@ describe('FollowupService - Backend Integration', () => {
         { status: 500, statusText: 'Internal Server Error' }
       );
 
-      await expectAsync(promise).toBeRejected();
+      await expect(promise).rejects.toThrow();
     });
   });
 

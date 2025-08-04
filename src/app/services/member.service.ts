@@ -247,4 +247,37 @@ export class MemberService {
   async loadMembers(): Promise<void> {
     await this.refreshMembers();
   }
+
+  /**
+   * Typeahead search for members
+   */
+  async searchMembersTypeahead(query: string, limit: number = 10): Promise<{
+    results: Array<{
+      id: string;
+      name: string;
+      email?: string;
+      phone?: string;
+    }>;
+    query: string;
+  }> {
+    try {
+      // Minimum 2 characters required for search
+      if (query.length < 2) {
+        return { results: [], query };
+      }
+
+      const params = new URLSearchParams();
+      params.set('q', query);
+      params.set('limit', limit.toString());
+
+      const response = await firstValueFrom(
+        this.http.get<any>(`${this.apiUrl}/typeahead?${params.toString()}`)
+      );
+      
+      return response;
+    } catch (error) {
+      console.error('Error in typeahead search:', error);
+      return { results: [], query };
+    }
+  }
 }

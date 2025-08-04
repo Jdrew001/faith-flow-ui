@@ -812,129 +812,86 @@
   }
 }
 
-// Enhanced DateTime Styling - Mobile Optimized
+// Calendar wrapper spacing fix
+:host ::ng-deep .calendar-day-wrapper {
+  -webkit-padding-start: 4px !important;
+  padding-inline-start: 4px !important;
+  -webkit-padding-end: 4px !important;
+  padding-inline-end: 4px !important;
+  padding-top: 20px !important;
+  padding-bottom: 20px !important;
+  height: 0 !important;
+  min-height: 1rem !important;
+}
+
+// Minimal DateTime styling for create session modal - most styles now in global.scss
 ion-datetime {
-  --background: transparent;
+  --background: rgba(255, 255, 255, 0.05);
   --color: #ffffff;
-  --color-selected: #007aff;
-  --color-hover: rgba(0, 122, 255, 0.2);
-  width: 100%;
-  max-width: none;
+  --color-selected: var(--ion-color-primary, #007aff);
+  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   
-  // Force full width
-  &.ios,
-  &.md {
-    width: 100%;
-    max-width: none;
-  }
-  
-  // Calendar grid mobile optimization
-  .calendar-wrapper {
-    width: 100%;
-    padding: 12px;
-  }
-  
-  .calendar-body {
-    width: 100%;
-  }
-  
-  .calendar-week-days,
-  .calendar-month-grid {
-    width: 100%;
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 0;
-  }
-  
-  .datetime-header {
+  // Dark theme specific overrides
+  &::part(calendar-day) {
     color: #ffffff;
-    padding: 12px;
   }
   
-  .calendar-month-year {
+  &::part(month-year) {
     color: #ffffff;
-    font-weight: 600;
-    font-size: 1.1rem;
   }
   
-  .calendar-day {
-    color: #ffffff;
-    aspect-ratio: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.95rem;
-    min-height: 40px;
-    min-width: 40px;
-    border-radius: 50%;
-    margin: 2px;
-    
-    &.calendar-day-today {
-      color: #007aff;
-      font-weight: 700;
-      border: 2px solid #007aff;
-    }
-    
-    &.calendar-day-active {
-      background: #007aff !important;
-      color: #ffffff !important;
-      font-weight: 600;
-    }
-    
-    &:hover:not(.calendar-day-disabled) {
-      background: rgba(0, 122, 255, 0.2);
-    }
-    
-    &.calendar-day-disabled {
-      color: #48484a;
-    }
-  }
-  
-  // Time picker mobile optimization
-  .time-body {
-    padding: 12px;
-  }
-  
-  .time-picker-columns {
-    gap: 8px;
-  }
-  
-  .time-item {
-    color: #ffffff;
-    min-height: 44px;
-    font-size: 1rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    
-    &.time-item-active {
-      background: #007aff;
-      color: #ffffff;
-      border-radius: 8px;
-    }
+  &::part(navigation-button) {
+    color: #007aff;
+    background: rgba(255, 255, 255, 0.1);
     
     &:hover {
-      background: rgba(0, 122, 255, 0.2);
+      background: rgba(255, 255, 255, 0.2);
     }
   }
   
-  // Navigation buttons
-  .calendar-action-buttons {
-    ion-button {
-      --color: #007aff;
-      font-size: 0.9rem;
-    }
+  &::part(calendar-day-of-week) {
+    color: rgba(255, 255, 255, 0.7);
   }
   
-  // Month/Year picker
-  .month-year-picker {
-    .picker-item {
+  // Enhanced time picker styling
+  &::part(time-button) {
+    color: #ffffff;
+    min-height: 48px;
+    font-size: 1rem;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background: rgba(0, 122, 255, 0.15);
+    }
+    
+    &:active,
+    &.time-button-active {
+      background: #007aff;
       color: #ffffff;
-      
-      &.picker-item-active {
-        color: #007aff;
-        font-weight: 600;
-      }
+      font-weight: 600;
+    }
+  }
+}
+
+// Navigation buttons
+.calendar-action-buttons {
+  ion-button {
+    --color: #007aff;
+    font-size: 0.9rem;
+  }
+}
+
+// Month/Year picker
+.month-year-picker {
+  .picker-item {
+    color: #ffffff;
+    
+    &.picker-item-active {
+      color: #007aff;
+      font-weight: 600;
     }
   }
 }

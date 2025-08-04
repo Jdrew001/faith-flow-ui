@@ -11,19 +11,15 @@
 <ion-content class="modal-content">
   <form [formGroup]="followupForm" (ngSubmit)="saveFollowup()">
     <div class="form-section">
-      <!-- Person Name Field -->
-      <div class="form-field" [class.has-value]="personNameControl?.value">
-        <div class="input-wrapper">
-          <ion-icon name="person-outline" class="field-icon"></ion-icon>
-          <input 
-            type="text"
-            class="custom-input"
-            formControlName="personName"
-            required>
-          <label class="floating-label">Person Name *</label>
-        </div>
-        <div class="error-message" *ngIf="personNameControl?.invalid && personNameControl?.touched">
-          Person name is required
+      <!-- Member Selection Field -->
+      <div class="member-selection-field">
+        <app-member-search
+          formControlName="selectedMember"
+          placeholder="Search for a member..."
+          [required]="true"
+        ></app-member-search>
+        <div class="error-message" *ngIf="selectedMemberControl?.invalid && selectedMemberControl?.touched">
+          Please select a member
         </div>
       </div>
 
@@ -162,28 +158,42 @@
         </h4>
         
         <!-- Phone Field -->
-        <div class="form-field" [class.has-value]="phoneControl?.value">
+        <div class="form-field" [class.has-value]="phoneControl?.value" [class.readonly-field]="isContactInfoFromMember">
           <div class="input-wrapper">
             <ion-icon name="call-outline" class="field-icon"></ion-icon>
             <input 
               type="tel"
               class="custom-input"
-              formControlName="phone">
+              formControlName="phone"
+              [readonly]="isContactInfoFromMember">
             <label class="floating-label">Phone</label>
+            <ion-icon 
+              name="lock-closed-outline" 
+              class="lock-icon" 
+              *ngIf="isContactInfoFromMember"
+              title="This value comes from the selected member">
+            </ion-icon>
           </div>
         </div>
 
         <!-- Email Field -->
-        <div class="form-field" [class.has-value]="emailControl?.value">
+        <div class="form-field" [class.has-value]="emailControl?.value" [class.readonly-field]="isContactInfoFromMember">
           <div class="input-wrapper">
             <ion-icon name="mail-outline" class="field-icon"></ion-icon>
             <input 
               type="email"
               class="custom-input"
-              formControlName="email">
+              formControlName="email"
+              [readonly]="isContactInfoFromMember">
             <label class="floating-label">Email</label>
+            <ion-icon 
+              name="lock-closed-outline" 
+              class="lock-icon" 
+              *ngIf="isContactInfoFromMember"
+              title="This value comes from the selected member">
+            </ion-icon>
           </div>
-          <div class="error-message" *ngIf="emailControl?.invalid && emailControl?.touched">
+          <div class="error-message" *ngIf="emailControl?.invalid && emailControl?.touched && !isContactInfoFromMember">
             Please enter a valid email address
           </div>
         </div>

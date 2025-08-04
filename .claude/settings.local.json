@@ -12,7 +12,12 @@
       "Bash(npm run:*)",
       "Bash(del \"C:\\Users\\dtatk\\Documents\\Projects\\faith-flow-ui\\src\\app\\services\\followup.service.ts\")",
       "Bash(rm:*)",
-      "Bash(cp:*)"
+      "Bash(cp:*)",
+      "Bash(true)",
+      "Bash(npm test)",
+      "Bash(npm test:*)",
+      "Bash(npx vitest run:*)",
+      "Bash(npm start)"
     ],
     "deny": []
   }

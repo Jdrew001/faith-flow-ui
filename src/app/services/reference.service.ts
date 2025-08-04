@@ -19,7 +19,7 @@ export interface ReferenceData {
   providedIn: 'root'
 })
 export class ReferenceService {
-  private apiUrl = `${environment.apiUrl}/api/reference`;
+  private apiUrl = `${environment.apiUrl}/reference`;
   
   // Cache the reference data
   private referenceData$: Observable<ReferenceData> | null = null;

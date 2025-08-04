@@ -1,20 +1,13 @@
 import { Component, EventEmitter, Input, Output, OnInit, OnChanges } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FollowUpItem } from '../../followups.page';
+import { Assignee } from '../../../services/assignee.service';
 
 export interface AssignmentForm {
   assignedTo: string;
   notes: string;
   dueDate: string;
   priority: string;
-}
-
-export interface Assignee {
-  value: string;
-  label: string;
-  role?: string;
-  avatar?: string;
-  color?: string;
 }
 
 @Component({

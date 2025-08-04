@@ -1,0 +1,83 @@
+<div class="member-search-container">
+  <!-- Show selected member chip when member is selected -->
+  <div class="selected-member-field" *ngIf="selectedMember">
+    <div class="field-label">Member *</div>
+    <div class="selected-member-chip">
+      <div class="chip-content">
+        <div class="member-avatar">
+          {{ selectedMember.name.charAt(0).toUpperCase() }}
+        </div>
+        <div class="member-info">
+          <span class="member-name">{{ selectedMember.name }}</span>
+          <span class="member-contact" *ngIf="selectedMember.email || selectedMember.phone">
+            {{ selectedMember.email || selectedMember.phone }}
+          </span>
+        </div>
+      </div>
+      <button 
+        type="button"
+        class="chip-clear-button" 
+        *ngIf="!disabled"
+        (click)="clearSelection()"
+      >
+        <ion-icon name="close"></ion-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Show search field when no member is selected -->
+  <div class="search-field" [class.has-value]="searchQuery" *ngIf="!selectedMember">
+    <div class="input-wrapper">
+      <ion-icon name="person-outline" class="field-icon"></ion-icon>
+      <input 
+        type="text"
+        class="custom-input"
+        placeholder=" "
+        [value]="searchQuery"
+        (input)="onSearchInput($event)"
+        (focus)="onFocus()"
+        (blur)="onBlur()"
+        [disabled]="disabled"
+        [required]="required">
+      <label class="floating-label">Member *</label>
+
+      <!-- Loading spinner -->
+      <ion-spinner 
+        name="crescent" 
+        class="search-spinner"
+        *ngIf="isSearching"
+      ></ion-spinner>
+    </div>
+
+    <!-- Search results dropdown -->
+    <div class="search-dropdown" *ngIf="showResults && searchResults.length > 0">
+      <div class="results-list">
+        <div 
+          *ngFor="let member of searchResults" 
+          class="result-item"
+          (click)="selectMember(member)"
+        >
+          <div class="result-avatar">
+            {{ member.name.charAt(0).toUpperCase() }}
+          </div>
+          <div class="result-info">
+            <span class="result-name">{{ member.name }}</span>
+            <span class="result-contact" *ngIf="member.email || member.phone">
+              <span *ngIf="member.email">{{ member.email }}</span>
+              <span *ngIf="member.email && member.phone"> • </span>
+              <span *ngIf="member.phone">{{ member.phone }}</span>
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- No results message -->
+    <div class="search-dropdown no-results" *ngIf="showResults && searchResults.length === 0 && !isSearching && searchQuery.length >= 2">
+      <div class="no-results-message">
+        <ion-icon name="search-outline"></ion-icon>
+        <p>No members found matching "{{ searchQuery }}"</p>
+      </div>
+    </div>
+  </div>
+</div>

@@ -121,6 +121,7 @@
           *ngFor="let followup of filteredFollowups; trackBy: trackByFollowupId"
           class="followup-card"
           [class.overdue]="isOverdue(followup.dueDate)"
+          [class.status-pending]="followup.status === 'pending'"
           (click)="openFollowupDetail(followup)">
           
           <!-- Priority Indicator -->
@@ -136,9 +137,26 @@
                 </div>
                 <div class="person-details">
                   <h3 class="person-name">{{ followup.personName }}</h3>
-                  <div class="followup-type">
-                    <ion-icon [name]="getTypeIcon(followup.type)"></ion-icon>
-                    {{ followup.type }}
+                  <!-- Contact Info Quick Access -->
+                  <div class="contact-info-quick">
+                    <a *ngIf="followup.contactInfo?.phone" 
+                       [href]="'tel:' + followup.contactInfo!.phone" 
+                       class="contact-link phone"
+                       (click)="$event.stopPropagation()">
+                      <ion-icon name="call-outline"></ion-icon>
+                      {{ followup.contactInfo!.phone }}
+                    </a>
+                    <a *ngIf="followup.contactInfo?.email" 
+                       [href]="'mailto:' + followup.contactInfo!.email" 
+                       class="contact-link email"
+                       (click)="$event.stopPropagation()">
+                      <ion-icon name="mail-outline"></ion-icon>
+                      {{ followup.contactInfo!.email }}
+                    </a>
+                    <span *ngIf="!followup.contactInfo?.phone && !followup.contactInfo?.email" class="no-contact">
+                      <ion-icon name="alert-circle-outline"></ion-icon>
+                      No contact info
+                    </span>
                   </div>
                 </div>
               </div>
@@ -151,7 +169,13 @@
             <!-- Title & Description -->
             <div class="followup-content">
               <h4 class="followup-title">{{ followup.title }}</h4>
-              <p class="followup-description">{{ followup.description }}</p>
+              <p class="followup-description" *ngIf="followup.description">{{ followup.description }}</p>
+              <div class="followup-metadata">
+                <span class="meta-item">
+                  <ion-icon [name]="getTypeIcon(followup.type)"></ion-icon>
+                  {{ followup.type }}
+                </span>
+              </div>
             </div>
 
             <!-- Footer Info -->
@@ -171,22 +195,24 @@
               
               <!-- Quick Actions -->
               <div class="quick-actions" (click)="$event.stopPropagation()">
+                <a 
+                  *ngIf="followup.contactInfo?.phone"
+                  [href]="'tel:' + followup.contactInfo!.phone"
+                  class="action-btn primary">
+                  <ion-icon name="call"></ion-icon>
+                </a>
+                <a 
+                  *ngIf="followup.contactInfo?.email"
+                  [href]="'mailto:' + followup.contactInfo!.email"
+                  class="action-btn primary">
+                  <ion-icon name="mail"></ion-icon>
+                </a>
                 <button 
                   class="action-btn"
                   [class.completed]="followup.status === 'completed'"
                   (click)="toggleComplete(followup)"
                   [disabled]="followup.status === 'completed'">
                   <ion-icon [name]="followup.status === 'completed' ? 'checkmark-circle' : 'checkmark-circle-outline'"></ion-icon>
-                </button>
-                <button 
-                  class="action-btn"
-                  (click)="openAssignModal(followup)">
-                  <ion-icon name="person-add-outline"></ion-icon>
-                </button>
-                <button 
-                  class="action-btn"
-                  (click)="openEditModal(followup)">
-                  <ion-icon name="create-outline"></ion-icon>
                 </button>
               </div>
             </div>

@@ -8,6 +8,7 @@ import { FollowupsPageRoutingModule } from './followups-routing.module';
 import { AssignmentModalComponent } from './components/assignment-modal/assignment-modal.component';
 import { FollowupModalComponent } from './components/followup-modal/followup-modal.component';
 import { AutoHideHeaderDirective } from '../shared/directives/auto-hide-header.directive';
+import { SharedModule } from '../shared/shared.module';
 
 @NgModule({
   imports: [
@@ -16,7 +17,8 @@ import { AutoHideHeaderDirective } from '../shared/directives/auto-hide-header.d
     ReactiveFormsModule,
     IonicModule,
     FollowupsPageRoutingModule,
-    AutoHideHeaderDirective
+    AutoHideHeaderDirective,
+    SharedModule
   ],
   declarations: [
     FollowupsPage,

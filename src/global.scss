@@ -49,13 +49,152 @@
   --color: #ffffff;
 }
 
-// Global iOS DateTime Fixes
+// Enhanced Calendar UX - Global DateTime Improvements
 ion-datetime {
   // Ensure proper display on all platforms
   width: 100% !important;
   max-width: 100% !important;
   
-  // iOS-specific calendar fixes
+  // Enhanced UX styling for better user experience
+  --color: var(--ion-color-dark, #000);
+  --background: transparent;
+  
+  // Better highlight colors for improved visibility
+  --highlight-color-selected: var(--ion-color-primary, #3880ff);
+  --highlight-color-today: #ffce00;
+  --highlight-color-focused: rgba(var(--ion-color-primary-rgb, 56, 128, 255), 0.15);
+  
+  // Force proper spacing and touch targets on ALL calendars
+  .calendar-month-grid {
+    display: grid !important;
+    grid-template-columns: repeat(7, 1fr) !important;
+    gap: 8px !important;
+    padding: 12px !important;
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  .calendar-week-days {
+    display: grid !important;
+    grid-template-columns: repeat(7, 1fr) !important;
+    gap: 8px !important;
+    padding: 0 12px 16px 12px !important;
+    margin-bottom: 8px !important;
+    border-bottom: 1px solid rgba(var(--ion-color-medium-rgb, 146, 148, 156), 0.2) !important;
+  }
+  
+  // Target the actual day wrapper elements for proper spacing (user's working solution with ::ng-deep)
+  :host ::ng-deep .calendar-day-wrapper {
+    -webkit-padding-start: 4px !important;
+    padding-inline-start: 4px !important;
+    -webkit-padding-end: 4px !important;
+    padding-inline-end: 4px !important;
+    padding-top: 20px !important;
+    padding-bottom: 20px !important;
+    height: 0 !important;
+    min-height: 1rem !important;
+  }
+  
+  .calendar-day-container {
+    padding: 2px !important;
+    margin: 2px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    min-width: 48px !important;
+    min-height: 48px !important;
+  }
+  
+  .calendar-day {
+    min-width: 44px !important;
+    min-height: 44px !important;
+    border-radius: 12px !important;
+    transition: all 0.2s ease !important;
+    position: relative !important;
+    margin: 2px !important;
+    padding: 6px !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-weight: 400 !important;
+    font-size: 0.95rem !important;
+    
+    &:hover:not(.calendar-day--disabled):not([aria-disabled="true"]) {
+      background: rgba(var(--ion-color-primary-rgb, 56, 128, 255), 0.15) !important;
+      transform: scale(1.1) !important;
+      z-index: 1 !important;
+    }
+    
+    &:active {
+      transform: scale(0.95) !important;
+    }
+  }
+  
+  // Aggressive today targeting that works everywhere
+  button.calendar-day[aria-current="date"],
+  button[aria-current="date"],
+  .calendar-day[aria-current="date"],
+  button.calendar-day.is-today,
+  button.is-today,
+  .calendar-day.is-today,
+  button[data-today="true"],
+  [data-today="true"],
+  .datetime-calendar-day-today,
+  .calendar-day-today,
+  button.calendar-day--today,
+  .calendar-day--today,
+  .calendar-day[data-today="true"] {
+    background: #ffce00 !important;
+    color: #000 !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 12px rgba(255, 206, 0, 0.4) !important;
+    border: 3px solid #ffce00 !important;
+    transform: scale(1.05) !important;
+    z-index: 2 !important;
+    border-radius: 12px !important;
+    
+    &:hover {
+      transform: scale(1.15) !important;
+      box-shadow: 0 6px 16px rgba(255, 206, 0, 0.6) !important;
+    }
+  }
+  
+  // Enhanced selected day styling
+  .calendar-day.calendar-day--selected,
+  .calendar-day[aria-selected="true"],
+  button.calendar-day--selected,
+  button[aria-selected="true"] {
+    background: var(--highlight-color-selected, #3880ff) !important;
+    color: white !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 16px rgba(var(--ion-color-primary-rgb, 56, 128, 255), 0.5) !important;
+    transform: scale(1.05) !important;
+    z-index: 2 !important;
+  }
+  
+  // Disabled days styling
+  .calendar-day.calendar-day--disabled,
+  .calendar-day[aria-disabled="true"],
+  button.calendar-day--disabled,
+  button[aria-disabled="true"] {
+    color: var(--ion-color-medium, #92949c) !important;
+    opacity: 0.4 !important;
+    cursor: not-allowed !important;
+    
+    &:hover {
+      transform: none !important;
+      background: transparent !important;
+    }
+  }
+  
+  // Outside month styling
+  .calendar-day.calendar-day--outside {
+    color: var(--ion-color-medium, #92949c) !important;
+    opacity: 0.5 !important;
+  }
+  
+  // iOS-specific calendar fixes with enhanced UX
   &.ios {
     // Ensure full width
     width: 100% !important;
@@ -90,66 +229,172 @@ ion-datetime {
       max-width: 100% !important;
     }
     
-    // Fix the calendar grid layout
+    // iOS specific wrapper targeting (user's working solution with ::ng-deep)
+    ::ng-deep .calendar-day-wrapper {
+      -webkit-padding-start: 4px !important;
+      padding-inline-start: 4px !important;
+      -webkit-padding-end: 4px !important;
+      padding-inline-end: 4px !important;
+      padding-top: 20px !important;
+      padding-bottom: 20px !important;
+      height: 0 !important;
+      min-height: 1rem !important;
+    }
+    
+    .calendar-day-container,
+    .calendar-day-cell {
+      padding: 3px !important;
+      margin: 1px !important;
+      min-width: 48px !important;
+      min-height: 48px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    
+    // Enhanced calendar grid layout for better touch targets
     .calendar-month-grid {
       display: grid !important;
       grid-template-columns: repeat(7, 1fr) !important;
-      gap: 4px !important;
+      gap: 8px !important;
       width: 100% !important;
       max-width: 100% !important;
-      padding: 0 !important;
+      padding: 12px !important;
     }
     
-    // Fix individual day cells
+    // Enhanced day cells with better touch targets and visual feedback
     .calendar-day {
       width: 100% !important;
       height: auto !important;
       aspect-ratio: 1 !important;
-      min-width: unset !important;
-      min-height: unset !important;
+      min-width: 48px !important;
+      min-height: 48px !important;
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
       margin: 0 !important;
-      padding: 8px !important;
-      font-size: 0.9rem !important;
+      padding: 4px !important;
+      font-size: 1rem !important;
+      font-weight: 500 !important;
+      border-radius: 12px !important;
+      transition: all 0.2s ease !important;
+      cursor: pointer !important;
+      position: relative !important;
+      
+      // Better hover and active states
+      &:hover:not(.calendar-day--disabled) {
+        background: rgba(var(--ion-color-primary-rgb, 56, 128, 255), 0.15) !important;
+        transform: scale(1.1) !important;
+        z-index: 1 !important;
+      }
+      
+      &:active {
+        transform: scale(0.95) !important;
+      }
     }
     
-    // Ensure week header is visible and full width
+    // Target today specifically with multiple selectors
+    .calendar-day[data-today="true"],
+    .calendar-day.calendar-day--today,
+    .calendar-day.is-today,
+    .calendar-day-today {
+      background: var(--highlight-color-today, #ffce00) !important;
+      color: var(--ion-color-dark, #000) !important;
+      font-weight: 700 !important;
+      box-shadow: 0 4px 12px rgba(255, 206, 0, 0.4) !important;
+      border: 3px solid var(--highlight-color-today, #ffce00) !important;
+      transform: scale(1.05) !important;
+      z-index: 2 !important;
+      
+      &:hover {
+        transform: scale(1.15) !important;
+        box-shadow: 0 6px 16px rgba(255, 206, 0, 0.6) !important;
+      }
+    }
+    
+    // Enhanced selected day styling
+    .calendar-day.calendar-day--selected,
+    .calendar-day[aria-selected="true"] {
+      background: var(--highlight-color-selected, #3880ff) !important;
+      color: white !important;
+      font-weight: 600 !important;
+      box-shadow: 0 4px 16px rgba(var(--ion-color-primary-rgb, 56, 128, 255), 0.5) !important;
+      transform: scale(1.05) !important;
+      z-index: 2 !important;
+    }
+    
+    // Disabled days styling
+    .calendar-day.calendar-day--disabled,
+    .calendar-day[aria-disabled="true"] {
+      color: var(--ion-color-medium, #92949c) !important;
+      opacity: 0.4 !important;
+      cursor: not-allowed !important;
+      
+      &:hover {
+        transform: none !important;
+        background: transparent !important;
+      }
+    }
+    
+    // Outside month styling
+    .calendar-day.calendar-day--outside {
+      color: var(--ion-color-medium, #92949c) !important;
+      opacity: 0.5 !important;
+    }
+    
+    // Enhanced week header styling
     .calendar-week-days {
       display: grid !important;
       grid-template-columns: repeat(7, 1fr) !important;
-      gap: 4px !important;
+      gap: 8px !important;
       width: 100% !important;
-      padding: 0 0 8px 0 !important;
+      padding: 0 12px 16px 12px !important;
+      margin-bottom: 8px !important;
+      border-bottom: 1px solid rgba(var(--ion-color-medium-rgb, 146, 148, 156), 0.2) !important;
       
       .calendar-day-of-week {
         text-align: center !important;
-        font-size: 0.75rem !important;
-        color: var(--ion-color-medium) !important;
+        font-size: 0.8rem !important;
+        font-weight: 600 !important;
+        color: var(--ion-color-medium, #92949c) !important;
         width: 100% !important;
+        padding: 8px 0 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
       }
     }
     
-    // Fix month header
+    // Enhanced month header with better navigation
     .calendar-header {
-      padding: 12px 16px !important;
+      padding: 16px !important;
       width: 100% !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
       
       .calendar-month-year {
-        font-size: 1rem !important;
-        font-weight: 600 !important;
+        font-size: 1.2rem !important;
+        font-weight: 700 !important;
+        color: var(--ion-color-dark, #000) !important;
+        margin: 0 !important;
       }
     }
     
-    // Navigation buttons
+    // Enhanced navigation buttons
     .calendar-navigation {
       width: 100% !important;
       
       .calendar-next-prev {
         ion-button {
-          --padding-start: 8px;
-          --padding-end: 8px;
+          --padding-start: 12px;
+          --padding-end: 12px;
+          --border-radius: 50%;
+          --box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          
+          &:hover {
+            --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            transform: scale(1.05);
+          }
         }
       }
     }
@@ -161,13 +406,227 @@ ion-datetime {
     }
   }
   
-  // Android/MD specific adjustments if needed
+  // Enhanced Android/MD specific adjustments
   &.md {
     width: 100% !important;
     max-width: 100% !important;
     
     .calendar-month-grid {
-      padding: 0 4px;
+      padding: 12px !important;
+      gap: 8px !important;
+    }
+    
+    .calendar-week-days {
+      gap: 8px !important;
+      padding: 0 12px 16px 12px !important;
+    }
+    
+    // MD specific wrapper targeting (user's working solution with ::ng-deep)
+    ::ng-deep .calendar-day-wrapper {
+      -webkit-padding-start: 4px !important;
+      padding-inline-start: 4px !important;
+      -webkit-padding-end: 4px !important;
+      padding-inline-end: 4px !important;
+      padding-top: 20px !important;
+      padding-bottom: 20px !important;
+      height: 0 !important;
+      min-height: 1rem !important;
+    }
+    
+    .calendar-day-container,
+    .calendar-day-cell {
+      padding: 3px !important;
+      margin: 1px !important;
+      min-width: 48px !important;
+      min-height: 48px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    
+    // Apply similar enhancements for MD
+    .calendar-day {
+      min-width: 44px !important;
+      min-height: 44px !important;
+      border-radius: 50% !important;
+      transition: all 0.2s ease !important;
+      padding: 6px !important;
+      position: relative !important;
+      margin: 2px !important;
+      
+      &:hover:not(.calendar-day--disabled) {
+        background: rgba(var(--ion-color-primary-rgb, 56, 128, 255), 0.15) !important;
+        transform: scale(1.1) !important;
+        z-index: 1 !important;
+      }
+    }
+    
+    // Target today for MD
+    .calendar-day[data-today="true"],
+    .calendar-day.calendar-day--today,
+    .calendar-day.is-today,
+    .calendar-day-today {
+      background: var(--highlight-color-today, #ffce00) !important;
+      color: var(--ion-color-dark, #000) !important;
+      font-weight: 700 !important;
+      box-shadow: 0 4px 12px rgba(255, 206, 0, 0.4) !important;
+      border: 3px solid var(--highlight-color-today, #ffce00) !important;
+      transform: scale(1.05) !important;
+      z-index: 2 !important;
+      
+      &:hover {
+        transform: scale(1.15) !important;
+        box-shadow: 0 6px 16px rgba(255, 206, 0, 0.6) !important;
+      }
+    }
+    
+    .calendar-day.calendar-day--selected,
+    .calendar-day[aria-selected="true"] {
+      background: var(--highlight-color-selected, #3880ff) !important;
+      color: white !important;
+      font-weight: 600 !important;
+      box-shadow: 0 4px 16px rgba(var(--ion-color-primary-rgb, 56, 128, 255), 0.5) !important;
+      transform: scale(1.05) !important;
+      z-index: 2 !important;
+    }
+  }
+  
+  // Enhanced shadow parts for consistent styling across platforms
+  &::part(calendar-day) {
+    font-weight: 400;
+    transition: all 0.2s ease;
+    min-width: 48px;
+    min-height: 48px;
+    border-radius: 12px;
+    margin: 2px;
+    cursor: pointer;
+    
+    &:hover {
+      background: rgba(var(--ion-color-primary-rgb, 56, 128, 255), 0.15);
+      transform: scale(1.1);
+    }
+  }
+  
+  &::part(calendar-day-today) {
+    background: #ffce00 !important;
+    color: #000 !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 12px rgba(255, 206, 0, 0.4) !important;
+    border: 3px solid #ffce00 !important;
+    transform: scale(1.05) !important;
+    z-index: 2 !important;
+    border-radius: 12px !important;
+    
+    &:hover {
+      transform: scale(1.15) !important;
+      box-shadow: 0 6px 16px rgba(255, 206, 0, 0.6) !important;
+    }
+  }
+  
+  &::part(calendar-day-active) {
+    background: var(--highlight-color-selected, #3880ff) !important;
+    color: white !important;
+    font-weight: 500 !important;
+    box-shadow: 0 4px 16px rgba(var(--ion-color-primary-rgb, 56, 128, 255), 0.5) !important;
+    transform: scale(1.05) !important;
+    z-index: 2 !important;
+  }
+  
+  &::part(calendar-day-disabled) {
+    color: var(--ion-color-medium, #92949c) !important;
+    opacity: 0.4 !important;
+    cursor: not-allowed !important;
+  }
+  
+  &::part(calendar-day-of-week) {
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-align: center;
+    padding: 8px 0;
+  }
+  
+  &::part(month-year) {
+    font-weight: 700;
+    font-size: 1.1rem;
+  }
+  
+  &::part(navigation-button) {
+    border-radius: 50%;
+    
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+}
+
+// Additional aggressive spacing fixes for all possible wrapper structures
+ion-datetime {
+  // Target any possible day wrapper elements
+  [class*="calendar-day"]:not(.calendar-day-of-week) {
+    min-width: 44px !important;
+    min-height: 44px !important;
+    margin: 2px !important;
+    padding: 2px !important;
+    
+    // If it's a wrapper, make sure it has proper spacing
+    &[class*="wrapper"],
+    &[class*="container"],
+    &[class*="cell"] {
+      padding: 3px !important;
+      margin: 2px !important;
+      min-width: 48px !important;
+      min-height: 48px !important;
+    }
+  }
+  
+  // Force grid gaps at multiple levels
+  [class*="calendar-month"] {
+    gap: 8px !important;
+    
+    > * {
+      margin: 2px !important;
+    }
+  }
+  
+  // Target buttons inside calendar specifically
+  button[class*="calendar-day"] {
+    min-width: 44px !important;
+    min-height: 44px !important;
+    margin: 2px !important;
+    padding: 6px !important;
+    border-radius: 12px !important;
+  }
+}
+
+// Aggressive targeting for today's date in ion-datetime
+ion-datetime {
+  // Target all possible today selectors
+  button.calendar-day[aria-current="date"],
+  button[aria-current="date"],
+  .calendar-day[aria-current="date"],
+  button.calendar-day.is-today,
+  button.is-today,
+  .calendar-day.is-today,
+  button[data-today="true"],
+  [data-today="true"],
+  .datetime-calendar-day-today,
+  .calendar-day-today,
+  button.calendar-day--today,
+  .calendar-day--today {
+    background: var(--highlight-color-today, #ffce00) !important;
+    color: var(--ion-color-dark, #000) !important;
+    font-weight: 700 !important;
+    box-shadow: 0 4px 12px rgba(255, 206, 0, 0.4) !important;
+    border: 3px solid var(--highlight-color-today, #ffce00) !important;
+    transform: scale(1.05) !important;
+    z-index: 2 !important;
+    border-radius: 12px !important;
+    position: relative !important;
+    
+    &:hover {
+      transform: scale(1.15) !important;
+      box-shadow: 0 6px 16px rgba(255, 206, 0, 0.6) !important;
     }
   }
 }

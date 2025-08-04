@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
-import { MenuController } from '@ionic/angular';
+import { MenuController, NavController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 import { User } from 'src/app/auth/model/auth.model';
 import { AuthService } from 'src/app/auth/services/auth.service';
@@ -34,7 +34,8 @@ export class MenuComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private menuCtrl: MenuController
+    private menuCtrl: MenuController,
+    private navCtrl: NavController
   ) { }
 
   ngOnInit() {
@@ -52,15 +53,15 @@ export class MenuComponent implements OnInit, OnDestroy {
   logout() {
     this.authService.logout();
     this.menuCtrl.close();
-    this.router.navigate(['/auth/login'], { replaceUrl: true });
+    this.navCtrl.navigateRoot('/auth/login');
   }
 
   navigateToLogin() {
-    this.router.navigate(['/auth/login']);
+    this.navCtrl.navigateForward('/auth/login');
   }
 
   navigateToRegister() {
-    this.router.navigate(['/auth/register']);
+    this.navCtrl.navigateForward('/auth/register');
   }
 
   handleQuickAction(action: string) {
@@ -75,7 +76,7 @@ export class MenuComponent implements OnInit, OnDestroy {
         console.log('Send message functionality');
         break;
       case 'createSession':
-        this.router.navigate(['/attendance'], { queryParams: { action: 'create' } });
+        this.navCtrl.navigateForward('/attendance', { queryParams: { action: 'create' } });
         this.menuCtrl.close();
         break;
       default:

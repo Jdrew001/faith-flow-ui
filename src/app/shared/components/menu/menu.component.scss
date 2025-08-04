@@ -1,7 +1,7 @@
 // Dark theme menu styles - Simplified and Clean
 .menu-content {
-  --background: #1c1c1e;
-  background: #1c1c1e;
+  --background: #2c2c2e;
+  background: #2c2c2e;
   color: #ffffff;
 }
 
@@ -14,47 +14,35 @@
 
 // User Profile Section - Premium Design
 .user-profile-section {
-  background: linear-gradient(135deg, #007aff 0%, #5856d6 100%);
-  padding: 28px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 20px;
+  padding-top: calc(20px + var(--ion-safe-area-top, 0px));
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   position: relative;
-  min-height: 88px;
+  min-height: 80px;
   overflow: hidden;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  margin-bottom: 8px;
   
-  // Subtle pattern overlay
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-image: 
-      radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.05) 0%, transparent 50%),
-      radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
-    pointer-events: none;
-  }
   
   .user-avatar-container {
     position: relative;
     
     .user-avatar {
-      width: 48px;
-      height: 48px;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.2);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      background: rgba(74, 144, 226, 0.1);
+      border: 2px solid rgba(74, 144, 226, 0.2);
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       
       .avatar-initials {
-        color: #ffffff;
-        font-size: 18px;
+        color: #4a90e2;
+        font-size: 16px;
         font-weight: 600;
       }
       
@@ -73,7 +61,7 @@
       width: 12px;
       height: 12px;
       background: #34c759;
-      border: 2px solid rgba(255, 255, 255, 0.3);
+      border: 2px solid #2c2c2e;
       border-radius: 50%;
     }
   }
@@ -83,17 +71,16 @@
     z-index: 1;
     
     .user-name {
-      color: #ffffff;
-      font-size: 16px;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 15px;
       font-weight: 600;
-      margin: 0 0 4px 0;
+      margin: 0 0 2px 0;
       line-height: 1.2;
-      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     }
     
     .user-role {
-      color: rgba(255, 255, 255, 0.8);
-      font-size: 14px;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 13px;
       font-weight: 400;
       margin: 0;
     }
@@ -136,11 +123,11 @@
   margin-bottom: 32px;
   
   .nav-header {
-    color: #8e8e93;
-    font-size: 12px;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
     margin: 0 0 16px 20px;
   }
 }
@@ -161,11 +148,11 @@
     min-height: 56px; // Better touch target
     
     &:hover {
-      background: rgba(255, 255, 255, 0.05);
+      background: rgba(255, 255, 255, 0.03);
     }
     
     &.active {
-      background: rgba(0, 122, 255, 0.15);
+      background: rgba(74, 144, 226, 0.15);
       
       &::before {
         content: '';
@@ -175,16 +162,16 @@
         transform: translateY(-50%);
         width: 4px;
         height: 24px;
-        background: #007aff;
+        background: #4a90e2;
         border-radius: 0 4px 4px 0;
       }
       
       .nav-item-icon ion-icon {
-        color: #007aff;
+        color: #4a90e2;
       }
       
       .nav-item-title {
-        color: #007aff;
+        color: #4a90e2;
         font-weight: 600;
       }
     }
@@ -198,7 +185,7 @@
       
       ion-icon {
         font-size: 22px;
-        color: #8e8e93;
+        color: rgba(255, 255, 255, 0.5);
         transition: color 0.2s ease;
       }
     }
@@ -227,7 +214,7 @@
   
   .quick-action-item {
     background: transparent;
-    border: 1px solid #3a3a3c;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 12px;
     padding: 20px 12px;
     min-height: 80px;
@@ -237,10 +224,11 @@
     text-align: center;
     cursor: pointer;
     transition: all 0.2s ease;
+    background: rgba(255, 255, 255, 0.02);
     
     &:hover {
-      background: rgba(0, 122, 255, 0.1);
-      border-color: #007aff;
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.2);
       transform: translateY(-1px);
     }
     
@@ -249,12 +237,12 @@
       
       ion-icon {
         font-size: 24px;
-        color: #007aff;
+        color: #4a90e2;
       }
     }
     
     .quick-action-title {
-      color: #8e8e93;
+      color: rgba(255, 255, 255, 0.7);
       font-size: 12px;
       font-weight: 500;
       line-height: 1.2;
@@ -265,7 +253,8 @@
 // Menu Footer - Simplified
 .menu-footer {
   padding: 16px 20px;
-  border-top: 1px solid #3a3a3c;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.2);
   
   .app-info {
     display: flex;
@@ -275,7 +264,8 @@
     .app-logo {
       width: 32px;
       height: 32px;
-      background: #007aff;
+      background: rgba(74, 144, 226, 0.2);
+      border: 1px solid rgba(74, 144, 226, 0.3);
       border-radius: 8px;
       display: flex;
       align-items: center;
@@ -283,7 +273,7 @@
       
       .logo-icon {
         font-size: 16px;
-        color: #ffffff;
+        color: #4a90e2;
       }
     }
     
@@ -319,12 +309,12 @@ ion-menu-toggle {
 }
 
 .main-navigation::-webkit-scrollbar-thumb {
-  background: #3a3a3c;
+  background: rgba(255, 255, 255, 0.1);
   border-radius: 2px;
 }
 
 .main-navigation::-webkit-scrollbar-thumb:hover {
-  background: #48484a;
+  background: rgba(255, 255, 255, 0.2);
 }
 
 // Responsive adjustments
