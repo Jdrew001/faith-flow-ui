@@ -1,2 +1,2 @@
-// Re-export all attendance-related models
-export * from './attendance.model';
+// Re-export models that remain in this directory
+export * from './member.model';

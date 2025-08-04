@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { MenuController, ViewDidEnter } from '@ionic/angular';
 import { AuthService } from '../auth/services/auth.service';
-import { DashboardService, AttendanceStats, FollowUpItem, UpcomingEvent, EngagementData, WorkflowTriggers } from '../services/dashboard.service';
+import { DashboardService } from './services/dashboard.service';
+import { AttendanceStats, FollowUpItem, UpcomingEvent, EngagementData, WorkflowTriggers, DashboardMetrics } from './models/dashboard.model';
 import { Observable, forkJoin } from 'rxjs';
 
 @Component({
@@ -39,6 +40,13 @@ export class SummaryComponent implements ViewDidEnter {
 
   recentActivities: any[] = [];
 
+  dashboardMetrics: DashboardMetrics = {
+    totalMembers: 0,
+    growthRate: 0,
+    avgAttendance: 0,
+    newMembers: 0
+  };
+
   isLoading = false;
   isLoadingAttendance = true;
   isLoadingFollowUps = true;
@@ -46,6 +54,7 @@ export class SummaryComponent implements ViewDidEnter {
   isLoadingEngagement = true;
   isLoadingWorkflows = true;
   isLoadingActivity = true;
+  isLoadingMetrics = true;
 
   constructor(
     private authService: AuthService,
@@ -71,6 +80,7 @@ export class SummaryComponent implements ViewDidEnter {
     this.loadsessionsData();
     this.loadEngagementData();
     this.loadWorkflowData();
+    this.loadMetricsData();
   }
 
   private loadAttendanceData() {
@@ -341,10 +351,6 @@ export class SummaryComponent implements ViewDidEnter {
     });
   }
 
-  getTotalMembers(): number {
-    // TODO: Get from service
-    return 127;
-  }
 
   onGoToAttendance() {
     this.router.navigate(['/attendance']);
@@ -370,19 +376,34 @@ export class SummaryComponent implements ViewDidEnter {
     return eventDate.toLocaleDateString('en-US', { month: 'short' }).toUpperCase();
   }
 
+  private loadMetricsData() {
+    this.isLoadingMetrics = true;
+    this.dashboardService.getDashboardMetrics().subscribe({
+      next: (data) => {
+        this.dashboardMetrics = data;
+        this.isLoadingMetrics = false;
+      },
+      error: (error) => {
+        console.error('Error loading metrics data:', error);
+        this.isLoadingMetrics = false;
+      }
+    });
+  }
+
   getGrowthRate(): number {
-    // TODO: Calculate from service data
-    return 12;
+    return this.dashboardMetrics.growthRate;
   }
 
   getAvgAttendance(): number {
-    // TODO: Calculate from service data
-    return 85;
+    return this.dashboardMetrics.avgAttendance;
   }
 
   getNewMembers(): number {
-    // TODO: Get from service data
-    return 8;
+    return this.dashboardMetrics.newMembers;
+  }
+
+  getTotalMembers(): number {
+    return this.dashboardMetrics.totalMembers;
   }
 
   refreshActivity() {
@@ -420,32 +441,16 @@ export class SummaryComponent implements ViewDidEnter {
 
   private loadActivityData() {
     this.isLoadingActivity = true;
-    // TODO: Replace with actual service call
-    setTimeout(() => {
-      this.recentActivities = [
-        {
-          type: 'attendance',
-          description: 'John Smith marked present in Sunday Service',
-          timestamp: new Date(Date.now() - 1000 * 60 * 30)
-        },
-        {
-          type: 'followup',
-          description: 'New follow-up created for Sarah Johnson',
-          timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2)
-        },
-        {
-          type: 'workflow',
-          description: 'Welcome workflow triggered for 3 new members',
-          timestamp: new Date(Date.now() - 1000 * 60 * 60 * 5)
-        },
-        {
-          type: 'attendance',
-          description: 'Attendance recorded for Youth Meeting',
-          timestamp: new Date(Date.now() - 1000 * 60 * 60 * 24)
-        }
-      ];
-      this.isLoadingActivity = false;
-    }, 1000);
+    this.dashboardService.getRecentActivity(5).subscribe({
+      next: (data) => {
+        this.recentActivities = data;
+        this.isLoadingActivity = false;
+      },
+      error: (error) => {
+        console.error('Error loading activity data:', error);
+        this.isLoadingActivity = false;
+      }
+    });
   }
 
 }

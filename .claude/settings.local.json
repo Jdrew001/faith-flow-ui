@@ -8,7 +8,11 @@
       "Bash(npm run build:*)",
       "Bash(mkdir:*)",
       "Bash(move:*)",
-      "Bash(mv:*)"
+      "Bash(mv:*)",
+      "Bash(npm run:*)",
+      "Bash(del \"C:\\Users\\dtatk\\Documents\\Projects\\faith-flow-ui\\src\\app\\services\\followup.service.ts\")",
+      "Bash(rm:*)",
+      "Bash(cp:*)"
     ],
     "deny": []
   }

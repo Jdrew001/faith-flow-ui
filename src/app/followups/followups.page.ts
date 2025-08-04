@@ -3,6 +3,8 @@ import { NavController, MenuController, ViewDidEnter, ModalController } from '@i
 import { ActivatedRoute } from '@angular/router';
 import { AssignmentForm, Assignee } from './components/assignment-modal/assignment-modal.component';
 import { FollowupModalComponent } from './components/followup-modal/followup-modal.component';
+import { FollowupService } from './services/followup.service';
+import { FollowupDto, FollowupFilters } from './models/followup.model';
 
 export interface FollowUpItem {
   id: string;
@@ -83,7 +85,8 @@ export class FollowupsPage implements ViewDidEnter {
     private navCtrl: NavController,
     private menuCtrl: MenuController,
     private route: ActivatedRoute,
-    private modalController: ModalController
+    private modalController: ModalController,
+    private followupService: FollowupService
   ) { }
 
   ionViewDidEnter() {
@@ -98,97 +101,43 @@ export class FollowupsPage implements ViewDidEnter {
     this.loadFollowups();
   }
 
-  loadFollowups() {
+  async loadFollowups() {
     this.isLoading = true;
-    // TODO: Replace with actual service call
-    setTimeout(() => {
-      this.followups = [
-      {
-        id: '1',
-        personName: 'Sarah Johnson',
-        title: 'Welcome New Visitor',
-        description: 'First-time visitor, expressed interest in small groups',
-        type: 'New Visitor Follow-up',
-        priority: 'high',
-        status: 'pending',
-        assignedTo: 'Pastor John',
-        createdDate: new Date('2025-07-15'),
-        dueDate: new Date('2025-07-22'),
-        notes: 'First-time visitor, expressed interest in small groups',
-        contactInfo: {
-          phone: '(555) 123-4567',
-          email: 'sarah.j@email.com'
-        }
-      },
-      {
-        id: '2',
-        personName: 'Mike Rodriguez',
-        title: 'Prayer Request Follow-up',
-        description: 'Check on family situation and job search',
-        type: 'Prayer Request Follow-up',
-        priority: 'medium',
-        status: 'in-progress',
-        assignedTo: 'Sarah Wilson',
-        createdDate: new Date('2025-07-10'),
-        dueDate: new Date('2025-07-24'),
-        notes: 'Family going through difficult time, pray for job opportunity',
-        contactInfo: {
-          phone: '(555) 234-5678',
-          email: 'mike.r@email.com'
-        }
-      },
-      {
-        id: '3',
-        personName: 'Lisa Chen',
-        title: 'Pastoral Care Visit',
-        description: 'Hospital visit for surgery recovery',
-        type: 'Pastoral Care',
-        priority: 'high',
-        status: 'pending',
-        assignedTo: 'Pastor John',
-        createdDate: new Date('2025-07-18'),
-        dueDate: new Date('2025-07-21'),
-        contactInfo: {
-          phone: '(555) 345-6789',
-          email: 'lisa.c@email.com'
-        }
-      },
-      {
-        id: '4',
-        personName: 'David Thompson',
-        title: 'Volunteer Follow-up',
-        description: 'Interested in joining worship team',
-        type: 'Volunteer Follow-up',
-        priority: 'low',
-        status: 'completed',
-        assignedTo: 'Mike Johnson',
-        createdDate: new Date('2025-07-12'),
-        dueDate: new Date('2025-07-19'),
-        contactInfo: {
-          phone: '(555) 456-7890',
-          email: 'david.t@email.com'
-        }
-      },
-      {
-        id: '5',
-        personName: 'Maria Garcia',
-        title: 'Baptism Follow-up',
-        description: 'Recent baptism, connect with small group',
-        type: 'New Member Follow-up',
-        priority: 'medium',
-        status: 'pending',
-        createdDate: new Date('2025-07-16'),
-        dueDate: new Date('2025-07-23'),
-        contactInfo: {
-          phone: '(555) 456-7890',
-          email: 'maria.g@email.com'
-        }
-      }
-      ];
+    try {
+      const filters: FollowupFilters = {
+        status: this.selectedStatus === 'all' ? undefined : this.selectedStatus as any,
+        priority: this.selectedPriority === 'all' ? undefined : this.selectedPriority as any,
+        assignee: this.selectedAssignee === 'all' ? undefined : this.selectedAssignee,
+        search: this.searchTerm.trim() || undefined,
+        sortBy: this.sortBy as any,
+        sortDirection: this.sortDirection
+      };
+
+      const response = await this.followupService.getFollowups(filters);
+      
+      // Convert FollowupDto to FollowUpItem format for compatibility
+      this.followups = response.followups.map(dto => ({
+        id: dto.id!,
+        personName: dto.personName,
+        title: dto.title,
+        description: dto.description || '',
+        type: dto.type,
+        priority: dto.priority,
+        status: dto.status,
+        assignedTo: dto.assignedTo,
+        createdDate: dto.createdDate ? new Date(dto.createdDate) : new Date(),
+        dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
+        notes: dto.notes,
+        contactInfo: dto.contactInfo
+      }));
 
       this.filterFollowups();
+    } catch (error) {
+      console.error('Error loading followups:', error);
+      // You might want to show a toast or alert here
+    } finally {
       this.isLoading = false;
-    }, 1000);
+    }
   }
 
   filterFollowups() {
@@ -296,16 +245,24 @@ export class FollowupsPage implements ViewDidEnter {
     this.filterFollowups();
   }
 
-  markAsComplete(followUp: FollowUpItem) {
-    followUp.status = 'completed';
-    this.filterFollowups();
-    // TODO: Call service to update backend
+  async markAsComplete(followUp: FollowUpItem) {
+    try {
+      await this.followupService.updateStatus(followUp.id, 'completed');
+      followUp.status = 'completed';
+      this.filterFollowups();
+    } catch (error) {
+      console.error('Error marking followup as complete:', error);
+    }
   }
 
-  markAsInProgress(followUp: FollowUpItem) {
-    followUp.status = 'in-progress';
-    this.filterFollowups();
-    // TODO: Call service to update backend
+  async markAsInProgress(followUp: FollowUpItem) {
+    try {
+      await this.followupService.updateStatus(followUp.id, 'in-progress');
+      followUp.status = 'in-progress';
+      this.filterFollowups();
+    } catch (error) {
+      console.error('Error marking followup as in progress:', error);
+    }
   }
 
   editFollowup(followUp: FollowUpItem) {
@@ -323,29 +280,37 @@ export class FollowupsPage implements ViewDidEnter {
     this.selectedFollowupForAssign = null;
   }
 
-  saveAssignment(assignmentForm: AssignmentForm) {
+  async saveAssignment(assignmentForm: AssignmentForm) {
     if (!this.selectedFollowupForAssign) return;
 
-    // Update the follow-up item
-    this.selectedFollowupForAssign.assignedTo = assignmentForm.assignedTo;
-    this.selectedFollowupForAssign.notes = assignmentForm.notes;
-    this.selectedFollowupForAssign.priority = assignmentForm.priority as 'high' | 'medium' | 'low';
-    
-    if (assignmentForm.dueDate) {
-      this.selectedFollowupForAssign.dueDate = new Date(assignmentForm.dueDate);
+    try {
+      const assignment = {
+        followupId: this.selectedFollowupForAssign.id,
+        assignedTo: assignmentForm.assignedTo,
+        priority: assignmentForm.priority as 'high' | 'medium' | 'low',
+        dueDate: assignmentForm.dueDate,
+        notes: assignmentForm.notes
+      };
+
+      await this.followupService.assignFollowup(assignment);
+
+      // Update local data
+      this.selectedFollowupForAssign.assignedTo = assignmentForm.assignedTo;
+      this.selectedFollowupForAssign.notes = assignmentForm.notes;
+      this.selectedFollowupForAssign.priority = assignmentForm.priority as 'high' | 'medium' | 'low';
+      
+      if (assignmentForm.dueDate) {
+        this.selectedFollowupForAssign.dueDate = new Date(assignmentForm.dueDate);
+      }
+
+      this.filterFollowups();
+      this.closeAssignModal();
+
+      console.log('Follow-up successfully assigned!');
+    } catch (error) {
+      console.error('Error assigning followup:', error);
+      // Show error message - you could implement a toast here
     }
-
-    // TODO: Call service to update backend
-    console.log('Assignment saved:', {
-      followUp: this.selectedFollowupForAssign,
-      assignment: assignmentForm
-    });
-
-    this.filterFollowups();
-    this.closeAssignModal();
-
-    // Show success message (you can implement toast here)
-    console.log('Follow-up successfully assigned!');
   }
 
   getAssigneeDetails(assigneeName: string): Assignee | null {
@@ -400,8 +365,8 @@ export class FollowupsPage implements ViewDidEnter {
   }
 
   addNewFollowup() {
-    // TODO: Navigate to create follow-up page or open modal
-    console.log('Add new follow-up');
+    // Open create modal
+    this.createNewFollowup();
   }
 
   goBack() {
@@ -459,7 +424,7 @@ export class FollowupsPage implements ViewDidEnter {
   }
   
   openFollowupDetail(followup: FollowUpItem) {
-    // Open edit modal when clicking on card
+    // Open edit modal when clicking on card - this calls backend to get latest data
     this.openEditModal(followup);
   }
   
@@ -492,14 +457,15 @@ export class FollowupsPage implements ViewDidEnter {
     }
   }
   
-  toggleComplete(followup: FollowUpItem) {
-    if (followup.status === 'completed') {
-      followup.status = 'pending';
-    } else {
-      followup.status = 'completed';
+  async toggleComplete(followup: FollowUpItem) {
+    try {
+      const newStatus = followup.status === 'completed' ? 'pending' : 'completed';
+      await this.followupService.updateStatus(followup.id, newStatus);
+      followup.status = newStatus;
+      this.filterFollowups();
+    } catch (error) {
+      console.error('Error toggling followup status:', error);
     }
-    this.filterFollowups();
-    // TODO: Call service to update backend
   }
   
   openAssignModal(followup: FollowUpItem) {
@@ -511,7 +477,7 @@ export class FollowupsPage implements ViewDidEnter {
     const modal = await this.modalController.create({
       component: FollowupModalComponent,
       componentProps: {
-        followup: followup,
+        followupId: followup.id, // Pass ID instead of full object
         assignees: this.assignees
       }
     });
@@ -520,15 +486,8 @@ export class FollowupsPage implements ViewDidEnter {
 
     const { data } = await modal.onDidDismiss();
     if (data && data.followup) {
-      const index = this.followups.findIndex(f => f.id === followup.id);
-      if (index > -1) {
-        this.followups[index] = {
-          ...this.followups[index],
-          ...data.followup,
-          dueDate: data.followup.dueDate ? new Date(data.followup.dueDate) : undefined
-        };
-        this.filterFollowups();
-      }
+      // Refresh the followups list to get updated data
+      await this.loadFollowups();
     }
   }
   
@@ -536,7 +495,7 @@ export class FollowupsPage implements ViewDidEnter {
     const modal = await this.modalController.create({
       component: FollowupModalComponent,
       componentProps: {
-        followup: null,
+        followupId: null, // No ID means create new
         assignees: this.assignees
       }
     });
@@ -545,14 +504,8 @@ export class FollowupsPage implements ViewDidEnter {
 
     const { data } = await modal.onDidDismiss();
     if (data && data.followup) {
-      const newFollowup: FollowUpItem = {
-        id: Date.now().toString(),
-        ...data.followup,
-        createdDate: new Date(),
-        dueDate: data.followup.dueDate ? new Date(data.followup.dueDate) : undefined
-      };
-      this.followups.push(newFollowup);
-      this.filterFollowups();
+      // Refresh the followups list to get updated data
+      await this.loadFollowups();
     }
   }
   

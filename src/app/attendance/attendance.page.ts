@@ -4,8 +4,8 @@ import { ModalController, ToastController } from '@ionic/angular';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 
-import { AttendanceService } from '../services/attendance.service';
-import { Session, AttendanceSummary } from '../models/attendance.model';
+import { AttendanceService } from './services/attendance.service';
+import { Session, AttendanceSummary } from './models/attendance.model';
 import { SessionDetailModalComponent } from './components/session-detail-modal/session-detail-modal.component';
 import { BulkAttendanceModalComponent } from './components/bulk-attendance-modal/bulk-attendance-modal.component';
 import { SessionMembersComponent } from './components/session-members/session-members.component';
@@ -33,7 +33,6 @@ export class AttendancePage implements OnInit, OnDestroy {
 
   searchControl = new FormControl('');
   selectedTimeFilter = 'today';
-  selectedSessionType = 'all';
   currentDate = new Date();
   isLoading = false;
   headerHidden = false;
@@ -69,9 +68,15 @@ export class AttendancePage implements OnInit, OnDestroy {
   async loadData() {
     this.isLoading = true;
     try {
-      this.sessions = await this.attendanceService.getSessions();
+      // Prepare filters for backend
+      const filters = this.getBackendFilters();
+      
+      // Fetch filtered data from backend
+      this.sessions = await this.attendanceService.getSessions(filters);
       this.attendanceStats = await this.attendanceService.getAttendanceStats();
-      this.filterSessions();
+      
+      // Since data is already filtered by backend, just assign
+      this.filteredSessions = [...this.sessions];
     } catch (error) {
       console.error('Error loading attendance data:', error);
       await this.showToast('Error loading data', 'danger');
@@ -79,55 +84,60 @@ export class AttendancePage implements OnInit, OnDestroy {
       this.isLoading = false;
     }
   }
-
-  filterSessions() {
-    let filtered = [...this.sessions];
-
-    // Filter by search term
-    const searchTerm = this.searchControl.value?.toLowerCase() || '';
+  
+  private getBackendFilters() {
+    const filters: any = {};
+    
+    // Add date range based on selected time filter
+    const { startDate, endDate } = this.getDateRange();
+    if (startDate) filters.startDate = startDate.toISOString();
+    if (endDate) filters.endDate = endDate.toISOString();
+    
+    // Add search term
+    const searchTerm = this.searchControl.value?.trim();
     if (searchTerm) {
-      filtered = filtered.filter(session =>
-        session.title.toLowerCase().includes(searchTerm) ||
-        session.location.toLowerCase().includes(searchTerm) ||
-        session.type.toLowerCase().includes(searchTerm)
-      );
+      filters.search = searchTerm;
     }
-
-    // Filter by time period
+    
+    return filters;
+  }
+  
+  private getDateRange(): { startDate: Date | null; endDate: Date | null } {
     const now = new Date();
+    let startDate: Date | null = null;
+    let endDate: Date | null = null;
+    
     switch (this.selectedTimeFilter) {
       case 'today':
-        filtered = filtered.filter(session => {
-          const sessionDate = new Date(session.date);
-          return sessionDate.toDateString() === this.currentDate.toDateString();
-        });
+        startDate = new Date(this.currentDate);
+        startDate.setHours(0, 0, 0, 0);
+        endDate = new Date(this.currentDate);
+        endDate.setHours(23, 59, 59, 999);
         break;
+        
       case 'week':
-        const weekStart = new Date(this.currentDate);
-        weekStart.setDate(this.currentDate.getDate() - this.currentDate.getDay());
-        const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekStart.getDate() + 6);
-        filtered = filtered.filter(session => {
-          const sessionDate = new Date(session.date);
-          return sessionDate >= weekStart && sessionDate <= weekEnd;
-        });
+        startDate = new Date(this.currentDate);
+        startDate.setDate(this.currentDate.getDate() - this.currentDate.getDay());
+        startDate.setHours(0, 0, 0, 0);
+        endDate = new Date(startDate);
+        endDate.setDate(startDate.getDate() + 6);
+        endDate.setHours(23, 59, 59, 999);
         break;
+        
       case 'month':
-        const monthStart = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), 1);
-        const monthEnd = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + 1, 0);
-        filtered = filtered.filter(session => {
-          const sessionDate = new Date(session.date);
-          return sessionDate >= monthStart && sessionDate <= monthEnd;
-        });
+        startDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth(), 1);
+        startDate.setHours(0, 0, 0, 0);
+        endDate = new Date(this.currentDate.getFullYear(), this.currentDate.getMonth() + 1, 0);
+        endDate.setHours(23, 59, 59, 999);
         break;
     }
+    
+    return { startDate, endDate };
+  }
 
-    // Filter by session type
-    if (this.selectedSessionType !== 'all') {
-      filtered = filtered.filter(session => session.type === this.selectedSessionType);
-    }
-
-    this.filteredSessions = filtered;
+  filterSessions() {
+    // Instead of client-side filtering, reload data from backend with filters
+    this.loadData();
   }
 
   // Event handlers
@@ -136,13 +146,12 @@ export class AttendancePage implements OnInit, OnDestroy {
     this.filterSessions();
   }
 
-  onSessionTypeChange(event: any) {
-    this.selectedSessionType = event.detail.value;
-    this.filterSessions();
-  }
 
   // Date navigation
   navigatePrevious() {
+    // Create new date to avoid mutating the original
+    this.currentDate = new Date(this.currentDate);
+    
     switch (this.selectedTimeFilter) {
       case 'today':
         this.currentDate.setDate(this.currentDate.getDate() - 1);
@@ -158,6 +167,9 @@ export class AttendancePage implements OnInit, OnDestroy {
   }
 
   navigateNext() {
+    // Create new date to avoid mutating the original
+    this.currentDate = new Date(this.currentDate);
+    
     switch (this.selectedTimeFilter) {
       case 'today':
         this.currentDate.setDate(this.currentDate.getDate() + 1);
@@ -212,7 +224,6 @@ export class AttendancePage implements OnInit, OnDestroy {
   clearAllFilters() {
     this.searchControl.setValue('');
     this.selectedTimeFilter = 'today';
-    this.selectedSessionType = 'all';
     this.currentDate = new Date();
     this.filterSessions();
   }

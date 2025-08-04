@@ -1,8 +1,8 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ModalController, ToastController } from '@ionic/angular';
-import { AttendanceService } from '../../../services/attendance.service';
-import { Session, CreateSessionDto } from '../../../models/attendance.model';
+import { AttendanceService } from '../../services/attendance.service';
+import { Session, CreateSessionDto } from '../../models/attendance.model';
 
 export interface CreateSessionForm {
   name: string;

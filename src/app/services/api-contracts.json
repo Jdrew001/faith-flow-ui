@@ -1,0 +1,753 @@
+{
+  "apiBaseUrl": "http://localhost:3000/faith-flow-service",
+  "services": {
+    "authentication": {
+      "endpoints": {
+        "login": {
+          "method": "POST",
+          "path": "/auth/login",
+          "request": {
+            "email": "string",
+            "password": "string"
+          },
+          "response": {
+            "token": "string",
+            "user": {
+              "id": "string",
+              "email": "string",
+              "name": "string",
+              "role": "string",
+              "churchId": "string",
+              "churchName": "string"
+            }
+          }
+        },
+        "register": {
+          "method": "POST",
+          "path": "/auth/register",
+          "request": {
+            "email": "string",
+            "password": "string",
+            "name": "string",
+            "churchName": "string"
+          },
+          "response": {
+            "token": "string",
+            "user": {
+              "id": "string",
+              "email": "string",
+              "name": "string",
+              "role": "string",
+              "churchId": "string",
+              "churchName": "string"
+            }
+          }
+        },
+        "logout": {
+          "method": "POST",
+          "path": "/auth/logout",
+          "request": {},
+          "response": {
+            "success": "boolean",
+            "message": "string"
+          }
+        },
+        "getCurrentUser": {
+          "method": "GET",
+          "path": "/auth/me",
+          "response": {
+            "id": "string",
+            "email": "string",
+            "name": "string",
+            "role": "string",
+            "churchId": "string",
+            "churchName": "string"
+          }
+        }
+      }
+    },
+    "attendance": {
+      "endpoints": {
+        "getSessions": {
+          "method": "GET",
+          "path": "/attendance/sessions",
+          "queryParams": {
+            "status": "upcoming | completed | all",
+            "type": "service | meeting | event | all",
+            "limit": "number",
+            "offset": "number",
+            "startDate": "ISO 8601 date string",
+            "endDate": "ISO 8601 date string"
+          },
+          "response": {
+            "sessions": [
+              {
+                "id": "string",
+                "title": "string",
+                "description": "string",
+                "startTime": "string (HH:mm)",
+                "endTime": "string (HH:mm)",
+                "date": "ISO 8601 date string",
+                "type": "service | meeting | event",
+                "location": "string",
+                "presentCount": "number",
+                "totalExpected": "number",
+                "attendanceRate": "number",
+                "status": "upcoming | completed | cancelled",
+                "leader": "string",
+                "tags": ["string"]
+              }
+            ],
+            "total": "number"
+          }
+        },
+        "createSession": {
+          "method": "POST",
+          "path": "/attendance/sessions",
+          "request": {
+            "title": "string",
+            "description": "string",
+            "date": "ISO 8601 date string",
+            "startTime": "string (HH:mm)",
+            "endTime": "string (HH:mm)",
+            "location": "string",
+            "type": "service | meeting | event",
+            "leader": "string",
+            "tags": ["string"],
+            "expectedAttendees": ["string"]
+          },
+          "response": {
+            "id": "string",
+            "title": "string",
+            "description": "string",
+            "startTime": "string",
+            "endTime": "string",
+            "date": "ISO 8601 date string",
+            "type": "string",
+            "location": "string",
+            "presentCount": "number",
+            "totalExpected": "number",
+            "attendanceRate": "number",
+            "status": "string",
+            "leader": "string",
+            "tags": ["string"]
+          }
+        },
+        "getSessionAttendance": {
+          "method": "GET",
+          "path": "/attendance/sessions/{sessionId}/attendance",
+          "response": {
+            "attendance": [
+              {
+                "id": "string",
+                "sessionId": "string",
+                "personId": "string",
+                "personName": "string",
+                "status": "Present | Absent",
+                "timestamp": "ISO 8601 date string",
+                "notes": "string (optional)"
+              }
+            ],
+            "total": "number",
+            "presentCount": "number",
+            "absentCount": "number"
+          }
+        },
+        "markAttendance": {
+          "method": "POST",
+          "path": "/attendance/sessions/{sessionId}/attendance",
+          "request": {
+            "personId": "string",
+            "status": "Present | Absent",
+            "notes": "string (optional)"
+          },
+          "response": {
+            "id": "string",
+            "sessionId": "string",
+            "personId": "string",
+            "personName": "string",
+            "status": "Present | Absent",
+            "timestamp": "ISO 8601 date string",
+            "notes": "string (optional)"
+          }
+        },
+        "bulkMarkAttendance": {
+          "method": "POST",
+          "path": "/attendance/sessions/{sessionId}/bulk-attendance",
+          "request": [
+            {
+              "personId": "string",
+              "status": "Present | Absent"
+            }
+          ],
+          "response": {
+            "success": "boolean",
+            "markedCount": "number",
+            "records": [
+              {
+                "id": "string",
+                "sessionId": "string",
+                "personId": "string",
+                "personName": "string",
+                "status": "Present | Absent",
+                "timestamp": "ISO 8601 date string"
+              }
+            ]
+          }
+        },
+        "autoMarkAbsent": {
+          "method": "POST",
+          "path": "/attendance/sessions/{sessionId}/auto-mark-absent",
+          "request": {},
+          "response": {
+            "success": "boolean",
+            "message": "string",
+            "data": {
+              "markedCount": "number",
+              "memberIds": ["string"]
+            }
+          }
+        },
+        "getAttendanceStats": {
+          "method": "GET",
+          "path": "/attendance/summary",
+          "response": {
+            "totalSessions": "number",
+            "averageAttendance": "number",
+            "totalAttendees": "number",
+            "weeklyGrowth": "number",
+            "mostPopularSession": "string",
+            "attendanceRate": "number"
+          }
+        }
+      }
+    },
+    "followups": {
+      "endpoints": {
+        "getFollowups": {
+          "method": "GET",
+          "path": "/followups",
+          "queryParams": {
+            "status": "all | pending | in-progress | completed",
+            "priority": "all | high | medium | low",
+            "assignee": "string",
+            "search": "string",
+            "sortBy": "dueDate | priority | createdDate | name | status",
+            "sortDirection": "asc | desc",
+            "limit": "number",
+            "offset": "number"
+          },
+          "response": {
+            "followups": [
+              {
+                "id": "string",
+                "personName": "string",
+                "title": "string",
+                "description": "string",
+                "type": "string",
+                "priority": "high | medium | low",
+                "status": "pending | in-progress | completed",
+                "assignedTo": "string",
+                "createdDate": "ISO 8601 date string",
+                "dueDate": "ISO 8601 date string",
+                "notes": "string",
+                "contactInfo": {
+                  "phone": "string",
+                  "email": "string"
+                }
+              }
+            ],
+            "total": "number",
+            "stats": {
+              "total": "number",
+              "pending": "number",
+              "inProgress": "number",
+              "completed": "number",
+              "overdue": "number",
+              "highPriority": "number"
+            }
+          }
+        },
+        "createFollowup": {
+          "method": "POST",
+          "path": "/followups",
+          "request": {
+            "personName": "string",
+            "title": "string",
+            "description": "string",
+            "type": "string",
+            "priority": "high | medium | low",
+            "assignedTo": "string",
+            "dueDate": "ISO 8601 date string",
+            "notes": "string",
+            "contactInfo": {
+              "phone": "string",
+              "email": "string"
+            }
+          },
+          "response": {
+            "id": "string",
+            "personName": "string",
+            "title": "string",
+            "description": "string",
+            "type": "string",
+            "priority": "high | medium | low",
+            "status": "pending",
+            "assignedTo": "string",
+            "createdDate": "ISO 8601 date string",
+            "dueDate": "ISO 8601 date string",
+            "notes": "string",
+            "contactInfo": {
+              "phone": "string",
+              "email": "string"
+            }
+          }
+        },
+        "updateFollowup": {
+          "method": "PUT",
+          "path": "/followups/{id}",
+          "request": {
+            "personName": "string (optional)",
+            "title": "string (optional)",
+            "description": "string (optional)",
+            "type": "string (optional)",
+            "priority": "high | medium | low (optional)",
+            "status": "pending | in-progress | completed (optional)",
+            "assignedTo": "string (optional)",
+            "dueDate": "ISO 8601 date string (optional)",
+            "notes": "string (optional)",
+            "contactInfo": {
+              "phone": "string (optional)",
+              "email": "string (optional)"
+            }
+          },
+          "response": {
+            "id": "string",
+            "personName": "string",
+            "title": "string",
+            "description": "string",
+            "type": "string",
+            "priority": "high | medium | low",
+            "status": "pending | in-progress | completed",
+            "assignedTo": "string",
+            "createdDate": "ISO 8601 date string",
+            "dueDate": "ISO 8601 date string",
+            "notes": "string",
+            "contactInfo": {
+              "phone": "string",
+              "email": "string"
+            }
+          }
+        },
+        "deleteFollowup": {
+          "method": "DELETE",
+          "path": "/followups/{id}",
+          "response": {
+            "success": "boolean",
+            "message": "string"
+          }
+        },
+        "bulkUpdateStatus": {
+          "method": "POST",
+          "path": "/followups/bulk-update-status",
+          "request": {
+            "ids": ["string"],
+            "status": "pending | in-progress | completed"
+          },
+          "response": {
+            "success": "boolean",
+            "updatedCount": "number"
+          }
+        },
+        "getFollowupStats": {
+          "method": "GET",
+          "path": "/followups/stats",
+          "response": {
+            "total": "number",
+            "pending": "number",
+            "inProgress": "number",
+            "completed": "number",
+            "overdue": "number",
+            "highPriority": "number"
+          }
+        },
+        "getOverdueFollowups": {
+          "method": "GET",
+          "path": "/followups/overdue",
+          "response": {
+            "followups": [
+              {
+                "id": "string",
+                "personName": "string",
+                "title": "string",
+                "description": "string",
+                "type": "string",
+                "priority": "high | medium | low",
+                "status": "pending | in-progress",
+                "assignedTo": "string",
+                "createdDate": "ISO 8601 date string",
+                "dueDate": "ISO 8601 date string",
+                "daysOverdue": "number"
+              }
+            ],
+            "total": "number"
+          }
+        },
+        "exportFollowups": {
+          "method": "GET",
+          "path": "/followups/export",
+          "queryParams": {
+            "format": "csv | pdf",
+            "status": "all | pending | in-progress | completed",
+            "priority": "all | high | medium | low",
+            "assignee": "string"
+          },
+          "response": "Binary file (CSV or PDF)"
+        }
+      }
+    },
+    "dashboard": {
+      "endpoints": {
+        "getDashboardSummary": {
+          "method": "GET",
+          "path": "/dashboard/summary",
+          "response": {
+            "attendance": {
+              "percentage": "number",
+              "present": "number",
+              "absent": "number",
+              "trend": "up | down | stable",
+              "rate": "number"
+            },
+            "engagement": [
+              {
+                "week": "string",
+                "value": "number"
+              }
+            ],
+            "followUps": [
+              {
+                "id": "number",
+                "name": "string",
+                "type": "New Member | First Time Visitor | Prayer Request | Connection | Pastoral Care | Follow-up",
+                "priority": "high | medium | low",
+                "daysAgo": "number"
+              }
+            ],
+            "sessions": {
+              "stats": {
+                "totalToday": "number",
+                "upcomingThisWeek": "number",
+                "completedThisMonth": "number"
+              },
+              "upcoming": [
+                {
+                  "id": "string",
+                  "title": "string",
+                  "date": "ISO 8601 date string",
+                  "time": "string",
+                  "type": "service | meeting | event | conference",
+                  "location": "string",
+                  "attendeeCount": "number"
+                }
+              ]
+            },
+            "workflows": {
+              "count": "number",
+              "lastSync": "ISO 8601 date string",
+              "status": "active | pending | error",
+              "activeWorkflows": "number",
+              "completedToday": "number",
+              "pendingActions": "number"
+            }
+          }
+        },
+        "getAttendanceStats": {
+          "method": "GET",
+          "path": "/dashboard/attendance-stats",
+          "response": {
+            "percentage": "number",
+            "present": "number",
+            "absent": "number",
+            "trend": "up | down | stable",
+            "rate": "number"
+          }
+        },
+        "getEngagementTrends": {
+          "method": "GET",
+          "path": "/dashboard/engagement-trends",
+          "queryParams": {
+            "weeks": "number (default: 7)"
+          },
+          "response": [
+            {
+              "week": "string",
+              "value": "number"
+            }
+          ]
+        },
+        "getFollowUps": {
+          "method": "GET",
+          "path": "/dashboard/follow-ups",
+          "queryParams": {
+            "priority": "high | medium | low",
+            "limit": "number (default: 10)"
+          },
+          "response": [
+            {
+              "id": "number",
+              "name": "string",
+              "type": "New Member | First Time Visitor | Prayer Request | Connection | Pastoral Care | Follow-up",
+              "priority": "high | medium | low",
+              "daysAgo": "number"
+            }
+          ]
+        },
+        "getUpcomingSessions": {
+          "method": "GET",
+          "path": "/dashboard/sessions/upcoming",
+          "queryParams": {
+            "limit": "number (default: 5)"
+          },
+          "response": [
+            {
+              "id": "string",
+              "title": "string",
+              "date": "ISO 8601 date string",
+              "time": "string",
+              "type": "service | meeting | event | conference",
+              "location": "string",
+              "attendeeCount": "number"
+            }
+          ]
+        },
+        "getWorkflowStats": {
+          "method": "GET",
+          "path": "/dashboard/workflows/stats",
+          "response": {
+            "count": "number",
+            "lastSync": "ISO 8601 date string",
+            "status": "active | pending | error",
+            "activeWorkflows": "number",
+            "completedToday": "number",
+            "pendingActions": "number"
+          }
+        }
+      }
+    },
+    "members": {
+      "endpoints": {
+        "getMembers": {
+          "method": "GET",
+          "path": "/members",
+          "queryParams": {
+            "status": "ACTIVE | INACTIVE | ALL",
+            "search": "string",
+            "limit": "number",
+            "offset": "number",
+            "sortBy": "name | joinDate | lastAttendance",
+            "sortDirection": "asc | desc"
+          },
+          "response": {
+            "members": [
+              {
+                "id": "string",
+                "name": "string",
+                "email": "string",
+                "phone": "string",
+                "status": "ACTIVE | INACTIVE",
+                "joinDate": "ISO 8601 date string",
+                "lastAttendance": "ISO 8601 date string",
+                "groups": ["string"],
+                "tags": ["string"]
+              }
+            ],
+            "total": "number",
+            "stats": {
+              "totalActive": "number",
+              "totalInactive": "number",
+              "newThisMonth": "number"
+            }
+          }
+        },
+        "getMember": {
+          "method": "GET",
+          "path": "/members/{id}",
+          "response": {
+            "id": "string",
+            "name": "string",
+            "email": "string",
+            "phone": "string",
+            "address": {
+              "street": "string",
+              "city": "string",
+              "state": "string",
+              "zip": "string"
+            },
+            "status": "ACTIVE | INACTIVE",
+            "joinDate": "ISO 8601 date string",
+            "lastAttendance": "ISO 8601 date string",
+            "groups": ["string"],
+            "tags": ["string"],
+            "notes": "string",
+            "emergencyContact": {
+              "name": "string",
+              "phone": "string",
+              "relationship": "string"
+            }
+          }
+        },
+        "createMember": {
+          "method": "POST",
+          "path": "/members",
+          "request": {
+            "name": "string",
+            "email": "string",
+            "phone": "string",
+            "address": {
+              "street": "string",
+              "city": "string",
+              "state": "string",
+              "zip": "string"
+            },
+            "groups": ["string"],
+            "tags": ["string"],
+            "notes": "string",
+            "emergencyContact": {
+              "name": "string",
+              "phone": "string",
+              "relationship": "string"
+            }
+          },
+          "response": {
+            "id": "string",
+            "name": "string",
+            "email": "string",
+            "phone": "string",
+            "status": "ACTIVE",
+            "joinDate": "ISO 8601 date string"
+          }
+        },
+        "updateMember": {
+          "method": "PUT",
+          "path": "/members/{id}",
+          "request": {
+            "name": "string (optional)",
+            "email": "string (optional)",
+            "phone": "string (optional)",
+            "address": {
+              "street": "string (optional)",
+              "city": "string (optional)",
+              "state": "string (optional)",
+              "zip": "string (optional)"
+            },
+            "status": "ACTIVE | INACTIVE (optional)",
+            "groups": ["string (optional)"],
+            "tags": ["string (optional)"],
+            "notes": "string (optional)",
+            "emergencyContact": {
+              "name": "string (optional)",
+              "phone": "string (optional)",
+              "relationship": "string (optional)"
+            }
+          },
+          "response": {
+            "id": "string",
+            "name": "string",
+            "email": "string",
+            "phone": "string",
+            "status": "ACTIVE | INACTIVE",
+            "updatedAt": "ISO 8601 date string"
+          }
+        },
+        "deleteMember": {
+          "method": "DELETE",
+          "path": "/members/{id}",
+          "response": {
+            "success": "boolean",
+            "message": "string"
+          }
+        },
+        "getMemberAttendance": {
+          "method": "GET",
+          "path": "/members/{id}/attendance",
+          "queryParams": {
+            "startDate": "ISO 8601 date string",
+            "endDate": "ISO 8601 date string",
+            "limit": "number"
+          },
+          "response": {
+            "attendance": [
+              {
+                "sessionId": "string",
+                "sessionTitle": "string",
+                "date": "ISO 8601 date string",
+                "status": "Present | Absent"
+              }
+            ],
+            "stats": {
+              "totalSessions": "number",
+              "presentCount": "number",
+              "absentCount": "number",
+              "attendanceRate": "number"
+            }
+          }
+        }
+      }
+    },
+    "assignees": {
+      "endpoints": {
+        "getAssignees": {
+          "method": "GET",
+          "path": "/assignees",
+          "response": [
+            {
+              "value": "string",
+              "label": "string",
+              "role": "string",
+              "avatar": "string",
+              "color": "primary | secondary | tertiary | success | warning | danger"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "commonTypes": {
+    "ErrorResponse": {
+      "error": {
+        "code": "string",
+        "message": "string",
+        "details": "object (optional)"
+      }
+    },
+    "PaginationParams": {
+      "limit": "number (default: 20, max: 100)",
+      "offset": "number (default: 0)",
+      "sortBy": "string",
+      "sortDirection": "asc | desc"
+    },
+    "DateRange": {
+      "startDate": "ISO 8601 date string",
+      "endDate": "ISO 8601 date string"
+    }
+  },
+  "httpStatusCodes": {
+    "200": "OK - Success",
+    "201": "Created - Resource created successfully",
+    "204": "No Content - Success with no response body",
+    "400": "Bad Request - Invalid request data",
+    "401": "Unauthorized - Authentication required",
+    "403": "Forbidden - Access denied",
+    "404": "Not Found - Resource not found",
+    "409": "Conflict - Resource already exists",
+    "422": "Unprocessable Entity - Validation errors",
+    "500": "Internal Server Error - Server error"
+  },
+  "authentication": {
+    "type": "Bearer Token",
+    "header": "Authorization: Bearer {token}",
+    "tokenExpiry": "7 days",
+    "refreshTokenExpiry": "30 days"
+  }
+}

@@ -2,9 +2,9 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, firstValueFrom } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { environment } from '../../environments/environment';
+import { environment } from '../../../environments/environment';
 import { Session, AttendanceRecord, AttendanceSummary, Person, CreateSessionDto } from '../models';
-import { MemberService } from './member.service';
+import { MemberService } from '../../services/member.service';
 
 @Injectable({
   providedIn: 'root'
@@ -16,10 +16,25 @@ export class AttendanceService {
 
   constructor(private http: HttpClient, private memberService: MemberService) {}
 
-  async getSessions(): Promise<Session[]> {
+  async getSessions(filters?: {
+    startDate?: string;
+    endDate?: string;
+    search?: string;
+    status?: string;
+  }): Promise<Session[]> {
     try {
-      // Make actual API call to backend
-      const response = await firstValueFrom(this.http.get<Session[]>(`${this.apiUrl}/sessions`));
+      // Build query parameters
+      const params = new URLSearchParams();
+      if (filters) {
+        if (filters.startDate) params.append('startDate', filters.startDate);
+        if (filters.endDate) params.append('endDate', filters.endDate);
+        if (filters.search) params.append('search', filters.search);
+        if (filters.status) params.append('status', filters.status);
+      }
+      
+      // Make actual API call to backend with filters
+      const url = params.toString() ? `${this.apiUrl}/sessions?${params.toString()}` : `${this.apiUrl}/sessions`;
+      const response = await firstValueFrom(this.http.get<Session[]>(url));
       const sessions = response || [];
       
       this.sessionsSubject.next(sessions);
@@ -69,15 +84,17 @@ export class AttendanceService {
 
   async getAttendanceStats(): Promise<AttendanceSummary> {
     try {
-      // Make actual API call to backend
-      const response = await firstValueFrom(this.http.get<AttendanceSummary>(`${this.apiUrl}/summary`));
-      return response || {
-        totalSessions: 0,
-        averageAttendance: 0,
-        totalAttendees: 0,
-        weeklyGrowth: 0,
-        mostPopularSession: '',
-        attendanceRate: 0
+      // Make actual API call to backend - using reports/summary endpoint
+      const response = await firstValueFrom(this.http.get<any>(`${this.apiUrl}/reports/summary`));
+      
+      // Transform backend response to match frontend model
+      return {
+        totalSessions: response?.occurrenceBreakdown?.length || 0,
+        averageAttendance: response?.summary?.attendanceRate || 0,
+        totalAttendees: response?.summary?.totalRecords || 0,
+        weeklyGrowth: 0, // Could be calculated from trend data
+        mostPopularSession: 'Sunday Morning Service', // Could be calculated from data
+        attendanceRate: response?.summary?.attendanceRate || 0
       };
     } catch (error) {
       console.error('Error fetching attendance stats:', error);
@@ -134,14 +151,13 @@ export class AttendanceService {
   async markAttendance(sessionId: string, personId: string, status: 'Present' | 'Absent', notes?: string): Promise<AttendanceRecord> {
     try {
       const attendanceData = {
-        personId,
         status,
         notes
       };
 
-      // Make actual API call to backend
+      // Make actual API call to backend using the correct endpoint format
       const response = await firstValueFrom(this.http.post<AttendanceRecord>(
-        `${this.apiUrl}/sessions/${sessionId}/attendance`,
+        `${this.apiUrl}/sessions/${sessionId}/attendance/${personId}`,
         attendanceData
       ));
       
@@ -162,10 +178,10 @@ export class AttendanceService {
 
   async bulkMarkAttendance(sessionId: string, attendanceData: { personId: string; status: 'Present' | 'Absent' }[]): Promise<AttendanceRecord[]> {
     try {
-      // Make actual API call to backend
+      // Make actual API call to backend with correct format
       const response = await firstValueFrom(this.http.post<AttendanceRecord[]>(
         `${this.apiUrl}/sessions/${sessionId}/bulk-attendance`,
-        attendanceData
+        { attendanceData }
       ));
 
       return response || attendanceData.map(data => ({
@@ -195,15 +211,16 @@ export class AttendanceService {
   async getPeople(): Promise<Person[]> {
     try {
       // Make actual API call to backend - using members endpoint for faster response
-      const response = await firstValueFrom(this.http.get<any>(`${environment.apiUrl}/members`));
+      const response = await firstValueFrom(this.http.get<any>(`${environment.apiUrl}/members?status=ACTIVE&limit=1000`));
       
       // Transform members response to Person format
       const members = response?.members || response || [];
       return members.map((member: any) => ({
         id: member.id,
-        name: member.name,
+        name: member.name || `${member.firstName} ${member.lastName}`.trim(),
         email: member.email,
         phone: member.phone,
+        avatar: member.avatar,
         groups: [], // Could be enhanced with actual group data
         lastAttendance: undefined // Could be enhanced with last attendance date
       }));
@@ -266,13 +283,13 @@ export class AttendanceService {
   }
 
   getSessionTrends(sessionId: string): Observable<any> {
-    // This would return attendance trends data over time
-    return this.http.get(`${this.apiUrl}/trends/session/${sessionId}`);
+    // Using the attendance rollup endpoint for trends data
+    return this.http.get(`${this.apiUrl}/rollup?sessionId=${sessionId}&period=weekly`);
   }
 
   getPersonAttendance(personId: string): Observable<AttendanceRecord[]> {
     // This would return a person's attendance history
-    return this.http.get<AttendanceRecord[]>(`${this.apiUrl}/person/${personId}`);
+    return this.http.get<AttendanceRecord[]>(`${this.apiUrl}/search?personId=${personId}`);
   }
 
   async updateAttendanceRecord(sessionId: string, personId: string, status: string): Promise<void> {
@@ -351,6 +368,80 @@ export class AttendanceService {
       return response.data;
     } catch (error) {
       console.error('Error auto-marking unmarked as absent:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get dashboard attendance statistics
+   */
+  async getDashboardStats(period: 'week' | 'month' | 'year' = 'week'): Promise<any> {
+    try {
+      const response = await firstValueFrom(
+        this.http.get(`${this.apiUrl}/dashboard/stats?period=${period}`)
+      );
+      return response;
+    } catch (error) {
+      console.error('Error fetching dashboard stats:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Export attendance data to CSV
+   */
+  async exportAttendanceCSV(startDate?: string, endDate?: string, sessionId?: string): Promise<void> {
+    try {
+      const params = new URLSearchParams();
+      if (startDate) params.append('startDate', startDate);
+      if (endDate) params.append('endDate', endDate);
+      if (sessionId) params.append('sessionId', sessionId);
+
+      const response = await firstValueFrom(
+        this.http.get(`${this.apiUrl}/export/csv?${params.toString()}`, { responseType: 'blob' })
+      );
+      
+      // Create download link
+      const blob = new Blob([response], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `attendance-export-${new Date().toISOString().split('T')[0]}.csv`;
+      link.click();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error exporting attendance data:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Search attendance records
+   */
+  async searchAttendance(params: {
+    query?: string;
+    personId?: string;
+    sessionId?: string;
+    status?: 'Present' | 'Absent';
+    startDate?: string;
+    endDate?: string;
+    page?: number;
+    limit?: number;
+  }): Promise<any> {
+    try {
+      const searchParams = new URLSearchParams();
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined) {
+          searchParams.append(key, value.toString());
+        }
+      });
+
+      const response = await firstValueFrom(
+        this.http.get(`${this.apiUrl}/search?${searchParams.toString()}`)
+      );
+      return response;
+    } catch (error) {
+      console.error('Error searching attendance:', error);
       throw error;
     }
   }

@@ -50,13 +50,31 @@
       <h2>Verify OTP</h2>
       <p class="input-description">Please enter the 6-digit OTP sent to {{ formattedPhoneNumber }}</p>
       
+      <!-- Hidden input for iOS SMS autofill -->
+      <input 
+        type="text" 
+        autocomplete="one-time-code" 
+        inputmode="numeric"
+        maxlength="6"
+        pattern="[0-9]{6}"
+        style="position: absolute; left: -9999px; opacity: 0; width: 1px; height: 1px;"
+        (input)="onHiddenOtpInput($event)"
+        #otpInput>
+      
       <div class="otp-display">
         <div 
           class="otp-digit" 
           *ngFor="let digit of otpDigits; let i = index"
-          [class.filled]="digit !== ''">
+          [class.filled]="digit !== ''"
+          (click)="focusHiddenInput()">
           {{ digit }}
         </div>
+      </div>
+      
+      <!-- Autofill indicator -->
+      <div class="autofill-indicator" *ngIf="isWebOtpSupported">
+        <ion-icon name="phone-portrait-outline"></ion-icon>
+        <span>SMS autofill enabled</span>
       </div>
     </div>
     
