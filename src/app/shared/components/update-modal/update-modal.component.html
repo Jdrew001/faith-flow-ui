@@ -1,0 +1,77 @@
+<div class="update-modal-container" @slideInUp>
+  <!-- Close Button -->
+  <ion-button 
+    fill="clear" 
+    class="close-button"
+    (click)="dismiss()">
+    <ion-icon name="close" slot="icon-only"></ion-icon>
+  </ion-button>
+
+  <!-- Modal Content -->
+  <div class="modal-content">
+    <!-- Animated Icon -->
+    <div class="update-icon-container" @fadeIn>
+      <div class="update-icon-wrapper">
+        <div class="pulse-ring" @pulseGlow></div>
+        <div class="pulse-ring delay-1" @pulseGlow></div>
+        <div class="pulse-ring delay-2" @pulseGlow></div>
+        <ion-icon name="download-outline" class="update-icon"></ion-icon>
+      </div>
+    </div>
+
+    <!-- Title and Message -->
+    <h2 class="modal-title" @fadeIn>New Update Available!</h2>
+    <p class="modal-subtitle" @fadeIn>
+      We've been working hard to bring you the best experience
+    </p>
+
+    <!-- Version Badge -->
+    <div class="version-badge" @fadeIn>
+      <ion-icon name="information-circle-outline"></ion-icon>
+      <span>Version 2.0.0</span>
+    </div>
+
+    <!-- Features List -->
+    <div class="features-container" @fadeIn>
+      <div class="feature-item" *ngFor="let feature of features; let i = index"
+           [style.animation-delay]="(400 + i * 100) + 'ms'">
+        <div class="feature-icon">
+          <ion-icon [name]="feature.icon"></ion-icon>
+        </div>
+        <span class="feature-text">{{ feature.text }}</span>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons" @fadeIn>
+      <ion-button 
+        expand="block" 
+        class="update-now-button"
+        (click)="updateNow()">
+        <ion-icon name="refresh-outline" slot="start"></ion-icon>
+        Update Now
+      </ion-button>
+      
+      <ion-button 
+        expand="block" 
+        fill="clear"
+        class="later-button"
+        (click)="updateLater()">
+        Maybe Later
+      </ion-button>
+    </div>
+
+    <!-- Progress Indicator (shown during update) -->
+    <div class="update-progress" *ngIf="false">
+      <ion-progress-bar type="indeterminate"></ion-progress-bar>
+      <p class="progress-text">Updating your app...</p>
+    </div>
+  </div>
+
+  <!-- Background Decoration -->
+  <div class="bg-decoration">
+    <div class="gradient-circle circle-1"></div>
+    <div class="gradient-circle circle-2"></div>
+    <div class="gradient-circle circle-3"></div>
+  </div>
+</div>

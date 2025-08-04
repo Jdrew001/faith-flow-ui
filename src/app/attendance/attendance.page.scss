@@ -179,6 +179,23 @@
   }
 }
 
+// Search Section
+.search-section {
+  padding: 16px;
+  background: #2c2c2e;
+  border-bottom: 1px solid #48484a;
+  
+  .session-searchbar {
+    --background: #3a3a3c;
+    --color: #ffffff;
+    --placeholder-color: #8e8e93;
+    --icon-color: #8e8e93;
+    --clear-button-color: #8e8e93;
+    --border-radius: 12px;
+    padding: 0;
+  }
+}
+
 // Refined Session Cards
 .session-cards {
   display: flex;

@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { SwUpdate } from '@angular/service-worker';
-import { AlertController } from '@ionic/angular';
+import { ModalController } from '@ionic/angular';
+import { UpdateModalComponent } from './shared/components/update-modal/update-modal.component';
 
 @Component({
   selector: 'app-root',
@@ -11,7 +12,7 @@ import { AlertController } from '@ionic/angular';
 export class AppComponent implements OnInit {
   constructor(
     private swUpdate: SwUpdate,
-    private alertController: AlertController
+    private modalController: ModalController
   ) {}
 
   ngOnInit() {
@@ -35,23 +36,28 @@ export class AppComponent implements OnInit {
   }
 
   private async promptUserToUpdate() {
-    const alert = await this.alertController.create({
-      header: 'Update Available',
-      message: 'A new version of Faith Flow is available. Would you like to update now?',
-      buttons: [
-        {
-          text: 'Later',
-          role: 'cancel'
-        },
-        {
-          text: 'Update',
-          handler: () => {
-            window.location.reload();
-          }
-        }
-      ]
+    const modal = await this.modalController.create({
+      component: UpdateModalComponent,
+      cssClass: 'update-modal',
+      breakpoints: [0, 0.5, 0.8, 1],
+      initialBreakpoint: 0.8,
+      backdropDismiss: false
     });
 
-    await alert.present();
+    await modal.present();
+
+    const { data } = await modal.onDidDismiss();
+    
+    if (data?.action === 'update') {
+      // Show loading state or perform update
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    } else if (data?.action === 'later') {
+      // Schedule another check in 1 hour
+      setTimeout(() => {
+        this.swUpdate.checkForUpdate();
+      }, 3600000);
+    }
   }
 }

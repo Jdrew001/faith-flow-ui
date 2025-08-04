@@ -16,10 +16,25 @@ export class AttendanceService {
 
   constructor(private http: HttpClient, private memberService: MemberService) {}
 
-  async getSessions(): Promise<Session[]> {
+  async getSessions(filters?: {
+    startDate?: string;
+    endDate?: string;
+    search?: string;
+    status?: string;
+  }): Promise<Session[]> {
     try {
-      // Make actual API call to backend
-      const response = await firstValueFrom(this.http.get<Session[]>(`${this.apiUrl}/sessions`));
+      // Build query parameters
+      const params = new URLSearchParams();
+      if (filters) {
+        if (filters.startDate) params.append('startDate', filters.startDate);
+        if (filters.endDate) params.append('endDate', filters.endDate);
+        if (filters.search) params.append('search', filters.search);
+        if (filters.status) params.append('status', filters.status);
+      }
+      
+      // Make actual API call to backend with filters
+      const url = params.toString() ? `${this.apiUrl}/sessions?${params.toString()}` : `${this.apiUrl}/sessions`;
+      const response = await firstValueFrom(this.http.get<Session[]>(url));
       const sessions = response || [];
       
       this.sessionsSubject.next(sessions);

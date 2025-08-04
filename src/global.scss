@@ -883,3 +883,16 @@ ion-content {
     }
   }
 }
+
+// Update Modal Styles
+.update-modal {
+  --backdrop-opacity: 0.6;
+  
+  .modal-wrapper {
+    background: transparent;
+  }
+  
+  .ion-page {
+    background: transparent;
+  }
+}
