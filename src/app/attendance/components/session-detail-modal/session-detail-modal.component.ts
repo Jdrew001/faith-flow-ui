@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { ModalController } from '@ionic/angular';
-import { AttendanceService } from '../../../services/attendance.service';
-import { AttendanceRecord, Session } from '../../../models/attendance.model';
+import { AttendanceService } from '../../services/attendance.service';
+import { AttendanceRecord, Session } from '../../models/attendance.model';
 
 @Component({
   selector: 'app-session-detail-modal',

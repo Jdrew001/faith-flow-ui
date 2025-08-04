@@ -161,7 +161,7 @@
               
               <div class="card-content">
                 <h3 class="card-title">Quick Stats</h3>
-                <div class="stats-grid">
+                <div class="stats-grid" *ngIf="!isLoadingMetrics">
                   <div class="stat-item" (click)="onViewReports()">
                     <ion-icon name="trending-up-outline" class="stat-icon up"></ion-icon>
                     <span class="stat-value">{{ getGrowthRate() }}%</span>
@@ -182,6 +182,9 @@
                     <span class="stat-value">{{ getNewMembers() }}</span>
                     <span class="stat-label">New Members</span>
                   </div>
+                </div>
+                <div class="loading-placeholder" *ngIf="isLoadingMetrics">
+                  <ion-spinner name="crescent"></ion-spinner>
                 </div>
               </div>
             </div>

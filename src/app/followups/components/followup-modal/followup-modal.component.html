@@ -66,12 +66,9 @@
           formControlName="type"
           interface="popover"
           class="custom-select">
-          <ion-select-option value="New Visitor Follow-up">New Visitor</ion-select-option>
-          <ion-select-option value="Prayer Request Follow-up">Prayer Request</ion-select-option>
-          <ion-select-option value="Pastoral Care">Pastoral Care</ion-select-option>
-          <ion-select-option value="Volunteer Follow-up">Volunteer</ion-select-option>
-          <ion-select-option value="New Member Follow-up">New Member</ion-select-option>
-          <ion-select-option value="General Follow-up">General</ion-select-option>
+          <ion-select-option *ngFor="let type of followupTypes" [value]="type.value">
+            {{ type.label }}
+          </ion-select-option>
         </ion-select>
         <div class="error-message" *ngIf="typeControl?.invalid && typeControl?.touched">
           Type is required
@@ -88,9 +85,9 @@
           formControlName="priority"
           interface="popover"
           class="custom-select">
-          <ion-select-option value="high">High</ion-select-option>
-          <ion-select-option value="medium">Medium</ion-select-option>
-          <ion-select-option value="low">Low</ion-select-option>
+          <ion-select-option *ngFor="let priority of priorities" [value]="priority.value">
+            {{ priority.label }}
+          </ion-select-option>
         </ion-select>
       </div>
 
@@ -121,9 +118,9 @@
           formControlName="status"
           interface="popover"
           class="custom-select">
-          <ion-select-option value="pending">Pending</ion-select-option>
-          <ion-select-option value="in-progress">In Progress</ion-select-option>
-          <ion-select-option value="completed">Completed</ion-select-option>
+          <ion-select-option *ngFor="let status of statuses" [value]="status.value">
+            {{ status.label }}
+          </ion-select-option>
         </ion-select>
       </div>
 
@@ -140,6 +137,20 @@
             [min]="getMinDate()"
             class="full-width-datetime">
           </ion-datetime>
+        </div>
+      </div>
+
+      <!-- Notes Field -->
+      <div class="form-field" [class.has-value]="notesControl?.value">
+        <div class="input-wrapper">
+          <ion-icon name="clipboard-outline" class="field-icon"></ion-icon>
+          <textarea 
+            class="custom-textarea"
+            formControlName="notes"
+            rows="4"
+            placeholder="Additional notes or instructions...">
+          </textarea>
+          <label class="floating-label">Notes</label>
         </div>
       </div>
 

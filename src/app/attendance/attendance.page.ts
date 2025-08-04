@@ -4,8 +4,8 @@ import { ModalController, ToastController } from '@ionic/angular';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { Subject } from 'rxjs';
 
-import { AttendanceService } from '../services/attendance.service';
-import { Session, AttendanceSummary } from '../models/attendance.model';
+import { AttendanceService } from './services/attendance.service';
+import { Session, AttendanceSummary } from './models/attendance.model';
 import { SessionDetailModalComponent } from './components/session-detail-modal/session-detail-modal.component';
 import { BulkAttendanceModalComponent } from './components/bulk-attendance-modal/bulk-attendance-modal.component';
 import { SessionMembersComponent } from './components/session-members/session-members.component';

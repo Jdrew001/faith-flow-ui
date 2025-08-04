@@ -3,8 +3,8 @@ import { ModalController, ToastController, ActionSheetController } from '@ionic/
 import { FormControl } from '@angular/forms';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
-import { AttendanceService } from '../../../services/attendance.service';
-import { Session, AttendanceRecord, Person } from '../../../models/attendance.model';
+import { AttendanceService } from '../../services/attendance.service';
+import { Session, AttendanceRecord, Person } from '../../models/attendance.model';
 import { AutoHideHeaderDirective } from '../../../shared/directives';
 
 interface MemberAttendance {
