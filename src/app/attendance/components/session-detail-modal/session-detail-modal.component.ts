@@ -2,6 +2,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { ModalController } from '@ionic/angular';
 import { AttendanceService } from '../../services/attendance.service';
 import { AttendanceRecord, Session } from '../../models/attendance.model';
+import { TimeUtils } from '../../../shared/utils/time.utils';
 
 @Component({
   selector: 'app-session-detail-modal',
@@ -64,10 +65,7 @@ export class SessionDetailModalComponent implements OnInit {
   }
 
   formatTime(time: string): string {
-    return new Date(`2000-01-01 ${time}`).toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit'
-    });
+    return TimeUtils.formatTime12Hour(time);
   }
 
   getStatusIcon(status: string): string {

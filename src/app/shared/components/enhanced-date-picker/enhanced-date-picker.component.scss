@@ -1,0 +1,614 @@
+.enhanced-date-picker {
+  position: relative;
+  width: 100%;
+  
+  &.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+}
+
+.date-input-wrapper {
+  position: relative;
+  cursor: pointer;
+  
+  .input-display {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #3a3a3c;
+    border: 2px solid #48484a;
+    border-radius: 12px;
+    padding: 20px 16px 20px 48px;
+    min-height: 52px;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      border-color: #5a5a5c;
+      background: #404042;
+    }
+    
+    &:focus-within {
+      border-color: #007aff;
+      box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+      background: #404042;
+    }
+    
+    &.has-value {
+      border-color: #007aff;
+      background: #404042;
+    }
+    
+    .calendar-icon {
+      position: absolute;
+      left: 16px;
+      font-size: 1.2rem;
+      color: #8e8e93;
+      flex-shrink: 0;
+    }
+    
+    .date-text {
+      flex: 1;
+      color: #ffffff;
+      font-size: 1rem;
+      font-weight: 500;
+      margin-left: 24px;
+    }
+    
+    &.placeholder .date-text {
+      color: #8e8e93;
+      font-weight: 400;
+    }
+    
+    .dropdown-icon {
+      font-size: 1rem;
+      color: #8e8e93;
+      transition: transform 0.2s ease;
+      flex-shrink: 0;
+      
+      &.rotated {
+        transform: rotate(180deg);
+      }
+    }
+  }
+  
+  .floating-label {
+    position: absolute;
+    top: -10px;
+    left: 44px;
+    background: #2c2c2e;
+    padding: 0 8px;
+    font-size: 0.85rem;
+    color: #8e8e93;
+    font-weight: 500;
+    pointer-events: none;
+  }
+}
+
+.date-picker-panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: #2c2c2e;
+  border: 2px solid #48484a;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+  margin-top: 8px;
+  overflow: hidden;
+  animation: slideDown 0.2s ease-out;
+  
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  &.datetime-mode {
+    min-height: 520px;
+  }
+}
+
+// Remove backdrop to prevent UI freezing
+
+.quick-options {
+  display: flex;
+  gap: 8px;
+  padding: 16px;
+  border-bottom: 1px solid #3a3a3c;
+  
+  .quick-option-btn {
+    flex: 1;
+    background: #3a3a3c;
+    border: 2px solid #48484a;
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: #ffffff;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background: #007aff;
+      border-color: #007aff;
+      transform: translateY(-1px);
+    }
+    
+    &:active {
+      transform: translateY(0);
+    }
+  }
+}
+
+.calendar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid #3a3a3c;
+  
+  .nav-btn {
+    background: #3a3a3c;
+    border: 2px solid #48484a;
+    border-radius: 8px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    
+    &:hover {
+      background: #007aff;
+      border-color: #007aff;
+      transform: scale(1.05);
+    }
+    
+    ion-icon {
+      font-size: 1.1rem;
+    }
+  }
+  
+  .month-year {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    
+    span {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #ffffff;
+    }
+    
+    .today-btn {
+      background: rgba(0, 122, 255, 0.1);
+      border: 1px solid rgba(0, 122, 255, 0.3);
+      border-radius: 6px;
+      padding: 4px 8px;
+      color: #007aff;
+      font-size: 0.8rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background: rgba(0, 122, 255, 0.2);
+        border-color: rgba(0, 122, 255, 0.5);
+      }
+    }
+  }
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  padding: 16px;
+  
+  .weekday-header {
+    text-align: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #8e8e93;
+    padding: 8px 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 40px;
+    
+    &:hover:not(.disabled):not(.empty) {
+      background: rgba(0, 122, 255, 0.1);
+      border-color: rgba(0, 122, 255, 0.3);
+      transform: scale(1.05);
+    }
+    
+    &.today {
+      background: rgba(0, 122, 255, 0.2);
+      border-color: #007aff;
+      color: #007aff;
+      font-weight: 600;
+    }
+    
+    &.selected {
+      background: #007aff;
+      border-color: #007aff;
+      color: #ffffff;
+      font-weight: 600;
+      transform: scale(1.1);
+      
+      &:hover {
+        background: #0056d3;
+        border-color: #0056d3;
+      }
+    }
+    
+    &.disabled {
+      color: #48484a;
+      cursor: not-allowed;
+      
+      &:hover {
+        background: transparent;
+        border-color: transparent;
+        transform: none;
+      }
+    }
+    
+    &.empty {
+      visibility: hidden;
+      pointer-events: none;
+    }
+  }
+}
+
+.picker-actions {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  border-top: 1px solid #3a3a3c;
+  
+  .action-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: 2px solid transparent;
+    
+    &.clear {
+      background: transparent;
+      border-color: #48484a;
+      color: #8e8e93;
+      
+      &:hover {
+        background: #3a3a3c;
+        color: #ffffff;
+        border-color: #5a5a5c;
+        transform: translateY(-1px);
+      }
+    }
+    
+    &.close {
+      background: linear-gradient(135deg, #007aff, #0056d3);
+      border-color: #007aff;
+      color: #ffffff;
+      
+      &:hover {
+        background: linear-gradient(135deg, #0056d3, #003d94);
+        border-color: #0056d3;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3);
+      }
+    }
+    
+    &:active {
+      transform: translateY(0);
+    }
+    
+    ion-icon {
+      font-size: 1rem;
+    }
+  }
+}
+
+// Tab Navigation
+.tab-navigation {
+  display: flex;
+  border-bottom: 1px solid #3a3a3c;
+  
+  .tab-button {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 16px;
+    background: transparent;
+    border: none;
+    color: #8e8e93;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    
+    &:hover:not(.disabled) {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.05);
+    }
+    
+    &.active {
+      color: #007aff;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 20%;
+        right: 20%;
+        height: 3px;
+        background: #007aff;
+        border-radius: 3px 3px 0 0;
+      }
+    }
+    
+    &.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    ion-icon {
+      font-size: 1.1rem;
+    }
+  }
+}
+
+.tab-content {
+  &.hidden {
+    display: none;
+  }
+  
+  &.time-tab {
+    padding: 0;
+  }
+}
+
+// Time Selection Styles
+.common-times {
+  padding: 20px;
+  border-bottom: 1px solid #3a3a3c;
+  
+  h4 {
+    margin: 0 0 12px 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #8e8e93;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .time-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    
+    .time-option {
+      background: #3a3a3c;
+      border: 2px solid #48484a;
+      border-radius: 8px;
+      padding: 10px;
+      color: #ffffff;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      
+      &:hover {
+        background: rgba(0, 122, 255, 0.1);
+        border-color: rgba(0, 122, 255, 0.3);
+        transform: translateY(-1px);
+      }
+      
+      &.selected {
+        background: #007aff;
+        border-color: #007aff;
+        color: #ffffff;
+      }
+    }
+  }
+}
+
+.time-picker {
+  padding: 20px;
+  
+  h4 {
+    margin: 0 0 20px 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #8e8e93;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .time-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 24px;
+    
+    .time-control {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      
+      .time-btn {
+        background: #3a3a3c;
+        border: 2px solid #48484a;
+        border-radius: 8px;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        
+        &:hover {
+          background: #007aff;
+          border-color: #007aff;
+          transform: scale(1.1);
+        }
+        
+        &:active {
+          transform: scale(0.95);
+        }
+        
+        ion-icon {
+          font-size: 1rem;
+        }
+      }
+      
+      .time-display {
+        background: #3a3a3c;
+        border: 2px solid #007aff;
+        border-radius: 12px;
+        padding: 12px 20px;
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: #ffffff;
+        min-width: 80px;
+        text-align: center;
+      }
+      
+      &.period {
+        margin-left: 8px;
+        
+        .period-btn {
+          background: #007aff;
+          border: none;
+          border-radius: 12px;
+          padding: 12px 24px;
+          color: #ffffff;
+          font-size: 1.2rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          height: 56px;
+          
+          &:hover {
+            background: #0056d3;
+            transform: scale(1.05);
+          }
+          
+          &:active {
+            transform: scale(0.95);
+          }
+        }
+      }
+    }
+    
+    .time-separator {
+      font-size: 2rem;
+      font-weight: 600;
+      color: #ffffff;
+      margin: 0 -8px;
+    }
+  }
+  
+  .datetime-preview {
+    background: rgba(0, 122, 255, 0.1);
+    border: 2px solid rgba(0, 122, 255, 0.3);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 20px;
+    
+    ion-icon {
+      font-size: 1.2rem;
+      color: #007aff;
+    }
+    
+    span {
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 480px) {
+  .quick-options {
+    .quick-option-btn {
+      font-size: 0.8rem;
+      padding: 6px 8px;
+    }
+  }
+  
+  .calendar-grid {
+    padding: 12px;
+    gap: 2px;
+    
+    .calendar-day {
+      min-height: 36px;
+      font-size: 0.85rem;
+    }
+  }
+  
+  .common-times .time-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .time-controls {
+    .time-control {
+      .time-display {
+        font-size: 1.5rem;
+        min-width: 60px;
+        padding: 10px 16px;
+      }
+      
+      &.period .period-btn {
+        font-size: 1rem;
+        padding: 10px 20px;
+        height: 48px;
+      }
+    }
+    
+    .time-separator {
+      font-size: 1.5rem;
+    }
+  }
+}

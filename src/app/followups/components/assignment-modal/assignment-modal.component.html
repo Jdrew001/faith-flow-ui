@@ -106,18 +106,12 @@
 
           <!-- Due Date -->
           <div class="datetime-section">
-            <div class="datetime-header">
-              <ion-icon name="calendar-outline" class="field-icon"></ion-icon>
-              <label class="datetime-label">Due Date</label>
-            </div>
-            <div class="datetime-wrapper">
-              <ion-datetime 
-                formControlName="dueDate"
-                presentation="date"
-                [min]="getMinDate()"
-                class="full-width-datetime">
-              </ion-datetime>
-            </div>
+            <app-enhanced-date-picker
+              formControlName="dueDate"
+              label="Due Date"
+              placeholder="Select due date"
+              [minDate]="getMinDate()">
+            </app-enhanced-date-picker>
           </div>
 
           <!-- Assignment Notes -->
