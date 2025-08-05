@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
-import { ToastController } from '@ionic/angular';
+import { ToastController, NavController } from '@ionic/angular';
 import { VerifyCodeResponse } from '../model/auth.model';
 import { OtpService } from '../services/otp.service';
 import { Subscription } from 'rxjs';
@@ -34,7 +34,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private router: Router,
     private toastController: ToastController,
-    private otpService: OtpService
+    private otpService: OtpService,
+    private navCtrl: NavController
   ) {}
 
   ngOnInit() {
@@ -134,7 +135,7 @@ export class LoginComponent implements OnInit, OnDestroy {
         next: (response: VerifyCodeResponse) => {
           if (response.success) {
             this.showSuccessToast(`Welcome, ${response.user.name}!`);
-            this.router.navigate(['/summary'], { replaceUrl: true });
+            this.navCtrl.navigateRoot('/summary');
           } else {
             this.showErrorToast('Invalid verification code');
             this.clearOtp();
@@ -165,7 +166,7 @@ export class LoginComponent implements OnInit, OnDestroy {
       // Stop OTP listener when going back
       this.otpService.stopOtpListener();
     } else {
-      this.router.navigate(['/welcome'], { replaceUrl: true });
+      this.navCtrl.navigateBack('/welcome');
     }
   }
 

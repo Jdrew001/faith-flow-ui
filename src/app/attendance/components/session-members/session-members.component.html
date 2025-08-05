@@ -7,7 +7,7 @@
           <ion-icon name="arrow-back" slot="icon-only"></ion-icon>
         </ion-button>
       </ion-buttons>
-      <ion-title>{{ session?.title }}</ion-title>
+      <ion-title>{{ session ? session.title : 'Session' }}</ion-title>
       <ion-buttons slot="end">
         <ion-button (click)="toggleViewMode()" fill="clear">
           <ion-icon [name]="viewMode === 'grid' ? 'list-outline' : 'grid-outline'" slot="icon-only"></ion-icon>

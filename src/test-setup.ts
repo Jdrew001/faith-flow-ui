@@ -94,6 +94,14 @@ Object.assign(global, {
   xdescribe: describe.skip
 });
 
+// Mock Ionic's global configuration to prevent icon loading errors
+(window as any).Ionic = {
+  config: {
+    _testing: true,
+    platform: {}
+  }
+};
+
 // Patch Zone.js for tests
 import { TestBed } from '@angular/core/testing';
 

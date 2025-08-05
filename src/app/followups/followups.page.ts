@@ -1,10 +1,12 @@
 import { Component, OnInit } from '@angular/core';
 import { NavController, MenuController, ViewDidEnter, ModalController } from '@ionic/angular';
 import { ActivatedRoute } from '@angular/router';
-import { AssignmentForm, Assignee } from './components/assignment-modal/assignment-modal.component';
+import { AssignmentForm } from './components/assignment-modal/assignment-modal.component';
+import { Assignee } from '../services/assignee.service';
 import { FollowupModalComponent } from './components/followup-modal/followup-modal.component';
 import { FollowupService } from './services/followup.service';
 import { FollowupDto, FollowupFilters } from './models/followup.model';
+import { AssigneeService } from '../services/assignee.service';
 
 export interface FollowUpItem {
   id: string;
@@ -65,11 +67,6 @@ export class FollowupsPage implements ViewDidEnter {
 
   assignees: Assignee[] = [
     { value: 'all', label: 'All Assignees' },
-    { value: 'Pastor John', label: 'Pastor John', role: 'Lead Pastor', avatar: 'PJ', color: 'primary' },
-    { value: 'Sarah Wilson', label: 'Sarah Wilson', role: 'Care Pastor', avatar: 'SW', color: 'secondary' },
-    { value: 'Mike Johnson', label: 'Mike Johnson', role: 'Youth Pastor', avatar: 'MJ', color: 'tertiary' },
-    { value: 'Lisa Chen', label: 'Lisa Chen', role: 'Admin', avatar: 'LC', color: 'success' },
-    { value: 'David Brown', label: 'David Brown', role: 'Volunteer Coordinator', avatar: 'DB', color: 'warning' },
     { value: 'unassigned', label: 'Unassigned' }
   ];
 
@@ -86,7 +83,8 @@ export class FollowupsPage implements ViewDidEnter {
     private menuCtrl: MenuController,
     private route: ActivatedRoute,
     private modalController: ModalController,
-    private followupService: FollowupService
+    private followupService: FollowupService,
+    private assigneeService: AssigneeService
   ) { }
 
   ionViewDidEnter() {
@@ -98,7 +96,26 @@ export class FollowupsPage implements ViewDidEnter {
       this.showBackButton = params['fromSummary'] === 'true';
     });
     
+    // Load assignees from backend
+    this.loadAssignees();
+    
     this.loadFollowups();
+  }
+
+  async loadAssignees() {
+    try {
+      const fetchedAssignees = await this.assigneeService.getAssignees();
+      
+      // Merge with static filter options
+      this.assignees = [
+        { value: 'all', label: 'All Assignees' },
+        ...fetchedAssignees,
+        { value: 'unassigned', label: 'Unassigned' }
+      ];
+    } catch (error) {
+      console.error('Error loading assignees:', error);
+      // Keep existing assignees as fallback
+    }
   }
 
   async loadFollowups() {

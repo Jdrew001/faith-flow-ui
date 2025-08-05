@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { IonicModule } from '@ionic/angular';
+import { IonicModule, NavController } from '@ionic/angular';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
@@ -11,6 +11,12 @@ describe('SummaryComponent', () => {
   let fixture: ComponentFixture<SummaryComponent>;
 
   beforeEach(() => {
+    const navCtrlSpy = {
+      navigateForward: vi.fn(),
+      navigateRoot: vi.fn(),
+      navigateBack: vi.fn()
+    };
+    
     TestBed.configureTestingModule({
       declarations: [ SummaryComponent ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -18,6 +24,9 @@ describe('SummaryComponent', () => {
         IonicModule.forRoot(),
         HttpClientTestingModule,
         RouterTestingModule
+      ],
+      providers: [
+        { provide: NavController, useValue: navCtrlSpy }
       ]
     }).compileComponents();
 

@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
-import { MenuController, ViewDidEnter } from '@ionic/angular';
+import { MenuController, ViewDidEnter, NavController } from '@ionic/angular';
 import { AuthService } from '../auth/services/auth.service';
 import { DashboardService } from './services/dashboard.service';
 import { AttendanceStats, FollowUpItem, UpcomingEvent, EngagementData, WorkflowTriggers, DashboardMetrics } from './models/dashboard.model';
@@ -60,7 +60,8 @@ export class SummaryComponent implements ViewDidEnter {
     private authService: AuthService,
     private dashboardService: DashboardService,
     private router: Router,
-    private menuCtrl: MenuController
+    private menuCtrl: MenuController,
+    private navCtrl: NavController
   ) {
     this.currentUser$ = this.authService.currentUser$;
   }
@@ -244,12 +245,12 @@ export class SummaryComponent implements ViewDidEnter {
   }
 
   onViewAllFollowUps() {
-    this.router.navigate(['/followups'], { queryParams: { fromSummary: 'true' } });
+    this.navCtrl.navigateForward('/followups', { queryParams: { fromSummary: 'true' } });
   }
 
   onGoToSessions() {
     // Navigate to attendance page
-    this.router.navigate(['/attendance']);
+    this.navCtrl.navigateForward('/attendance');
   }
 
   onViewWorkflows() {
@@ -353,7 +354,7 @@ export class SummaryComponent implements ViewDidEnter {
 
 
   onGoToAttendance() {
-    this.router.navigate(['/attendance']);
+    this.navCtrl.navigateForward('/attendance');
   }
 
   onViewFollowUp(item: FollowUpItem) {

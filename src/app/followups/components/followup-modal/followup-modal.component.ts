@@ -4,6 +4,8 @@ import { ModalController, LoadingController, ToastController } from '@ionic/angu
 import { FollowupService } from '../../services/followup.service';
 import { FollowupDto, CreateFollowupDto, UpdateFollowupDto } from '../../models/followup.model';
 import { ReferenceService, ReferenceOption } from '../../../services/reference.service';
+import { SelectedMember } from '../../../shared/components/member-search/member-search.component';
+import { MemberService } from '../../../services/member.service';
 
 @Component({
   selector: 'app-followup-modal',
@@ -30,7 +32,8 @@ export class FollowupModalComponent implements OnInit {
     private followupService: FollowupService,
     private loadingController: LoadingController,
     private toastController: ToastController,
-    private referenceService: ReferenceService
+    private referenceService: ReferenceService,
+    private memberService: MemberService
   ) {}
 
   async ngOnInit() {
@@ -77,11 +80,76 @@ export class FollowupModalComponent implements OnInit {
     }
   }
 
-  private populateForm() {
+  private async populateForm() {
     if (!this.followupData) return;
 
+    // Try to find and set the member
+    if (this.followupData.memberId) {
+      // If we have a memberId, fetch the member details
+      try {
+        const member = await this.memberService.getMemberById(this.followupData.memberId);
+        const selectedMember: SelectedMember = {
+          id: member.id,
+          name: member.name,
+          email: member.email,
+          phone: member.phone
+        };
+        
+        this.followupForm.patchValue({
+          selectedMember: selectedMember
+        });
+        
+        // Also update contact info from the selected member
+        if (selectedMember.email || selectedMember.phone) {
+          this.followupForm.patchValue({
+            contactInfo: {
+              email: selectedMember.email || this.followupData.contactInfo?.email || '',
+              phone: selectedMember.phone || this.followupData.contactInfo?.phone || ''
+            }
+          });
+        }
+      } catch (error) {
+        console.error('Error loading member details:', error);
+      }
+    } else if (this.followupData.personName) {
+      // If no memberId but we have personName, try to find the member
+      try {
+        const searchResult = await this.memberService.searchMembersTypeahead(this.followupData.personName);
+        if (searchResult.results && searchResult.results.length > 0) {
+          // Try to find exact match
+          const exactMatch = searchResult.results.find(m => 
+            m.name.toLowerCase() === this.followupData!.personName.toLowerCase()
+          );
+          
+          if (exactMatch) {
+            const selectedMember: SelectedMember = {
+              id: exactMatch.id,
+              name: exactMatch.name,
+              email: exactMatch.email,
+              phone: exactMatch.phone
+            };
+            
+            this.followupForm.patchValue({
+              selectedMember: selectedMember
+            });
+            
+            // Also update contact info from the selected member
+            if (selectedMember.email || selectedMember.phone) {
+              this.followupForm.patchValue({
+                contactInfo: {
+                  email: selectedMember.email || this.followupData.contactInfo?.email || '',
+                  phone: selectedMember.phone || this.followupData.contactInfo?.phone || ''
+                }
+              });
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error searching for member by name:', error);
+      }
+    }
+
     this.followupForm.patchValue({
-      personName: this.followupData.personName || '',
       title: this.followupData.title || '',
       description: this.followupData.description || '',
       type: this.followupData.type || 'Follow-up',
@@ -99,7 +167,7 @@ export class FollowupModalComponent implements OnInit {
 
   private initializeForm(): void {
     this.followupForm = this.formBuilder.group({
-      personName: ['', Validators.required],
+      selectedMember: [null, Validators.required],
       title: ['', Validators.required],
       description: [''],
       type: ['Follow-up', Validators.required],
@@ -113,14 +181,19 @@ export class FollowupModalComponent implements OnInit {
         email: ['', Validators.email]
       })
     });
+
+    // Watch for member selection changes
+    this.followupForm.get('selectedMember')?.valueChanges.subscribe(member => {
+      this.onMemberSelected(member);
+    });
   }
 
   get isEditing(): boolean {
     return !!this.followupId;
   }
 
-  get personNameControl() {
-    return this.followupForm.get('personName');
+  get selectedMemberControl() {
+    return this.followupForm.get('selectedMember');
   }
 
   get titleControl() {
@@ -163,6 +236,11 @@ export class FollowupModalComponent implements OnInit {
     return this.followupForm.get('contactInfo.email');
   }
 
+  get isContactInfoFromMember(): boolean {
+    const selectedMember = this.followupForm.get('selectedMember')?.value;
+    return !!selectedMember && (!!selectedMember.email || !!selectedMember.phone);
+  }
+
   getAssigneesList() {
     return this.assignees.filter(a => a.value !== 'all' && a.value !== 'unassigned');
   }
@@ -173,6 +251,23 @@ export class FollowupModalComponent implements OnInit {
 
   isFormValid(): boolean {
     return this.followupForm.valid;
+  }
+
+  onMemberSelected(member: SelectedMember | null) {
+    if (member) {
+      // Update contact info if available from member
+      const contactInfo = this.followupForm.get('contactInfo');
+      if (member.email) {
+        contactInfo?.patchValue({ email: member.email });
+      }
+      if (member.phone) {
+        contactInfo?.patchValue({ phone: member.phone });
+      }
+    } else {
+      // Clear contact info if member is deselected
+      const contactInfo = this.followupForm.get('contactInfo');
+      contactInfo?.patchValue({ email: '', phone: '' });
+    }
   }
 
   async saveFollowup() {
@@ -196,12 +291,18 @@ export class FollowupModalComponent implements OnInit {
         formValue.dueDate = new Date(formValue.dueDate).toISOString();
       }
 
+      // Extract member information
+      const selectedMember = formValue.selectedMember as SelectedMember;
+      const personName = selectedMember?.name || '';
+      const memberId = selectedMember?.id;
+
       let savedFollowup: FollowupDto;
 
       if (this.isEditing && this.followupId) {
         // Update existing followup
         const updateData: UpdateFollowupDto = {
-          personName: formValue.personName,
+          personName: personName,
+          memberId: memberId,
           title: formValue.title,
           description: formValue.description,
           type: formValue.type,
@@ -218,7 +319,8 @@ export class FollowupModalComponent implements OnInit {
       } else {
         // Create new followup
         const createData: CreateFollowupDto = {
-          personName: formValue.personName,
+          personName: personName,
+          memberId: memberId,
           title: formValue.title,
           description: formValue.description,
           type: formValue.type,
