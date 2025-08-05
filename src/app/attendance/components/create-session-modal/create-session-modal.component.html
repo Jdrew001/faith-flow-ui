@@ -53,26 +53,13 @@
 
         <!-- Date and Time -->
         <div class="datetime-section" [class.error]="hasFieldError('datetime')">
-          <div class="datetime-header">
-            <ion-icon name="calendar-outline" class="field-icon"></ion-icon>
-            <ion-label class="datetime-label">Date & Time *</ion-label>
-          </div>
-          <div class="datetime-wrapper">
-            <ion-datetime 
-              formControlName="datetime"
-              [min]="getMinDateTime()"
-              presentation="date-time"
-              class="full-width-datetime"
-              [showDefaultButtons]="true"
-              [showClearButton]="false"
-              size="cover"
-              [preferWheel]="false">
-              <ion-buttons slot="buttons">
-                <ion-button (click)="clearDateTime()">Clear</ion-button>
-                <ion-button (click)="confirmDateTime()">Done</ion-button>
-              </ion-buttons>
-            </ion-datetime>
-          </div>
+          <app-enhanced-date-picker
+            formControlName="datetime"
+            label="Date & Time"
+            placeholder="Select date and time"
+            mode="datetime"
+          >
+          </app-enhanced-date-picker>
           <div class="error-message" *ngIf="hasFieldError('datetime')">
             <ion-icon name="alert-circle-outline"></ion-icon>
             {{ getFieldError('datetime') }}

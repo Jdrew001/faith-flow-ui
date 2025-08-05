@@ -1,0 +1,169 @@
+<div class="enhanced-date-picker" [class.disabled]="disabled">
+  <!-- Input Display -->
+  <div class="date-input-wrapper" (click)="togglePicker($event)">
+    <div class="input-display" [class.has-value]="selectedDate" [class.placeholder]="!selectedDate">
+      <ion-icon [name]="mode === 'datetime' ? 'time-outline' : 'calendar-outline'" class="calendar-icon"></ion-icon>
+      <span class="date-text">{{ displayValue || placeholder || 'Select date' }}</span>
+      <ion-icon name="chevron-down" class="dropdown-icon" [class.rotated]="isOpen"></ion-icon>
+    </div>
+    <label class="floating-label" *ngIf="label">{{ label }}<span *ngIf="required"> *</span></label>
+  </div>
+
+  <!-- Dropdown Panel -->
+  <div class="date-picker-panel" [class.open]="isOpen" [class.datetime-mode]="mode === 'datetime'" *ngIf="isOpen">
+    <!-- Tab Navigation for DateTime Mode -->
+    <div class="tab-navigation" *ngIf="mode === 'datetime'">
+      <button 
+        type="button"
+        class="tab-button" 
+        [class.active]="activeTab === 'date'"
+        (click)="switchTab('date')">
+        <ion-icon name="calendar-outline"></ion-icon>
+        Date
+      </button>
+      <button 
+        type="button"
+        class="tab-button" 
+        [class.active]="activeTab === 'time'"
+        [class.disabled]="!selectedDateObj"
+        (click)="switchTab('time')">
+        <ion-icon name="time-outline"></ion-icon>
+        Time
+      </button>
+    </div>
+
+    <!-- Date Selection Tab -->
+    <div class="tab-content" [class.hidden]="mode === 'datetime' && activeTab !== 'date'">
+      <!-- Quick Options -->
+      <div class="quick-options">
+        <button 
+          *ngFor="let option of quickOptions"
+          type="button" 
+          class="quick-option-btn"
+          (click)="selectQuickOption(option.value)">
+          {{ option.label }}
+        </button>
+      </div>
+
+      <!-- Calendar Header -->
+      <div class="calendar-header">
+        <button type="button" class="nav-btn" (click)="previousMonth()">
+          <ion-icon name="chevron-back"></ion-icon>
+        </button>
+        
+        <div class="month-year">
+          <span>{{ monthName }}</span>
+          <button type="button" class="today-btn" (click)="goToToday()" *ngIf="showTodayButton()">
+            Today
+          </button>
+        </div>
+        
+        <button type="button" class="nav-btn" (click)="nextMonth()">
+          <ion-icon name="chevron-forward"></ion-icon>
+        </button>
+      </div>
+
+      <!-- Calendar Grid -->
+      <div class="calendar-grid">
+        <!-- Week Day Headers -->
+        <div class="weekday-header" *ngFor="let day of weekDays">
+          {{ day }}
+        </div>
+        
+        <!-- Calendar Days -->
+        <button
+          *ngFor="let date of calendarDays; trackBy: trackByIndex"
+          type="button"
+          class="calendar-day"
+          [class.today]="date && isToday(date)"
+          [class.selected]="date && isSelected(date)"
+          [class.disabled]="!date || isDateDisabled(date)"
+          [class.empty]="!date"
+          [disabled]="!date || isDateDisabled(date)"
+          (click)="date && selectDate(date)">
+          <span *ngIf="date">{{ date.getDate() }}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Time Selection Tab -->
+    <div class="tab-content time-tab" [class.hidden]="mode !== 'datetime' || activeTab !== 'time'" *ngIf="mode === 'datetime'">
+      <!-- Common Time Options -->
+      <div class="common-times">
+        <h4>Quick Select</h4>
+        <div class="time-grid">
+          <button 
+            type="button"
+            *ngFor="let time of commonTimes"
+            class="time-option"
+            [class.selected]="selectedHour === (time.hour > 12 ? time.hour - 12 : time.hour) && selectedMinute === time.minute && selectedPeriod === time.period"
+            (click)="selectCommonTime(time)">
+            {{ time.label }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Time Picker -->
+      <div class="time-picker">
+        <h4>Custom Time</h4>
+        <div class="time-controls">
+          <!-- Hour Control -->
+          <div class="time-control">
+            <button type="button" class="time-btn increment" (click)="incrementHour()">
+              <ion-icon name="chevron-up"></ion-icon>
+            </button>
+            <div class="time-display">
+              {{ selectedHour < 10 ? '0' + selectedHour : selectedHour }}
+            </div>
+            <button type="button" class="time-btn decrement" (click)="decrementHour()">
+              <ion-icon name="chevron-down"></ion-icon>
+            </button>
+          </div>
+
+          <div class="time-separator">:</div>
+
+          <!-- Minute Control -->
+          <div class="time-control">
+            <button type="button" class="time-btn increment" (click)="incrementMinute()">
+              <ion-icon name="chevron-up"></ion-icon>
+            </button>
+            <div class="time-display">
+              {{ selectedMinute < 10 ? '0' + selectedMinute : selectedMinute }}
+            </div>
+            <button type="button" class="time-btn decrement" (click)="decrementMinute()">
+              <ion-icon name="chevron-down"></ion-icon>
+            </button>
+          </div>
+
+          <!-- Period Control -->
+          <div class="time-control period">
+            <button type="button" class="period-btn" (click)="togglePeriod()">
+              {{ selectedPeriod }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Selected DateTime Preview -->
+        <div class="datetime-preview" *ngIf="selectedDateObj">
+          <ion-icon name="calendar-outline"></ion-icon>
+          <span>{{ getDateTimePreview() }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="picker-actions">
+      <button type="button" class="action-btn clear" (click)="clearDate()" *ngIf="selectedDate">
+        <ion-icon name="close-outline"></ion-icon>
+        Clear
+      </button>
+      <button 
+        type="button"
+        class="action-btn close" 
+        (click)="mode === 'datetime' ? confirmDateTime() : closePicker()">
+        <ion-icon name="checkmark-outline"></ion-icon>
+        {{ mode === 'datetime' && activeTab === 'date' ? 'Next' : 'Done' }}
+      </button>
+    </div>
+  </div>
+</div>

@@ -255,56 +255,9 @@ ion-header ion-toolbar {
     .datetime-section {
       margin-bottom: 28px;
       
-      .datetime-header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 12px;
-        
-        .field-icon {
-          font-size: 1.2rem;
-          color: #007aff;
-          background: rgba(0, 122, 255, 0.1);
-          padding: 8px;
-          border-radius: 8px;
-        }
-        
-        .datetime-label {
-          font-weight: 600;
-          color: #ffffff;
-          font-size: 0.95rem;
-        }
-      }
-      
-      .datetime-wrapper {
-        background: #3a3a3c;
-        border: 2px solid #48484a;
-        border-radius: 12px;
-        padding: 0;
-        transition: all 0.3s ease;
-        overflow: visible; // Changed from hidden to visible
+      app-enhanced-date-picker {
+        display: block;
         width: 100%;
-        
-        &:focus-within {
-          border-color: #007aff;
-          box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
-          background: #404042;
-        }
-        
-        .full-width-datetime {
-          --background: transparent;
-          --color: #ffffff;
-          width: 100%;
-          display: block;
-          padding: 0;
-          margin: 0;
-          
-          // Force full width on iOS
-          &.ios {
-            width: 100% !important;
-            max-width: 100% !important;
-          }
-        }
       }
     }
     

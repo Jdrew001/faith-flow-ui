@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ModalController, ToastController } from '@ionic/angular';
 import { AttendanceService } from '../../services/attendance.service';
 import { Session, CreateSessionDto } from '../../models/attendance.model';
+import { TimeUtils } from '../../../shared/utils/time.utils';
 
 export interface CreateSessionForm {
   name: string;
@@ -114,7 +115,7 @@ export class CreateSessionModalComponent implements OnInit {
       title: formData.name,
       description: formData.description || undefined,
       date: sessionDate,
-      startTime: sessionDate.toTimeString().slice(0, 5), // HH:MM format
+      startTime: TimeUtils.formatTime12Hour(sessionDate),
       endTime: this.calculateEndTime(sessionDate),
       location: formData.location,
       type: formData.type as 'service' | 'meeting' | 'event' | 'class' || 'service',
@@ -124,9 +125,9 @@ export class CreateSessionModalComponent implements OnInit {
   }
 
   private calculateEndTime(startDate: Date): string {
-    // Default to 1 hour later
-    const endDate = new Date(startDate.getTime() + 60 * 60 * 1000);
-    return endDate.toTimeString().slice(0, 5);
+    // Default to 1.5 hours later
+    const endDate = new Date(startDate.getTime() + 90 * 60 * 1000);
+    return TimeUtils.formatTime12Hour(endDate);
   }
 
   private markFormGroupTouched() {

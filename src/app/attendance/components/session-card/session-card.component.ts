@@ -1,4 +1,5 @@
 import { Component, Input } from '@angular/core';
+import { TimeUtils } from '../../../shared/utils/time.utils';
 
 @Component({
   selector: 'app-session-card',
@@ -44,9 +45,6 @@ export class SessionCardComponent {
 
   formatTime(time: string): string {
     if (!time) return '';
-    return new Date(`2000-01-01 ${time}`).toLocaleTimeString('en-US', {
-      hour: 'numeric',
-      minute: '2-digit'
-    });
+    return TimeUtils.formatTime12Hour(time);
   }
 }

@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ModalController, LoadingController, ToastController } from '@ionic/angular';
 import { FollowupService } from '../../services/followup.service';
@@ -33,7 +33,8 @@ export class FollowupModalComponent implements OnInit {
     private loadingController: LoadingController,
     private toastController: ToastController,
     private referenceService: ReferenceService,
-    private memberService: MemberService
+    private memberService: MemberService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   async ngOnInit() {
@@ -82,6 +83,10 @@ export class FollowupModalComponent implements OnInit {
 
   private async populateForm() {
     if (!this.followupData) return;
+
+    // Log the status value for debugging
+    console.log('Followup status value:', this.followupData.status);
+    console.log('Available statuses:', this.statuses);
 
     // Try to find and set the member
     if (this.followupData.memberId) {
@@ -149,6 +154,7 @@ export class FollowupModalComponent implements OnInit {
       }
     }
 
+    // Set form values
     this.followupForm.patchValue({
       title: this.followupData.title || '',
       description: this.followupData.description || '',
@@ -163,6 +169,16 @@ export class FollowupModalComponent implements OnInit {
         email: this.followupData.contactInfo?.email || ''
       }
     });
+
+    // Force change detection for ion-select
+    setTimeout(() => {
+      if (this.followupData) {
+        this.followupForm.patchValue({
+          status: this.followupData.status || 'pending'
+        });
+        this.cdr.detectChanges();
+      }
+    }, 100);
   }
 
   private initializeForm(): void {
