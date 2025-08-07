@@ -12,7 +12,7 @@ interface MemberAttendance {
   personId: string;
   personName: string;
   avatar?: string;
-  status: 'Present' | 'Absent' | 'Late' | 'Excused' | 'Unmarked';
+  status: 'Present' | 'Absent' | 'Unmarked';
   timestamp?: string;
   notes?: string;
   selected?: boolean; // Add selection state
@@ -44,14 +44,12 @@ export class SessionMembersComponent implements OnInit, OnDestroy {
   // Stats
   presentCount = 0;
   absentCount = 0;
-  lateCount = 0;
-  excusedCount = 0;
   unmarkedCount = 0;
   attendanceRate = 0;
   
   // UI State
   viewMode: 'grid' | 'list' = 'grid';
-  showFilters = true;
+  showFilters = false;
   activeFilterCount = 0;
   lastUpdated: Date = new Date();
   showSuccessAnimation = false;
@@ -148,12 +146,6 @@ export class SessionMembersComponent implements OnInit, OnDestroy {
       case 'absent':
         filtered = filtered.filter(member => member.status === 'Absent');
         break;
-      case 'late':
-        filtered = filtered.filter(member => member.status === 'Late');
-        break;
-      case 'excused':
-        filtered = filtered.filter(member => member.status === 'Excused');
-        break;
     }
 
     this.filteredMembers = filtered;
@@ -162,14 +154,11 @@ export class SessionMembersComponent implements OnInit, OnDestroy {
   calculateStats() {
     this.presentCount = this.members.filter(m => m.status === 'Present').length;
     this.absentCount = this.members.filter(m => m.status === 'Absent').length;
-    this.lateCount = this.members.filter(m => m.status === 'Late').length;
-    this.excusedCount = this.members.filter(m => m.status === 'Excused').length;
     this.unmarkedCount = this.members.filter(m => m.status === 'Unmarked').length;
     
-    // Calculate attendance rate as present + late out of total members
-    const attendedCount = this.presentCount + this.lateCount;
+    // Calculate attendance rate as present out of total members
     this.attendanceRate = this.members.length > 0 ? 
-      Math.round((attendedCount / this.members.length) * 100) : 0;
+      Math.round((this.presentCount / this.members.length) * 100) : 0;
   }
 
   onFilterChange(filter: string) {
@@ -201,16 +190,10 @@ export class SessionMembersComponent implements OnInit, OnDestroy {
           handler: () => this.updateMemberStatus(member, 'Absent')
         },
         {
-          text: 'Late',
-          icon: 'time',
-          cssClass: member.status === 'Late' ? 'selected' : '',
-          handler: () => this.updateMemberStatus(member, 'Late')
-        },
-        {
-          text: 'Excused',
-          icon: 'information-circle',
-          cssClass: member.status === 'Excused' ? 'selected' : '',
-          handler: () => this.updateMemberStatus(member, 'Excused')
+          text: 'Unmarked',
+          icon: 'help-circle-outline',
+          cssClass: member.status === 'Unmarked' ? 'selected' : '',
+          handler: () => this.updateMemberStatus(member, 'Unmarked')
         },
         {
           text: 'Cancel',
@@ -223,7 +206,7 @@ export class SessionMembersComponent implements OnInit, OnDestroy {
     await actionSheet.present();
   }
 
-  async updateMemberStatus(member: MemberAttendance, status: 'Present' | 'Absent' | 'Late' | 'Excused' | 'Unmarked', event?: Event) {
+  async updateMemberStatus(member: MemberAttendance, status: 'Present' | 'Absent' | 'Unmarked', event?: Event) {
     if (event) {
       event.stopPropagation();
     }
@@ -235,8 +218,8 @@ export class SessionMembersComponent implements OnInit, OnDestroy {
       
       if (status === 'Unmarked') {
         member.timestamp = undefined;
-        // For unmarked status, we might want to clear the attendance record
-        // await this.attendanceService.clearAttendanceRecord(this.session.id, member.personId);
+        // Clear the attendance record for unmarked status
+        await this.attendanceService.updateAttendanceRecord(this.session.id, member.personId, 'Unmarked');
       } else {
         member.timestamp = new Date().toISOString();
         // Update in service for other statuses
@@ -365,7 +348,7 @@ export class SessionMembersComponent implements OnInit, OnDestroy {
     this.members.forEach(member => member.selected = false);
   }
 
-  async markSelectedAs(status: 'Present' | 'Absent' | 'Late' | 'Excused') {
+  async markSelectedAs(status: 'Present' | 'Absent' | 'Unmarked') {
     if (this.selectedMembers.size === 0) {
       await this.showToast('No members selected', 'warning');
       return;
@@ -532,7 +515,7 @@ export class SessionMembersComponent implements OnInit, OnDestroy {
     event.stopPropagation();
     
     // Cycle through: Unmarked -> Present -> Absent -> Unmarked
-    let newStatus: 'Present' | 'Absent' | 'Late' | 'Excused' | 'Unmarked';
+    let newStatus: 'Present' | 'Absent' | 'Unmarked';
     
     switch (member.status) {
       case 'Unmarked':
@@ -542,12 +525,6 @@ export class SessionMembersComponent implements OnInit, OnDestroy {
         newStatus = 'Absent';
         break;
       case 'Absent':
-        newStatus = 'Late';
-        break;
-      case 'Late':
-        newStatus = 'Excused';
-        break;
-      case 'Excused':
         newStatus = 'Unmarked';
         break;
       default:
@@ -561,8 +538,7 @@ export class SessionMembersComponent implements OnInit, OnDestroy {
     switch (status) {
       case 'Present': return 'checkmark-circle';
       case 'Absent': return 'remove-circle';
-      case 'Late': return 'time';
-      case 'Excused': return 'information-circle';
+      case 'Unmarked': return 'help-circle-outline';
       default: return 'help-circle-outline';
     }
   }
@@ -571,9 +547,8 @@ export class SessionMembersComponent implements OnInit, OnDestroy {
     switch (status) {
       case 'Present': return 'success';
       case 'Absent': return 'danger';
-      case 'Late': return 'warning';
-      case 'Excused': return 'medium';
-      default: return 'light';
+      case 'Unmarked': return 'warning';
+      default: return 'warning';
     }
   }
 

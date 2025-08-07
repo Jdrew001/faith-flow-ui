@@ -95,12 +95,8 @@
         color: #ff453a;
       }
       
-      &.late .stat-value {
-        color: #ff9500;
-      }
-      
       &.unmarked .stat-value {
-        color: #8e8e93;
+        color: #ff9500;
       }
       
       &.rate .stat-value {
@@ -468,18 +464,20 @@
           
           &.present {
             background: #34c759;
+            border: 2px solid #34c759;
+            box-shadow: 0 0 8px rgba(52, 199, 89, 0.3);
           }
           
           &.absent {
             background: #ff453a;
+            border: 2px solid #ff453a;
+            box-shadow: 0 0 8px rgba(255, 69, 58, 0.3);
           }
           
-          &.late {
+          &.unmarked {
             background: #ff9500;
-          }
-          
-          &.excused {
-            background: #8e8e93;
+            border: 2px solid #ff9500;
+            box-shadow: 0 0 8px rgba(255, 149, 0, 0.3);
           }
         }
       }
@@ -507,9 +505,7 @@
             
             &.present { color: #34c759; }
             &.absent { color: #ff453a; }
-            &.late { color: #ff9500; }
-            &.excused { color: #8e8e93; }
-            &.unmarked { color: #8e8e93; }
+            &.unmarked { color: #ff9500; }
           }
           
           .timestamp {
@@ -549,6 +545,7 @@
           
           &.present.active {
             color: #34c759;
+            background: rgba(52, 199, 89, 0.1);
             
             ion-icon {
               color: #34c759;
@@ -557,9 +554,19 @@
           
           &.absent.active {
             color: #ff453a;
+            background: rgba(255, 69, 58, 0.1);
             
             ion-icon {
               color: #ff453a;
+            }
+          }
+          
+          &.unmarked.active {
+            color: #ff9500;
+            background: rgba(255, 149, 0, 0.1);
+            
+            ion-icon {
+              color: #ff9500;
             }
           }
         }
@@ -669,19 +676,10 @@
               color: #ff453a;
             }
             
-            &.late {
-              background: rgba(255,149,0,0.2);
-              color: #ff9500;
-            }
-            
-            &.excused {
-              background: rgba(142,142,147,0.2);
-              color: #8e8e93;
-            }
-            
             &.unmarked {
-              background: rgba(142,142,147,0.1);
-              color: #8e8e93;
+              background: rgba(255, 149, 0, 0.2);
+              color: #ff9500;
+              border: 1px solid rgba(255, 149, 0, 0.3);
             }
           }
         }
@@ -739,16 +737,10 @@
             }
           }
           
-          &.late {
+          &.unmarked {
             border-color: #ff9500;
             color: #ff9500;
-            background: rgba(255,149,0,0.1);
-          }
-          
-          &.excused {
-            border-color: #8e8e93;
-            color: #8e8e93;
-            background: rgba(142,142,147,0.1);
+            background: rgba(255, 149, 0, 0.1);
           }
         }
       }
@@ -894,19 +886,11 @@
           }
         }
         
-        &.late {
+        &.unmarked {
           background: #ff9500;
           
           &:hover {
             background: #ffb340;
-          }
-        }
-        
-        &.excused {
-          background: #8e8e93;
-          
-          &:hover {
-            background: #aeaeb2;
           }
         }
       }
