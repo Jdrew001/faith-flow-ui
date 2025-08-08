@@ -43,10 +43,6 @@
         <span class="stat-value">{{ absentCount }}</span>
         <span class="stat-label">Absent</span>
       </div>
-      <div class="stat-item late" (click)="onFilterChange('late')">
-        <span class="stat-value">{{ lateCount }}</span>
-        <span class="stat-label">Late</span>
-      </div>
       <div class="stat-item unmarked" (click)="onFilterChange('unmarked')">
         <span class="stat-value">{{ unmarkedCount }}</span>
         <span class="stat-label">Unmarked</span>
@@ -117,14 +113,6 @@
           (click)="onFilterChange('absent')">
           <ion-icon name="close-circle-outline"></ion-icon>
           <ion-label>Absent ({{ absentCount }})</ion-label>
-        </ion-chip>
-        
-        <ion-chip 
-          [color]="selectedFilter === 'late' ? 'warning' : 'medium'"
-          [outline]="selectedFilter !== 'late'"
-          (click)="onFilterChange('late')">
-          <ion-icon name="time-outline"></ion-icon>
-          <ion-label>Late ({{ lateCount }})</ion-label>
         </ion-chip>
         
         <ion-chip 
@@ -201,9 +189,10 @@
                     (click)="updateMemberStatus(member, 'Absent', $event)">
               <ion-icon name="close-outline"></ion-icon>
             </button>
-            <button class="action-button more" 
-                    (click)="showMemberOptions(member, $event)">
-              <ion-icon name="ellipsis-horizontal"></ion-icon>
+            <button class="action-button unmarked" 
+                    [class.active]="member.status === 'Unmarked'"
+                    (click)="updateMemberStatus(member, 'Unmarked', $event)">
+              <ion-icon name="help-circle-outline"></ion-icon>
             </button>
           </div>
         </div>
@@ -297,14 +286,9 @@
         <span>Absent</span>
       </button>
       
-      <button class="fab-action late" (click)="markSelectedAs('Late')">
-        <ion-icon name="time"></ion-icon>
-        <span>Late</span>
-      </button>
-      
-      <button class="fab-action excused" (click)="markSelectedAs('Excused')">
-        <ion-icon name="information-circle"></ion-icon>
-        <span>Excused</span>
+      <button class="fab-action unmarked" (click)="markSelectedAs('Unmarked')">
+        <ion-icon name="help-circle-outline"></ion-icon>
+        <span>Unmarked</span>
       </button>
     </div>
   </div>

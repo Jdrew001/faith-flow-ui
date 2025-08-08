@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, Output, OnInit, OnChanges } from '@angu
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { FollowUpItem } from '../../followups.page';
 import { Assignee } from '../../../services/assignee.service';
+import { convertUTCToLocalDateString, convertLocalToUTC } from '../../../shared/utils/date-timezone.util';
 
 export interface AssignmentForm {
   assignedTo: string;
@@ -61,8 +62,8 @@ export class AssignmentModalComponent implements OnInit, OnChanges {
     }
   }
 
-  formatDateForInput(date: Date): string {
-    return date.toISOString().split('T')[0];
+  formatDateForInput(date: Date | string): string {
+    return convertUTCToLocalDateString(date);
   }
 
   closeModal() {
@@ -123,7 +124,7 @@ export class AssignmentModalComponent implements OnInit, OnChanges {
   }
 
   getMinDate(): string {
-    return new Date().toISOString().split('T')[0];
+    return convertUTCToLocalDateString(new Date());
   }
 
   get assignedToControl() {

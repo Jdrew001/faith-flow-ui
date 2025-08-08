@@ -7,6 +7,7 @@ import { FollowupModalComponent } from './components/followup-modal/followup-mod
 import { FollowupService } from './services/followup.service';
 import { FollowupDto, FollowupFilters } from './models/followup.model';
 import { AssigneeService } from '../services/assignee.service';
+import { convertUTCToLocalDate, convertLocalToUTC } from '../shared/utils/date-timezone.util';
 
 export interface FollowUpItem {
   id: string;
@@ -14,8 +15,8 @@ export interface FollowUpItem {
   title: string;
   description: string;
   type: string;
-  priority: 'high' | 'medium' | 'low';
-  status: 'pending' | 'in-progress' | 'completed';
+  priority: 'HIGH' | 'MEDIUM' | 'LOW';
+  status: 'OPEN' | 'IN_PROGRESS' | 'COMPLETED';
   assignedTo?: string;
   createdDate: Date;
   dueDate?: Date;
@@ -53,9 +54,9 @@ export class FollowupsPage implements ViewDidEnter {
   // Available filter options
   priorities = [
     { value: 'all', label: 'All Priorities' },
-    { value: 'high', label: 'High Priority' },
-    { value: 'medium', label: 'Medium Priority' },
-    { value: 'low', label: 'Low Priority' }
+    { value: 'HIGH', label: 'High Priority' },
+    { value: 'MEDIUM', label: 'Medium Priority' },
+    { value: 'LOW', label: 'Low Priority' }
   ];
 
   statuses = [
@@ -134,18 +135,18 @@ export class FollowupsPage implements ViewDidEnter {
       
       // Convert FollowupDto to FollowUpItem format for compatibility
       this.followups = response.followups.map(dto => ({
-        id: dto.id!,
-        personName: dto.personName,
-        title: dto.title,
-        description: dto.description || '',
-        type: dto.type,
-        priority: dto.priority,
-        status: dto.status,
-        assignedTo: dto.assignedTo,
-        createdDate: dto.createdDate ? new Date(dto.createdDate) : new Date(),
-        dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
-        notes: dto.notes,
-        contactInfo: dto.contactInfo
+          id: dto.id!,
+          personName: dto.personName,
+          title: dto.title,
+          description: dto.description || '',
+          type: dto.type,
+          priority: dto.priority,
+          status: dto.status,
+          assignedTo: dto.assignedTo,
+          createdDate: dto.createdDate ? new Date(dto.createdDate) : new Date(),
+          dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
+          notes: dto.notes,
+          contactInfo: dto.contactInfo
       }));
 
       this.filterFollowups();
@@ -196,12 +197,12 @@ export class FollowupsPage implements ViewDidEnter {
 
       switch (this.sortBy) {
         case 'priority':
-          const priorityOrder = { 'high': 3, 'medium': 2, 'low': 1 };
+          const priorityOrder = { 'HIGH': 3, 'MEDIUM': 2, 'LOW': 1 };
           aValue = priorityOrder[a.priority];
           bValue = priorityOrder[b.priority];
           break;
         case 'status':
-          const statusOrder = { 'pending': 3, 'in-progress': 2, 'completed': 1 };
+          const statusOrder = { 'OPEN': 3, 'IN_PROGRESS': 2, 'COMPLETED': 1 };
           aValue = statusOrder[a.status];
           bValue = statusOrder[b.status];
           break;
@@ -264,8 +265,8 @@ export class FollowupsPage implements ViewDidEnter {
 
   async markAsComplete(followUp: FollowUpItem) {
     try {
-      await this.followupService.updateStatus(followUp.id, 'completed');
-      followUp.status = 'completed';
+      await this.followupService.updateStatus(followUp.id, 'COMPLETED');
+      followUp.status = 'COMPLETED';
       this.filterFollowups();
     } catch (error) {
       console.error('Error marking followup as complete:', error);
@@ -274,8 +275,8 @@ export class FollowupsPage implements ViewDidEnter {
 
   async markAsInProgress(followUp: FollowUpItem) {
     try {
-      await this.followupService.updateStatus(followUp.id, 'in-progress');
-      followUp.status = 'in-progress';
+      await this.followupService.updateStatus(followUp.id, 'IN_PROGRESS');
+      followUp.status = 'IN_PROGRESS';
       this.filterFollowups();
     } catch (error) {
       console.error('Error marking followup as in progress:', error);
@@ -304,8 +305,8 @@ export class FollowupsPage implements ViewDidEnter {
       const assignment = {
         followupId: this.selectedFollowupForAssign.id,
         assignedTo: assignmentForm.assignedTo,
-        priority: assignmentForm.priority as 'high' | 'medium' | 'low',
-        dueDate: assignmentForm.dueDate,
+        priority: assignmentForm.priority as 'HIGH' | 'MEDIUM' | 'LOW',
+        dueDate: assignmentForm.dueDate,  // Enhanced date picker now handles timezone conversion
         notes: assignmentForm.notes
       };
 
@@ -314,7 +315,7 @@ export class FollowupsPage implements ViewDidEnter {
       // Update local data
       this.selectedFollowupForAssign.assignedTo = assignmentForm.assignedTo;
       this.selectedFollowupForAssign.notes = assignmentForm.notes;
-      this.selectedFollowupForAssign.priority = assignmentForm.priority as 'high' | 'medium' | 'low';
+      this.selectedFollowupForAssign.priority = assignmentForm.priority as 'HIGH' | 'MEDIUM' | 'LOW';
       
       if (assignmentForm.dueDate) {
         this.selectedFollowupForAssign.dueDate = new Date(assignmentForm.dueDate);
@@ -372,13 +373,24 @@ export class FollowupsPage implements ViewDidEnter {
     }
   }
 
-  isOverdue(dueDate: Date | undefined): boolean {
+  isOverdue(dueDate: Date | string | undefined): boolean {
     if (!dueDate) return false;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const due = new Date(dueDate);
+    const due = convertUTCToLocalDate(dueDate);
+    if (!due) return false;
     due.setHours(0, 0, 0, 0);
     return due < today;
+  }
+
+  isDueToday(dueDate: Date | string | undefined): boolean {
+    if (!dueDate) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const due = convertUTCToLocalDate(dueDate);
+    if (!due) return false;
+    due.setHours(0, 0, 0, 0);
+    return due.getTime() === today.getTime();
   }
 
   addNewFollowup() {
@@ -412,14 +424,14 @@ export class FollowupsPage implements ViewDidEnter {
   }
   
   getPendingCount(): number {
-    return this.followups.filter(f => f.status === 'pending').length;
+    return this.followups.filter(f => f.status === 'OPEN').length;
   }
   
   getOverdueCount(): number {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return this.followups.filter(f => {
-      if (!f.dueDate || f.status === 'completed') return false;
+      if (!f.dueDate || f.status === 'COMPLETED') return false;
       const due = new Date(f.dueDate);
       due.setHours(0, 0, 0, 0);
       return due < today;
@@ -476,7 +488,7 @@ export class FollowupsPage implements ViewDidEnter {
   
   async toggleComplete(followup: FollowUpItem) {
     try {
-      const newStatus = followup.status === 'completed' ? 'pending' : 'completed';
+      const newStatus = followup.status === 'COMPLETED' ? 'OPEN' : 'COMPLETED';
       await this.followupService.updateStatus(followup.id, newStatus);
       followup.status = newStatus;
       this.filterFollowups();

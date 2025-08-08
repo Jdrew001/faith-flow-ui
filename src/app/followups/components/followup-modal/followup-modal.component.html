@@ -54,18 +54,14 @@
 
       <!-- Type Select -->
       <div class="select-field">
-        <div class="select-header">
-          <ion-icon name="pricetag-outline" class="field-icon"></ion-icon>
-          <label class="select-label">Type *</label>
-        </div>
-        <ion-select 
+        <app-custom-select
           formControlName="type"
-          interface="popover"
-          class="custom-select">
-          <ion-select-option *ngFor="let type of followupTypes" [value]="type.value">
-            {{ type.label }}
-          </ion-select-option>
-        </ion-select>
+          [options]="followupTypes"
+          placeholder="Select a type"
+          label="Type *"
+          icon="pricetag-outline"
+          [required]="true">
+        </app-custom-select>
         <div class="error-message" *ngIf="typeControl?.invalid && typeControl?.touched">
           Type is required
         </div>
@@ -73,51 +69,38 @@
 
       <!-- Priority Select -->
       <div class="select-field">
-        <div class="select-header">
-          <ion-icon name="flag-outline" class="field-icon"></ion-icon>
-          <label class="select-label">Priority</label>
-        </div>
-        <ion-select 
+        <app-custom-select
           formControlName="priority"
-          interface="popover"
-          class="custom-select">
-          <ion-select-option *ngFor="let priority of priorities" [value]="priority.value">
-            {{ priority.label }}
-          </ion-select-option>
-        </ion-select>
+          [options]="priorities"
+          placeholder="Select priority"
+          label="Priority"
+          icon="flag-outline"
+          [showColors]="true">
+        </app-custom-select>
       </div>
 
       <!-- Assign To Select -->
       <div class="select-field">
-        <div class="select-header">
-          <ion-icon name="person-add-outline" class="field-icon"></ion-icon>
-          <label class="select-label">Assign To</label>
-        </div>
-        <ion-select 
+        <app-custom-select
           formControlName="assignedTo"
-          interface="popover"
-          class="custom-select">
-          <ion-select-option value="">Unassigned</ion-select-option>
-          <ion-select-option *ngFor="let assignee of getAssigneesList()" [value]="assignee.value">
-            {{ assignee.label }}
-          </ion-select-option>
-        </ion-select>
+          [options]="assigneeOptions"
+          placeholder="Select assignee"
+          label="Assign To"
+          icon="person-add-outline"
+          [searchable]="true">
+        </app-custom-select>
       </div>
 
       <!-- Status Select (only show when editing) -->
       <div class="select-field" *ngIf="isEditing">
-        <div class="select-header">
-          <ion-icon name="stats-chart-outline" class="field-icon"></ion-icon>
-          <label class="select-label">Status</label>
-        </div>
-        <ion-select 
+        <app-custom-select
           formControlName="status"
-          interface="popover"
-          class="custom-select">
-          <ion-select-option *ngFor="let status of statuses" [value]="status.value">
-            {{ status.label }}
-          </ion-select-option>
-        </ion-select>
+          [options]="statuses"
+          placeholder="Select status"
+          label="Status"
+          icon="stats-chart-outline"
+          [showColors]="true">
+        </app-custom-select>
       </div>
 
       <!-- Due Date -->

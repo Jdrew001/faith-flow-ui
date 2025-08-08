@@ -3,6 +3,12 @@ export interface FollowupContact {
   email?: string;
 }
 
+export interface DateTimeWithTimezone {
+  localTime: string;
+  timezoneOffsetMinutes: number;
+  utcTime?: string;
+}
+
 export interface FollowupDto {
   id?: string;
   personName: string;
@@ -10,8 +16,8 @@ export interface FollowupDto {
   title: string;
   description?: string;
   type: string;
-  priority: 'high' | 'medium' | 'low';
-  status: 'pending' | 'in-progress' | 'completed';
+  priority: 'HIGH' | 'MEDIUM' | 'LOW';
+  status: 'OPEN' | 'IN_PROGRESS' | 'COMPLETED';
   assignedTo?: string;
   createdDate?: string;
   dueDate?: string;
@@ -25,9 +31,9 @@ export interface CreateFollowupDto {
   title: string;
   description?: string;
   type: string;
-  priority: 'high' | 'medium' | 'low';
+  priority: 'HIGH' | 'MEDIUM' | 'LOW';
   assignedTo?: string;
-  dueDate?: string;
+  dueDate?: string | DateTimeWithTimezone;  // Can be ISO string or object with timezone
   notes?: string;
   contactInfo?: FollowupContact;
 }
@@ -38,10 +44,10 @@ export interface UpdateFollowupDto {
   title?: string;
   description?: string;
   type?: string;
-  priority?: 'high' | 'medium' | 'low';
-  status?: 'pending' | 'in-progress' | 'completed';
+  priority?: 'HIGH' | 'MEDIUM' | 'LOW';
+  status?: 'OPEN' | 'IN_PROGRESS' | 'COMPLETED';
   assignedTo?: string;
-  dueDate?: string;
+  dueDate?: string | DateTimeWithTimezone;  // Can be ISO string or object with timezone
   notes?: string;
   contactInfo?: FollowupContact;
 }
@@ -49,14 +55,14 @@ export interface UpdateFollowupDto {
 export interface FollowupAssignment {
   followupId: string;
   assignedTo: string;
-  priority: 'high' | 'medium' | 'low';
-  dueDate?: string;
+  priority: 'HIGH' | 'MEDIUM' | 'LOW';
+  dueDate?: string | DateTimeWithTimezone;  // Can be ISO string or object with timezone
   notes?: string;
 }
 
 export interface FollowupFilters {
-  status?: 'all' | 'pending' | 'in-progress' | 'completed';
-  priority?: 'all' | 'high' | 'medium' | 'low';
+  status?: 'all' | 'OPEN' | 'IN_PROGRESS' | 'COMPLETED';
+  priority?: 'all' | 'HIGH' | 'MEDIUM' | 'LOW';
   assignee?: string;
   search?: string;
   sortBy?: 'dueDate' | 'priority' | 'createdDate' | 'name' | 'status';

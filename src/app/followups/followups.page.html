@@ -54,13 +54,13 @@
         <ion-segment-button value="all">
           <ion-label>All</ion-label>
         </ion-segment-button>
-        <ion-segment-button value="pending">
-          <ion-label>Pending</ion-label>
+        <ion-segment-button value="OPEN">
+          <ion-label>Open</ion-label>
         </ion-segment-button>
-        <ion-segment-button value="in-progress">
+        <ion-segment-button value="IN_PROGRESS">
           <ion-label>In Progress</ion-label>
         </ion-segment-button>
-        <ion-segment-button value="completed">
+        <ion-segment-button value="COMPLETED">
           <ion-label>Completed</ion-label>
         </ion-segment-button>
       </ion-segment>
@@ -75,22 +75,22 @@
         </button>
         <button 
           class="priority-pill high"
-          [class.active]="selectedPriority === 'high'"
-          (click)="setPriority('high')">
+          [class.active]="selectedPriority === 'HIGH'"
+          (click)="setPriority('HIGH')">
           <span class="priority-dot"></span>
           High
         </button>
         <button 
           class="priority-pill medium"
-          [class.active]="selectedPriority === 'medium'"
-          (click)="setPriority('medium')">
+          [class.active]="selectedPriority === 'MEDIUM'"
+          (click)="setPriority('MEDIUM')">
           <span class="priority-dot"></span>
           Medium
         </button>
         <button 
           class="priority-pill low"
-          [class.active]="selectedPriority === 'low'"
-          (click)="setPriority('low')">
+          [class.active]="selectedPriority === 'LOW'"
+          (click)="setPriority('LOW')">
           <span class="priority-dot"></span>
           Low
         </button>
@@ -121,18 +121,24 @@
           *ngFor="let followup of filteredFollowups; trackBy: trackByFollowupId"
           class="followup-card"
           [class.overdue]="isOverdue(followup.dueDate)"
-          [class.status-pending]="followup.status === 'pending'"
+          [class.status-open]="followup.status === 'OPEN'"
           (click)="openFollowupDetail(followup)">
           
           <!-- Priority Indicator -->
-          <div class="priority-indicator" [class]="followup.priority"></div>
+          <div class="priority-indicator" 
+               [class.high]="followup.priority === 'HIGH'"
+               [class.medium]="followup.priority === 'MEDIUM'"
+               [class.low]="followup.priority === 'LOW'"></div>
           
           <!-- Card Content -->
           <div class="card-body">
             <!-- Header Section -->
             <div class="followup-header">
               <div class="person-info">
-                <div class="person-avatar" [class]="followup.priority">
+                <div class="person-avatar" 
+                     [class.high]="followup.priority === 'HIGH'"
+                     [class.medium]="followup.priority === 'MEDIUM'"
+                     [class.low]="followup.priority === 'LOW'">
                   {{ getInitials(followup.personName) }}
                 </div>
                 <div class="person-details">
@@ -183,12 +189,13 @@
               <div class="footer-info">
                 <div class="info-item" *ngIf="followup.assignedTo">
                   <ion-icon name="person-outline"></ion-icon>
-                  <span>{{ followup.assignedTo }}</span>
+                  <span>{{ getAssigneeName(followup.assignedTo) }}</span>
                 </div>
                 <div class="info-item" *ngIf="followup.dueDate">
                   <ion-icon name="calendar-outline"></ion-icon>
-                  <span [class.overdue-text]="isOverdue(followup.dueDate)">
-                    {{ formatDueDate(followup.dueDate) }}
+                  <span [class.overdue-text]="isOverdue(followup.dueDate)"
+                        [class.today-text]="isDueToday(followup.dueDate)">
+                    {{ followup.dueDate | localDate:'display' }}
                   </span>
                 </div>
               </div>
@@ -209,10 +216,10 @@
                 </a>
                 <button 
                   class="action-btn"
-                  [class.completed]="followup.status === 'completed'"
+                  [class.completed]="followup.status === 'COMPLETED'"
                   (click)="toggleComplete(followup)"
-                  [disabled]="followup.status === 'completed'">
-                  <ion-icon [name]="followup.status === 'completed' ? 'checkmark-circle' : 'checkmark-circle-outline'"></ion-icon>
+                  [disabled]="followup.status === 'COMPLETED'">
+                  <ion-icon [name]="followup.status === 'COMPLETED' ? 'checkmark-circle' : 'checkmark-circle-outline'"></ion-icon>
                 </button>
               </div>
             </div>

@@ -1,6 +1,25 @@
 import { Component, Input, Output, EventEmitter, forwardRef, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { convertUTCToLocalDate, convertLocalToUTC, convertUTCToLocalDateString } from '../../utils/date-timezone.util';
 
+/**
+ * Enhanced Date Picker Component
+ * 
+ * IMPORTANT: Date/Time Handling
+ * - For 'datetime' mode: Returns an object with:
+ *   - localTime: Local datetime string (e.g., "2025-08-10T10:45")
+ *   - timezoneOffsetMinutes: Timezone offset in minutes (e.g., -300 for CST)
+ *   - utcTime: ISO 8601 UTC string for compatibility
+ * - For 'date' mode: Returns date string in YYYY-MM-DD format
+ * 
+ * This ensures the backend has full context about the user's timezone
+ * and can handle scheduling appropriately.
+ */
+export interface DateTimeValue {
+  localTime: string;
+  timezoneOffsetMinutes: number;
+  utcTime: string;
+}
 @Component({
   selector: 'app-enhanced-date-picker',
   templateUrl: './enhanced-date-picker.component.html',
@@ -24,6 +43,7 @@ export class EnhancedDatePickerComponent implements ControlValueAccessor, OnInit
   @Input() maxDate: string = '';
   @Input() mode: 'date' | 'datetime' = 'date';
   @Input() minuteStep: number = 15;
+  @Input() returnFullObject: boolean = true; // Return full object with timezone info
   
   @Output() dateChange = new EventEmitter<string>();
 
@@ -102,7 +122,8 @@ export class EnhancedDatePickerComponent implements ControlValueAccessor, OnInit
     if (value) {
       this.selectedDate = value;
       try {
-        this.selectedDateObj = new Date(value);
+        // Use our timezone utility to properly convert the date
+        this.selectedDateObj = convertUTCToLocalDate(value, true);
         this.updateDisplayValue();
         
         // Extract time if datetime mode
@@ -181,8 +202,8 @@ export class EnhancedDatePickerComponent implements ControlValueAccessor, OnInit
       // Switch to time tab for time selection
       this.activeTab = 'time';
     } else {
-      // For date mode, emit immediately
-      this.selectedDate = date.toISOString().split('T')[0];
+      // For date mode, emit date string in YYYY-MM-DD format
+      this.selectedDate = convertUTCToLocalDateString(date);
       this.updateDisplayValue();
       this.onChange(this.selectedDate);
       this.dateChange.emit(this.selectedDate);
@@ -277,16 +298,45 @@ export class EnhancedDatePickerComponent implements ControlValueAccessor, OnInit
     this.selectedDateObj.setSeconds(0);
     this.selectedDateObj.setMilliseconds(0);
     
-    this.selectedDate = this.selectedDateObj.toISOString();
+    // Store the value based on returnFullObject setting
+    if (this.mode === 'datetime' && this.returnFullObject) {
+      this.selectedDate = this.getDateTimeValue();
+    } else {
+      this.selectedDate = this.selectedDateObj.toISOString();
+    }
     this.updateDisplayValue();
+  }
+  
+  private getDateTimeValue(): any {
+    if (!this.selectedDateObj) return null;
+    
+    // Format local time as YYYY-MM-DDTHH:mm
+    const year = this.selectedDateObj.getFullYear();
+    const month = String(this.selectedDateObj.getMonth() + 1).padStart(2, '0');
+    const day = String(this.selectedDateObj.getDate()).padStart(2, '0');
+    const hours = String(this.selectedDateObj.getHours()).padStart(2, '0');
+    const minutes = String(this.selectedDateObj.getMinutes()).padStart(2, '0');
+    const localTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+    
+    // Get timezone offset in minutes (negative for west of UTC)
+    const timezoneOffsetMinutes = -this.selectedDateObj.getTimezoneOffset();
+    
+    return {
+      localTime,
+      timezoneOffsetMinutes,
+      utcTime: this.selectedDateObj.toISOString()
+    };
   }
   
   confirmDateTime() {
     if (!this.selectedDateObj) return;
     
     this.applyTimeToDate();
-    this.onChange(this.selectedDate);
-    this.dateChange.emit(this.selectedDate);
+    const value = this.mode === 'datetime' && this.returnFullObject 
+      ? this.getDateTimeValue() 
+      : this.selectedDate;
+    this.onChange(value);
+    this.dateChange.emit(value);
     this.isOpen = false;
     this.cdr.markForCheck();
   }
@@ -440,7 +490,7 @@ export class EnhancedDatePickerComponent implements ControlValueAccessor, OnInit
   isDateDisabled(date: Date): boolean {
     if (!date) return true;
     
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = convertUTCToLocalDateString(date);
     
     if (this.minDate && dateStr < this.minDate) return true;
     if (this.maxDate && dateStr > this.maxDate) return true;

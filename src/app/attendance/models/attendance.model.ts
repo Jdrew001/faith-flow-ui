@@ -2,8 +2,10 @@ export interface Session {
   id: string;
   title: string;
   date: Date;
-  startTime: string;
-  endTime: string;
+  startTime?: string;  // Legacy field
+  endTime?: string;    // Legacy field
+  startDateTime?: string;  // ISO 8601 UTC timestamp
+  endDateTime?: string;    // ISO 8601 UTC timestamp
   location: string;
   type: 'service' | 'meeting' | 'event' | 'class' | 'sessions';
   status: 'upcoming' | 'active' | 'completed' | 'cancelled';
@@ -15,11 +17,19 @@ export interface Session {
   tags?: string[];
 }
 
+export interface DateTimeWithTimezone {
+  localTime: string;
+  timezoneOffsetMinutes: number;
+  utcTime?: string;
+}
+
 export interface CreateSessionDto {
   title: string;
-  date: Date;
-  startTime: string;
-  endTime: string;
+  date?: Date;  // Legacy field
+  startTime?: string;  // Legacy field
+  endTime?: string;  // Legacy field
+  startDateTime?: string | DateTimeWithTimezone;  // Can be ISO string or object with timezone
+  endDateTime?: string | DateTimeWithTimezone;    // Can be ISO string or object with timezone
   location: string;
   type?: 'service' | 'meeting' | 'event' | 'class';
   description?: string;
