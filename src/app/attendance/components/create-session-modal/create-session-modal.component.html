@@ -90,36 +90,11 @@
             <ion-icon name="bookmark-outline" class="field-icon"></ion-icon>
             <ion-label class="select-label">Session Type</ion-label>
           </div>
-          <ion-select 
+          <app-custom-select
             formControlName="type"
             placeholder="Select session type"
-            fill="outline"
-            class="custom-select">
-            <ion-select-option value="service">
-              <span class="option-content">
-                <ion-icon name="people-outline"></ion-icon>
-                Service
-              </span>
-            </ion-select-option>
-            <ion-select-option value="meeting">
-              <span class="option-content">
-                <ion-icon name="chatbubbles-outline"></ion-icon>
-                Meeting
-              </span>
-            </ion-select-option>
-            <ion-select-option value="class">
-              <span class="option-content">
-                <ion-icon name="school-outline"></ion-icon>
-                Class
-              </span>
-            </ion-select-option>
-            <ion-select-option value="event">
-              <span class="option-content">
-                <ion-icon name="calendar-outline"></ion-icon>
-                Event
-              </span>
-            </ion-select-option>
-          </ion-select>
+            [options]="sessionTypeOptions">
+          </app-custom-select>
         </div>
 
         <!-- Leader Assignment -->

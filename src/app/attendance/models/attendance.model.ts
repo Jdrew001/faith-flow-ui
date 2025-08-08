@@ -35,6 +35,7 @@ export interface CreateSessionDto {
   description?: string;
   leader?: string;
   tags?: string[];
+  recurrenceType?: string;  // 'one_time' | 'weekly' | 'monthly'
 }
 
 export interface AttendanceRecord {

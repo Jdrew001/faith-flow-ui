@@ -28,6 +28,13 @@ export class CreateSessionModalComponent implements OnInit {
   sessionForm!: FormGroup;
   isLoading = false;
 
+  sessionTypeOptions = [
+    { value: 'service', label: 'Service' },
+    { value: 'meeting', label: 'Meeting' },
+    { value: 'class', label: 'Class' },
+    { value: 'event', label: 'Event' }
+  ];
+
   occurrenceOptions = [
     { 
       value: 'once', 
@@ -149,6 +156,13 @@ export class CreateSessionModalComponent implements OnInit {
       endDateTime = endDate.toISOString();
     }
     
+    // Map occurrence values to backend RecurrenceType enum
+    const recurrenceTypeMap: { [key: string]: string } = {
+      'once': 'one_time',
+      'weekly': 'weekly',
+      'monthly': 'monthly'
+    };
+    
     return {
       title: formData.name,
       description: formData.description || undefined,
@@ -157,7 +171,8 @@ export class CreateSessionModalComponent implements OnInit {
       location: formData.location,
       type: formData.type as 'service' | 'meeting' | 'event' | 'class' || 'service',
       leader: formData.leader || undefined,
-      tags: [] // We can add tag functionality later
+      tags: [], // We can add tag functionality later
+      recurrenceType: recurrenceTypeMap[formData.occurrence] || 'one_time'
     };
   }
 
