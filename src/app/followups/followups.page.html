@@ -54,13 +54,13 @@
         <ion-segment-button value="all">
           <ion-label>All</ion-label>
         </ion-segment-button>
-        <ion-segment-button value="pending">
-          <ion-label>Pending</ion-label>
+        <ion-segment-button value="OPEN">
+          <ion-label>Open</ion-label>
         </ion-segment-button>
-        <ion-segment-button value="in-progress">
+        <ion-segment-button value="IN_PROGRESS">
           <ion-label>In Progress</ion-label>
         </ion-segment-button>
-        <ion-segment-button value="completed">
+        <ion-segment-button value="COMPLETED">
           <ion-label>Completed</ion-label>
         </ion-segment-button>
       </ion-segment>
@@ -121,7 +121,7 @@
           *ngFor="let followup of filteredFollowups; trackBy: trackByFollowupId"
           class="followup-card"
           [class.overdue]="isOverdue(followup.dueDate)"
-          [class.status-pending]="followup.status === 'pending'"
+          [class.status-open]="followup.status === 'OPEN'"
           (click)="openFollowupDetail(followup)">
           
           <!-- Priority Indicator -->
@@ -188,7 +188,7 @@
                 <div class="info-item" *ngIf="followup.dueDate">
                   <ion-icon name="calendar-outline"></ion-icon>
                   <span [class.overdue-text]="isOverdue(followup.dueDate)">
-                    {{ formatDueDate(followup.dueDate) }}
+                    {{ followup.dueDate | localDate:'display' }}
                   </span>
                 </div>
               </div>
@@ -209,10 +209,10 @@
                 </a>
                 <button 
                   class="action-btn"
-                  [class.completed]="followup.status === 'completed'"
+                  [class.completed]="followup.status === 'COMPLETED'"
                   (click)="toggleComplete(followup)"
-                  [disabled]="followup.status === 'completed'">
-                  <ion-icon [name]="followup.status === 'completed' ? 'checkmark-circle' : 'checkmark-circle-outline'"></ion-icon>
+                  [disabled]="followup.status === 'COMPLETED'">
+                  <ion-icon [name]="followup.status === 'COMPLETED' ? 'checkmark-circle' : 'checkmark-circle-outline'"></ion-icon>
                 </button>
               </div>
             </div>

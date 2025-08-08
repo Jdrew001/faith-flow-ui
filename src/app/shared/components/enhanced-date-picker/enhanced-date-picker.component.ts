@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter, forwardRef, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+import { convertUTCToLocalDate, convertLocalToUTC, convertUTCToLocalDateString } from '../../utils/date-timezone.util';
 
 @Component({
   selector: 'app-enhanced-date-picker',
@@ -102,7 +103,8 @@ export class EnhancedDatePickerComponent implements ControlValueAccessor, OnInit
     if (value) {
       this.selectedDate = value;
       try {
-        this.selectedDateObj = new Date(value);
+        // Use our timezone utility to properly convert the date
+        this.selectedDateObj = convertUTCToLocalDate(value, true);
         this.updateDisplayValue();
         
         // Extract time if datetime mode
@@ -181,8 +183,8 @@ export class EnhancedDatePickerComponent implements ControlValueAccessor, OnInit
       // Switch to time tab for time selection
       this.activeTab = 'time';
     } else {
-      // For date mode, emit immediately
-      this.selectedDate = date.toISOString().split('T')[0];
+      // For date mode, emit date string in YYYY-MM-DD format
+      this.selectedDate = convertUTCToLocalDateString(date);
       this.updateDisplayValue();
       this.onChange(this.selectedDate);
       this.dateChange.emit(this.selectedDate);
@@ -440,7 +442,7 @@ export class EnhancedDatePickerComponent implements ControlValueAccessor, OnInit
   isDateDisabled(date: Date): boolean {
     if (!date) return true;
     
-    const dateStr = date.toISOString().split('T')[0];
+    const dateStr = convertUTCToLocalDateString(date);
     
     if (this.minDate && dateStr < this.minDate) return true;
     if (this.maxDate && dateStr > this.maxDate) return true;

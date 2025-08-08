@@ -246,7 +246,8 @@
 
 // Followups Container
 .followups-container {
-  padding: 20px 16px 100px;
+  padding: 16px;
+  padding-bottom: 100px;
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
@@ -278,7 +279,7 @@
 .followup-cards {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
   
   .followup-card {
     background: #3a3a3c;
@@ -290,6 +291,9 @@
     border: 1px solid transparent;
     animation: slideIn 0.3s ease-out;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
     
     &:hover {
       transform: translateY(-2px);
@@ -308,8 +312,8 @@
       }
     }
     
-    // Highlight pending cards
-    &.status-pending {
+    // Highlight open/pending cards
+    &.status-open {
       border: 1px solid rgba(255, 149, 0, 0.3);
       background: linear-gradient(135deg, #3a3a3c 0%, rgba(255, 149, 0, 0.05) 100%);
       
@@ -343,6 +347,9 @@
     .card-body {
       padding: 16px;
       padding-left: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
     
     // Header Section
@@ -350,39 +357,45 @@
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
-      margin-bottom: 12px;
+      gap: 12px;
       
       .person-info {
         display: flex;
         gap: 12px;
-        align-items: center;
+        align-items: flex-start;
         flex: 1;
+        min-width: 0;
         
         .person-avatar {
-          width: 44px;
-          height: 44px;
+          width: 40px;
+          height: 40px;
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
           font-weight: 600;
-          font-size: 16px;
+          font-size: 14px;
           color: #ffffff;
           flex-shrink: 0;
+          background: rgba(0, 122, 255, 0.15);
+          border: 1px solid rgba(0, 122, 255, 0.3);
           
           &.high {
-            background: rgba(255, 59, 48, 0.2);
-            color: #ff3b30;
+            background: rgba(255, 59, 48, 0.15);
+            border: 1px solid rgba(255, 59, 48, 0.3);
+            color: #ffffff;
           }
           
           &.medium {
-            background: rgba(255, 149, 0, 0.2);
-            color: #ff9500;
+            background: rgba(255, 149, 0, 0.15);
+            border: 1px solid rgba(255, 149, 0, 0.3);
+            color: #ffffff;
           }
           
           &.low {
-            background: rgba(52, 199, 89, 0.2);
-            color: #34c759;
+            background: rgba(52, 199, 89, 0.15);
+            border: 1px solid rgba(52, 199, 89, 0.3);
+            color: #ffffff;
           }
         }
         
@@ -403,17 +416,22 @@
           .contact-info-quick {
             display: flex;
             flex-wrap: wrap;
-            gap: 12px;
+            gap: 8px;
             align-items: center;
+            margin-top: 4px;
             
             .contact-link {
-              display: flex;
+              display: inline-flex;
               align-items: center;
-              gap: 6px;
-              font-size: 13px;
+              gap: 4px;
+              font-size: 12px;
               color: #007aff;
               text-decoration: none;
               transition: all 0.2s ease;
+              max-width: 100%;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
               
               ion-icon {
                 font-size: 16px;
@@ -444,12 +462,12 @@
             .no-contact {
               display: flex;
               align-items: center;
-              gap: 6px;
-              font-size: 13px;
+              gap: 4px;
+              font-size: 12px;
               color: #ff9500;
               
               ion-icon {
-                font-size: 16px;
+                font-size: 14px;
               }
             }
           }
@@ -469,14 +487,17 @@
       }
       
       .status-badge {
-        display: flex;
+        display: inline-flex;
         align-items: center;
-        gap: 6px;
-        padding: 4px 10px;
-        border-radius: 12px;
-        font-size: 11px;
+        gap: 4px;
+        padding: 4px 8px;
+        border-radius: 10px;
+        font-size: 10px;
         font-weight: 600;
         flex-shrink: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        height: fit-content;
         
         .status-dot {
           width: 6px;
@@ -485,7 +506,7 @@
           background: currentColor;
         }
         
-        &.pending {
+        &.OPEN {
           background: rgba(255, 149, 0, 0.15);
           color: #ff9500;
           border: 1px solid rgba(255, 149, 0, 0.3);
@@ -495,12 +516,12 @@
           }
         }
         
-        &.in-progress {
+        &.IN_PROGRESS {
           background: rgba(255, 149, 0, 0.2);
           color: #ff9500;
         }
         
-        &.completed {
+        &.COMPLETED {
           background: rgba(52, 199, 89, 0.2);
           color: #34c759;
         }
@@ -509,7 +530,7 @@
     
     // Content Section
     .followup-content {
-      margin-bottom: 16px;
+      flex: 1;
       
       .followup-title {
         font-size: 15px;
@@ -532,7 +553,9 @@
       
       .followup-metadata {
         display: flex;
-        gap: 16px;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 8px;
         
         .meta-item {
           display: flex;
@@ -554,11 +577,17 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 12px;
+      margin-top: auto;
+      padding-top: 12px;
+      border-top: 1px solid rgba(142, 142, 147, 0.1);
       
       .footer-info {
         display: flex;
-        gap: 16px;
+        flex-wrap: wrap;
+        gap: 12px;
         flex: 1;
+        min-width: 0;
         
         .info-item {
           display: flex;
@@ -582,6 +611,7 @@
       .quick-actions {
         display: flex;
         gap: 4px;
+        flex-shrink: 0;
         
         .action-btn {
           width: 40px;
@@ -1247,7 +1277,8 @@ ion-select-option {
   }
   
   .followups-container {
-    padding: 0 24px 100px;
+    padding: 24px;
+    padding-bottom: 100px;
   }
   
   .followup-cards {
@@ -1265,12 +1296,12 @@ ion-select-option {
   }
 }
 
-// iPhone SE and smaller
+// Small phones and iPhone SE
 @media screen and (max-width: 375px) {
   .welcome-banner {
-    padding: 16px;
+    padding: 12px;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
     text-align: center;
     
     .banner-content {
@@ -1321,9 +1352,15 @@ ion-select-option {
     }
   }
   
+  .followups-container {
+    padding: 12px;
+    padding-bottom: 100px;
+  }
+  
   .followup-card {
     .card-body {
       padding: 14px;
+      padding-left: 18px;
     }
     
     .person-avatar {

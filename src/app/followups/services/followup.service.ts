@@ -131,7 +131,7 @@ export class FollowupService {
   /**
    * Update followup status
    */
-  async updateStatus(id: string, status: 'pending' | 'in-progress' | 'completed'): Promise<FollowupDto> {
+  async updateStatus(id: string, status: 'OPEN' | 'IN_PROGRESS' | 'COMPLETED'): Promise<FollowupDto> {
     try {
       const response = await firstValueFrom(
         this.http.put<{ success: boolean; data: FollowupDto }>(`${this.apiUrl}/${id}/status`, { status })
@@ -180,7 +180,7 @@ export class FollowupService {
   /**
    * Bulk update followup statuses
    */
-  async bulkUpdateStatus(ids: string[], status: 'pending' | 'in-progress' | 'completed'): Promise<void> {
+  async bulkUpdateStatus(ids: string[], status: 'OPEN' | 'IN_PROGRESS' | 'COMPLETED'): Promise<void> {
     try {
       await firstValueFrom(
         this.http.post<{ success: boolean; message: string }>(`${this.apiUrl}/bulk-update-status`, { ids, status })
@@ -281,7 +281,7 @@ export class FollowupService {
    * Helper methods
    */
   private isOverdue(followup: FollowupDto): boolean {
-    if (!followup.dueDate || followup.status === 'completed') return false;
+    if (!followup.dueDate || followup.status === 'COMPLETED') return false;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const dueDate = new Date(followup.dueDate);

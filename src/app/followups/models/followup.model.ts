@@ -11,7 +11,7 @@ export interface FollowupDto {
   description?: string;
   type: string;
   priority: 'high' | 'medium' | 'low';
-  status: 'pending' | 'in-progress' | 'completed';
+  status: 'OPEN' | 'IN_PROGRESS' | 'COMPLETED';
   assignedTo?: string;
   createdDate?: string;
   dueDate?: string;
@@ -39,7 +39,7 @@ export interface UpdateFollowupDto {
   description?: string;
   type?: string;
   priority?: 'high' | 'medium' | 'low';
-  status?: 'pending' | 'in-progress' | 'completed';
+  status?: 'OPEN' | 'IN_PROGRESS' | 'COMPLETED';
   assignedTo?: string;
   dueDate?: string;
   notes?: string;
@@ -55,7 +55,7 @@ export interface FollowupAssignment {
 }
 
 export interface FollowupFilters {
-  status?: 'all' | 'pending' | 'in-progress' | 'completed';
+  status?: 'all' | 'OPEN' | 'IN_PROGRESS' | 'COMPLETED';
   priority?: 'all' | 'high' | 'medium' | 'low';
   assignee?: string;
   search?: string;

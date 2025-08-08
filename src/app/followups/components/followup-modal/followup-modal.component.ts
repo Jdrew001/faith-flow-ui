@@ -6,6 +6,7 @@ import { FollowupDto, CreateFollowupDto, UpdateFollowupDto } from '../../models/
 import { ReferenceService, ReferenceOption } from '../../../services/reference.service';
 import { SelectedMember } from '../../../shared/components/member-search/member-search.component';
 import { MemberService } from '../../../services/member.service';
+import { convertUTCToLocalDateString, convertLocalToUTC } from '../../../shared/utils/date-timezone.util';
 
 @Component({
   selector: 'app-followup-modal',
@@ -161,8 +162,8 @@ export class FollowupModalComponent implements OnInit {
       type: this.followupData.type || 'Follow-up',
       priority: this.followupData.priority || 'medium',
       assignedTo: this.followupData.assignedTo || '',
-      status: this.followupData.status || 'pending',
-      dueDate: this.followupData.dueDate ? new Date(this.followupData.dueDate).toISOString().split('T')[0] : '',
+      status: this.followupData.status || 'OPEN',
+      dueDate: this.followupData.dueDate ? convertUTCToLocalDateString(this.followupData.dueDate) : '',
       notes: this.followupData.notes || '',
       contactInfo: {
         phone: this.followupData.contactInfo?.phone || '',
@@ -189,7 +190,7 @@ export class FollowupModalComponent implements OnInit {
       type: ['Follow-up', Validators.required],
       priority: ['medium', Validators.required],
       assignedTo: [''],
-      status: ['pending', Validators.required],
+      status: ['OPEN', Validators.required],
       dueDate: [''],
       notes: [''],
       contactInfo: this.formBuilder.group({
@@ -262,7 +263,7 @@ export class FollowupModalComponent implements OnInit {
   }
 
   getMinDate(): string {
-    return new Date().toISOString().split('T')[0];
+    return convertUTCToLocalDateString(new Date());
   }
 
   isFormValid(): boolean {
@@ -302,9 +303,9 @@ export class FollowupModalComponent implements OnInit {
     try {
       const formValue = this.followupForm.value;
       
-      // Format due date properly
+      // Convert local date to UTC for backend
       if (formValue.dueDate) {
-        formValue.dueDate = new Date(formValue.dueDate).toISOString();
+        formValue.dueDate = convertLocalToUTC(formValue.dueDate);
       }
 
       // Extract member information

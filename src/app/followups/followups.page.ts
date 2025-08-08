@@ -7,6 +7,7 @@ import { FollowupModalComponent } from './components/followup-modal/followup-mod
 import { FollowupService } from './services/followup.service';
 import { FollowupDto, FollowupFilters } from './models/followup.model';
 import { AssigneeService } from '../services/assignee.service';
+import { convertUTCToLocalDate, convertLocalToUTC } from '../shared/utils/date-timezone.util';
 
 export interface FollowUpItem {
   id: string;
@@ -15,7 +16,7 @@ export interface FollowUpItem {
   description: string;
   type: string;
   priority: 'high' | 'medium' | 'low';
-  status: 'pending' | 'in-progress' | 'completed';
+  status: 'OPEN' | 'IN_PROGRESS' | 'COMPLETED';
   assignedTo?: string;
   createdDate: Date;
   dueDate?: Date;
@@ -201,7 +202,7 @@ export class FollowupsPage implements ViewDidEnter {
           bValue = priorityOrder[b.priority];
           break;
         case 'status':
-          const statusOrder = { 'pending': 3, 'in-progress': 2, 'completed': 1 };
+          const statusOrder = { 'OPEN': 3, 'IN_PROGRESS': 2, 'COMPLETED': 1 };
           aValue = statusOrder[a.status];
           bValue = statusOrder[b.status];
           break;
@@ -264,8 +265,8 @@ export class FollowupsPage implements ViewDidEnter {
 
   async markAsComplete(followUp: FollowUpItem) {
     try {
-      await this.followupService.updateStatus(followUp.id, 'completed');
-      followUp.status = 'completed';
+      await this.followupService.updateStatus(followUp.id, 'COMPLETED');
+      followUp.status = 'COMPLETED';
       this.filterFollowups();
     } catch (error) {
       console.error('Error marking followup as complete:', error);
@@ -274,8 +275,8 @@ export class FollowupsPage implements ViewDidEnter {
 
   async markAsInProgress(followUp: FollowUpItem) {
     try {
-      await this.followupService.updateStatus(followUp.id, 'in-progress');
-      followUp.status = 'in-progress';
+      await this.followupService.updateStatus(followUp.id, 'IN_PROGRESS');
+      followUp.status = 'IN_PROGRESS';
       this.filterFollowups();
     } catch (error) {
       console.error('Error marking followup as in progress:', error);
@@ -305,7 +306,7 @@ export class FollowupsPage implements ViewDidEnter {
         followupId: this.selectedFollowupForAssign.id,
         assignedTo: assignmentForm.assignedTo,
         priority: assignmentForm.priority as 'high' | 'medium' | 'low',
-        dueDate: assignmentForm.dueDate,
+        dueDate: assignmentForm.dueDate ? convertLocalToUTC(assignmentForm.dueDate) : undefined,
         notes: assignmentForm.notes
       };
 
@@ -372,11 +373,12 @@ export class FollowupsPage implements ViewDidEnter {
     }
   }
 
-  isOverdue(dueDate: Date | undefined): boolean {
+  isOverdue(dueDate: Date | string | undefined): boolean {
     if (!dueDate) return false;
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const due = new Date(dueDate);
+    const due = convertUTCToLocalDate(dueDate);
+    if (!due) return false;
     due.setHours(0, 0, 0, 0);
     return due < today;
   }
@@ -412,14 +414,14 @@ export class FollowupsPage implements ViewDidEnter {
   }
   
   getPendingCount(): number {
-    return this.followups.filter(f => f.status === 'pending').length;
+    return this.followups.filter(f => f.status === 'OPEN').length;
   }
   
   getOverdueCount(): number {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     return this.followups.filter(f => {
-      if (!f.dueDate || f.status === 'completed') return false;
+      if (!f.dueDate || f.status === 'COMPLETED') return false;
       const due = new Date(f.dueDate);
       due.setHours(0, 0, 0, 0);
       return due < today;
@@ -476,7 +478,7 @@ export class FollowupsPage implements ViewDidEnter {
   
   async toggleComplete(followup: FollowUpItem) {
     try {
-      const newStatus = followup.status === 'completed' ? 'pending' : 'completed';
+      const newStatus = followup.status === 'COMPLETED' ? 'OPEN' : 'COMPLETED';
       await this.followupService.updateStatus(followup.id, newStatus);
       followup.status = newStatus;
       this.filterFollowups();
