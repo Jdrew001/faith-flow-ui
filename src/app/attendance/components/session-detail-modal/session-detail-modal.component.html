@@ -29,7 +29,7 @@
           
           <div class="meta-item">
             <ion-icon name="time" color="medium"></ion-icon>
-            <span>{{ formatTime(session.startTime) }} - {{ formatTime(session.endTime) }}</span>
+            <span>{{ getSessionTime() }}</span>
           </div>
           
           <div class="meta-item" *ngIf="session.location">
@@ -99,7 +99,7 @@
           
           <div class="info-item">
             <strong>Duration:</strong>
-            <p>{{ formatTime(session.startTime) }} - {{ formatTime(session.endTime) }}</p>
+            <p>{{ getSessionTime() }}</p>
           </div>
           
           <div class="info-item" *ngIf="session.location">

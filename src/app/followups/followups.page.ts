@@ -306,7 +306,7 @@ export class FollowupsPage implements ViewDidEnter {
         followupId: this.selectedFollowupForAssign.id,
         assignedTo: assignmentForm.assignedTo,
         priority: assignmentForm.priority as 'HIGH' | 'MEDIUM' | 'LOW',
-        dueDate: assignmentForm.dueDate ? convertLocalToUTC(assignmentForm.dueDate) : undefined,
+        dueDate: assignmentForm.dueDate,  // Enhanced date picker now handles timezone conversion
         notes: assignmentForm.notes
       };
 

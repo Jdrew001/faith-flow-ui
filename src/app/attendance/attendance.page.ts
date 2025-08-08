@@ -10,6 +10,7 @@ import { SessionDetailModalComponent } from './components/session-detail-modal/s
 import { BulkAttendanceModalComponent } from './components/bulk-attendance-modal/bulk-attendance-modal.component';
 import { SessionMembersComponent } from './components/session-members/session-members.component';
 import { CreateSessionModalComponent } from './components/create-session-modal/create-session-modal.component';
+import { convertUTCToLocalDate } from '../shared/utils/date-timezone.util';
 
 @Component({
   selector: 'app-attendance',
@@ -226,6 +227,54 @@ export class AttendancePage implements OnInit, OnDestroy {
     this.selectedTimeFilter = 'today';
     this.currentDate = new Date();
     this.filterSessions();
+  }
+
+  // Helper methods to format datetime from UTC to local
+  getSessionDate(session: Session): Date {
+    // Use startDateTime if available, otherwise fall back to date field
+    if (session.startDateTime) {
+      return convertUTCToLocalDate(session.startDateTime) || new Date();
+    }
+    return new Date(session.date);
+  }
+
+  getSessionTime(session: Session): string {
+    // Use startDateTime/endDateTime if available, otherwise fall back to startTime/endTime
+    if (session.startDateTime && session.endDateTime) {
+      const startDate = convertUTCToLocalDate(session.startDateTime);
+      const endDate = convertUTCToLocalDate(session.endDateTime);
+      
+      if (startDate && endDate) {
+        const startTime = startDate.toLocaleTimeString('en-US', { 
+          hour: 'numeric', 
+          minute: '2-digit',
+          hour12: true 
+        });
+        const endTime = endDate.toLocaleTimeString('en-US', { 
+          hour: 'numeric', 
+          minute: '2-digit',
+          hour12: true 
+        });
+        return `${startTime} - ${endTime}`;
+      }
+    }
+    
+    // Fallback to legacy fields
+    return session.startTime || '';
+  }
+
+  getSessionStartTime(session: Session): string {
+    if (session.startDateTime) {
+      const startDate = convertUTCToLocalDate(session.startDateTime);
+      if (startDate) {
+        return startDate.toLocaleTimeString('en-US', { 
+          hour: 'numeric', 
+          minute: '2-digit',
+          hour12: true 
+        });
+      }
+    }
+    return session.startTime || '';
   }
 
   async openSessionDetail(session: Session, event?: Event) {

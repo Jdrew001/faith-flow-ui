@@ -636,8 +636,10 @@ export class SessionMembersComponent implements OnInit, OnDestroy {
 
   private getSessionEndDateTime(): Date {
     const sessionDate = new Date(this.session.date);
-    const [hours, minutes] = this.session.endTime.split(':').map(Number);
-    sessionDate.setHours(hours, minutes, 0, 0);
+    if (this.session.endTime) {
+      const [hours, minutes] = this.session.endTime.split(':').map(Number);
+      sessionDate.setHours(hours, minutes, 0, 0);
+    }
     return sessionDate;
   }
 

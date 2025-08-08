@@ -3,6 +3,12 @@ export interface FollowupContact {
   email?: string;
 }
 
+export interface DateTimeWithTimezone {
+  localTime: string;
+  timezoneOffsetMinutes: number;
+  utcTime?: string;
+}
+
 export interface FollowupDto {
   id?: string;
   personName: string;
@@ -27,7 +33,7 @@ export interface CreateFollowupDto {
   type: string;
   priority: 'HIGH' | 'MEDIUM' | 'LOW';
   assignedTo?: string;
-  dueDate?: string;
+  dueDate?: string | DateTimeWithTimezone;  // Can be ISO string or object with timezone
   notes?: string;
   contactInfo?: FollowupContact;
 }
@@ -41,7 +47,7 @@ export interface UpdateFollowupDto {
   priority?: 'HIGH' | 'MEDIUM' | 'LOW';
   status?: 'OPEN' | 'IN_PROGRESS' | 'COMPLETED';
   assignedTo?: string;
-  dueDate?: string;
+  dueDate?: string | DateTimeWithTimezone;  // Can be ISO string or object with timezone
   notes?: string;
   contactInfo?: FollowupContact;
 }
@@ -50,7 +56,7 @@ export interface FollowupAssignment {
   followupId: string;
   assignedTo: string;
   priority: 'HIGH' | 'MEDIUM' | 'LOW';
-  dueDate?: string;
+  dueDate?: string | DateTimeWithTimezone;  // Can be ISO string or object with timezone
   notes?: string;
 }
 

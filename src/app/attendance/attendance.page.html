@@ -115,11 +115,11 @@
           <div class="session-details">
             <div class="detail-item">
               <ion-icon name="calendar-outline"></ion-icon>
-              {{ session.date | date:'EEE, MMM d' }}
+              {{ getSessionDate(session) | date:'EEE, MMM d' }}
             </div>
             <div class="detail-item">
               <ion-icon name="time-outline"></ion-icon>
-              {{ session.startTime }}
+              {{ getSessionTime(session) }}
             </div>
             <div class="detail-item">
               <ion-icon name="location-outline"></ion-icon>

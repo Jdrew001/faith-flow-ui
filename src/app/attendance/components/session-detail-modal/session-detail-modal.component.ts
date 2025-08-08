@@ -3,6 +3,7 @@ import { ModalController } from '@ionic/angular';
 import { AttendanceService } from '../../services/attendance.service';
 import { AttendanceRecord, Session } from '../../models/attendance.model';
 import { TimeUtils } from '../../../shared/utils/time.utils';
+import { convertUTCToLocalDate } from '../../../shared/utils/date-timezone.util';
 
 @Component({
   selector: 'app-session-detail-modal',
@@ -64,8 +65,38 @@ export class SessionDetailModalComponent implements OnInit {
     });
   }
 
-  formatTime(time: string): string {
+  formatTime(time: string | undefined): string {
+    if (!time) return '';
     return TimeUtils.formatTime12Hour(time);
+  }
+
+  getSessionTime(): string {
+    // Use startDateTime/endDateTime if available, otherwise fall back to startTime/endTime
+    if (this.session.startDateTime && this.session.endDateTime) {
+      const startDate = convertUTCToLocalDate(this.session.startDateTime);
+      const endDate = convertUTCToLocalDate(this.session.endDateTime);
+      
+      if (startDate && endDate) {
+        const startTime = startDate.toLocaleTimeString('en-US', { 
+          hour: 'numeric', 
+          minute: '2-digit',
+          hour12: true 
+        });
+        const endTime = endDate.toLocaleTimeString('en-US', { 
+          hour: 'numeric', 
+          minute: '2-digit',
+          hour12: true 
+        });
+        return `${startTime} - ${endTime}`;
+      }
+    }
+    
+    // Fallback to legacy fields
+    if (this.session.startTime && this.session.endTime) {
+      return `${this.formatTime(this.session.startTime)} - ${this.formatTime(this.session.endTime)}`;
+    }
+    
+    return this.session.startTime ? this.formatTime(this.session.startTime) : '';
   }
 
   getStatusIcon(status: string): string {

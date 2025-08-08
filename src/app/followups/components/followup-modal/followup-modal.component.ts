@@ -310,10 +310,8 @@ export class FollowupModalComponent implements OnInit {
     try {
       const formValue = this.followupForm.value;
       
-      // Convert local date to UTC for backend
-      if (formValue.dueDate) {
-        formValue.dueDate = convertLocalToUTC(formValue.dueDate);
-      }
+      // The enhanced date picker now returns an object with timezone info
+      // No need to convert, just pass it through
 
       // Extract member information
       const selectedMember = formValue.selectedMember as SelectedMember;

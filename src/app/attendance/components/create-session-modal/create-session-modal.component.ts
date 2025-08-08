@@ -2,13 +2,14 @@ import { Component, OnInit, Input } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ModalController, ToastController } from '@ionic/angular';
 import { AttendanceService } from '../../services/attendance.service';
-import { Session, CreateSessionDto } from '../../models/attendance.model';
+import { Session, CreateSessionDto, DateTimeWithTimezone } from '../../models/attendance.model';
 import { TimeUtils } from '../../../shared/utils/time.utils';
+import { convertLocalToUTC } from '../../../shared/utils/date-timezone.util';
 
 export interface CreateSessionForm {
   name: string;
   description: string;
-  datetime: string;
+  datetime: string | DateTimeWithTimezone;
   occurrence: 'once' | 'weekly' | 'monthly';
   location: string;
   type: 'service' | 'meeting' | 'event' | 'class';
@@ -109,14 +110,50 @@ export class CreateSessionModalComponent implements OnInit {
   }
 
   private prepareSessionData(formData: CreateSessionForm): CreateSessionDto {
-    const sessionDate = new Date(formData.datetime);
+    // The datetime from the enhanced date picker now returns an object with timezone info
+    const startDateTimeValue = formData.datetime;
+    
+    let startDateTime: string | DateTimeWithTimezone;
+    let endDateTime: string | DateTimeWithTimezone;
+    
+    // Type guard to check if it's a DateTimeWithTimezone object
+    const isDateTimeWithTimezone = (value: any): value is DateTimeWithTimezone => {
+      return value && typeof value === 'object' && 'localTime' in value;
+    };
+    
+    if (isDateTimeWithTimezone(startDateTimeValue)) {
+      // New format with timezone info
+      startDateTime = startDateTimeValue;
+      
+      // Calculate end time (1.5 hours later)
+      const startDate = new Date(startDateTimeValue.utcTime || startDateTimeValue.localTime);
+      const endDate = new Date(startDate.getTime() + 90 * 60 * 1000);
+      
+      // Create end datetime with same timezone offset
+      const endYear = endDate.getFullYear();
+      const endMonth = String(endDate.getMonth() + 1).padStart(2, '0');
+      const endDay = String(endDate.getDate()).padStart(2, '0');
+      const endHours = String(endDate.getHours()).padStart(2, '0');
+      const endMinutes = String(endDate.getMinutes()).padStart(2, '0');
+      
+      endDateTime = {
+        localTime: `${endYear}-${endMonth}-${endDay}T${endHours}:${endMinutes}`,
+        timezoneOffsetMinutes: startDateTimeValue.timezoneOffsetMinutes,
+        utcTime: endDate.toISOString()
+      };
+    } else {
+      // Fallback to string format
+      startDateTime = startDateTimeValue as string;
+      const startDate = new Date(startDateTimeValue as string);
+      const endDate = new Date(startDate.getTime() + 90 * 60 * 1000);
+      endDateTime = endDate.toISOString();
+    }
     
     return {
       title: formData.name,
       description: formData.description || undefined,
-      date: sessionDate,
-      startTime: TimeUtils.formatTime12Hour(sessionDate),
-      endTime: this.calculateEndTime(sessionDate),
+      startDateTime: startDateTime,
+      endDateTime: endDateTime,
       location: formData.location,
       type: formData.type as 'service' | 'meeting' | 'event' | 'class' || 'service',
       leader: formData.leader || undefined,
