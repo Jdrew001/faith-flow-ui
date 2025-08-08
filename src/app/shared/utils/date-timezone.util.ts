@@ -26,13 +26,16 @@ export function convertUTCToLocalDate(utcDateString: string | Date | null | unde
       // If the UTC date looks like it was meant to represent a specific date (time at noon UTC)
       // extract just the date portion and create a local date
       const utcHours = date.getUTCHours();
-      if (utcHours === 12) {
-        // This was likely a date-only value stored at noon UTC
+      if (utcHours === 12 || utcHours === 0) {
+        // This was likely a date-only value stored at noon or midnight UTC
         // Extract the UTC date components and create a local date
         const year = date.getUTCFullYear();
         const month = date.getUTCMonth();
         const day = date.getUTCDate();
-        return new Date(year, month, day, 0, 0, 0, 0);
+        
+        // Create a new date in local timezone with the UTC date components
+        const localDate = new Date(year, month, day, 0, 0, 0, 0);
+        return localDate;
       }
     }
 
@@ -171,9 +174,9 @@ export function formatUTCDateForDisplay(utcDateString: string | Date | null | un
   } else if (diffDays < -1 && diffDays >= -7) {
     dateStr = `${Math.abs(diffDays)} days ago`;
   } else if (diffDays > 7 && diffDays <= 14) {
-    dateStr = 'Next week';
+    dateStr = `In ${diffDays} days`;
   } else if (diffDays < -7 && diffDays >= -14) {
-    dateStr = 'Last week';
+    dateStr = `${Math.abs(diffDays)} days ago`;
   } else {
     // For dates further away, use standard formatting
     const options: Intl.DateTimeFormatOptions = {

@@ -1,0 +1,87 @@
+<div class="custom-select-container" 
+     [class.disabled]="disabled" 
+     [class.open]="isOpen"
+     (focusout)="onFocusOut($event)">
+  <!-- Select Header -->
+  <div class="select-header" 
+       (click)="toggleDropdown($event)"
+       tabindex="0">
+    <div class="select-content">
+      <ion-icon *ngIf="icon" [name]="icon" class="select-icon"></ion-icon>
+      
+      <div class="select-value">
+        <span class="select-label" *ngIf="label">{{ label }}</span>
+        <div class="selected-option" *ngIf="selectedOption">
+          <span class="option-label">{{ selectedOption.label }}</span>
+        </div>
+        <span class="placeholder" *ngIf="!selectedOption">{{ placeholder }}</span>
+      </div>
+    </div>
+    
+    <div class="select-actions">
+      <ion-icon 
+        *ngIf="selectedOption && !required && !disabled" 
+        name="close-circle" 
+        class="clear-icon"
+        (click)="clearSelection($event)">
+      </ion-icon>
+      <ion-icon 
+        name="chevron-down" 
+        class="dropdown-icon"
+        [class.rotated]="isOpen">
+      </ion-icon>
+    </div>
+  </div>
+
+  <!-- Dropdown Options -->
+  <div class="dropdown-container" *ngIf="isOpen" [@slideDown]>
+    <!-- Search Box (if searchable) -->
+    <div class="search-box" *ngIf="searchable">
+      <ion-icon name="search-outline"></ion-icon>
+      <input 
+        type="text" 
+        [(ngModel)]="searchTerm"
+        (input)="onSearch()"
+        placeholder="Search..."
+        class="search-input">
+    </div>
+
+    <!-- Options List -->
+    <div class="options-list">
+      <div 
+        *ngFor="let option of filteredOptions"
+        class="option-item"
+        [class.selected]="selectedOption?.value === option.value"
+        (click)="selectOption(option, $event)">
+        
+        <!-- Priority/Status Indicator -->
+        <div 
+          *ngIf="showColors && (option.color || option.value)" 
+          class="option-indicator"
+          [style.background]="option.color || getPriorityColor(option.value)">
+        </div>
+        
+        <!-- Option Content -->
+        <div class="option-content">
+          <ion-icon *ngIf="option.icon" [name]="option.icon" class="option-icon"></ion-icon>
+          <div class="option-text">
+            <span class="option-label">{{ option.label }}</span>
+            <span class="option-description" *ngIf="option.description">{{ option.description }}</span>
+          </div>
+        </div>
+
+        <!-- Checkmark for selected -->
+        <ion-icon 
+          *ngIf="selectedOption?.value === option.value" 
+          name="checkmark" 
+          class="selected-icon">
+        </ion-icon>
+      </div>
+
+      <!-- No Results -->
+      <div class="no-results" *ngIf="searchable && filteredOptions.length === 0">
+        No results found
+      </div>
+    </div>
+  </div>
+</div>

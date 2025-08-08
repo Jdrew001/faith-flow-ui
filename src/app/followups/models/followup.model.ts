@@ -10,7 +10,7 @@ export interface FollowupDto {
   title: string;
   description?: string;
   type: string;
-  priority: 'high' | 'medium' | 'low';
+  priority: 'HIGH' | 'MEDIUM' | 'LOW';
   status: 'OPEN' | 'IN_PROGRESS' | 'COMPLETED';
   assignedTo?: string;
   createdDate?: string;
@@ -25,7 +25,7 @@ export interface CreateFollowupDto {
   title: string;
   description?: string;
   type: string;
-  priority: 'high' | 'medium' | 'low';
+  priority: 'HIGH' | 'MEDIUM' | 'LOW';
   assignedTo?: string;
   dueDate?: string;
   notes?: string;
@@ -38,7 +38,7 @@ export interface UpdateFollowupDto {
   title?: string;
   description?: string;
   type?: string;
-  priority?: 'high' | 'medium' | 'low';
+  priority?: 'HIGH' | 'MEDIUM' | 'LOW';
   status?: 'OPEN' | 'IN_PROGRESS' | 'COMPLETED';
   assignedTo?: string;
   dueDate?: string;
@@ -49,14 +49,14 @@ export interface UpdateFollowupDto {
 export interface FollowupAssignment {
   followupId: string;
   assignedTo: string;
-  priority: 'high' | 'medium' | 'low';
+  priority: 'HIGH' | 'MEDIUM' | 'LOW';
   dueDate?: string;
   notes?: string;
 }
 
 export interface FollowupFilters {
   status?: 'all' | 'OPEN' | 'IN_PROGRESS' | 'COMPLETED';
-  priority?: 'all' | 'high' | 'medium' | 'low';
+  priority?: 'all' | 'HIGH' | 'MEDIUM' | 'LOW';
   assignee?: string;
   search?: string;
   sortBy?: 'dueDate' | 'priority' | 'createdDate' | 'name' | 'status';

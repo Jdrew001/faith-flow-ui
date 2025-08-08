@@ -15,7 +15,7 @@ export interface FollowUpItem {
   title: string;
   description: string;
   type: string;
-  priority: 'high' | 'medium' | 'low';
+  priority: 'HIGH' | 'MEDIUM' | 'LOW';
   status: 'OPEN' | 'IN_PROGRESS' | 'COMPLETED';
   assignedTo?: string;
   createdDate: Date;
@@ -54,9 +54,9 @@ export class FollowupsPage implements ViewDidEnter {
   // Available filter options
   priorities = [
     { value: 'all', label: 'All Priorities' },
-    { value: 'high', label: 'High Priority' },
-    { value: 'medium', label: 'Medium Priority' },
-    { value: 'low', label: 'Low Priority' }
+    { value: 'HIGH', label: 'High Priority' },
+    { value: 'MEDIUM', label: 'Medium Priority' },
+    { value: 'LOW', label: 'Low Priority' }
   ];
 
   statuses = [
@@ -135,18 +135,18 @@ export class FollowupsPage implements ViewDidEnter {
       
       // Convert FollowupDto to FollowUpItem format for compatibility
       this.followups = response.followups.map(dto => ({
-        id: dto.id!,
-        personName: dto.personName,
-        title: dto.title,
-        description: dto.description || '',
-        type: dto.type,
-        priority: dto.priority,
-        status: dto.status,
-        assignedTo: dto.assignedTo,
-        createdDate: dto.createdDate ? new Date(dto.createdDate) : new Date(),
-        dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
-        notes: dto.notes,
-        contactInfo: dto.contactInfo
+          id: dto.id!,
+          personName: dto.personName,
+          title: dto.title,
+          description: dto.description || '',
+          type: dto.type,
+          priority: dto.priority,
+          status: dto.status,
+          assignedTo: dto.assignedTo,
+          createdDate: dto.createdDate ? new Date(dto.createdDate) : new Date(),
+          dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
+          notes: dto.notes,
+          contactInfo: dto.contactInfo
       }));
 
       this.filterFollowups();
@@ -197,7 +197,7 @@ export class FollowupsPage implements ViewDidEnter {
 
       switch (this.sortBy) {
         case 'priority':
-          const priorityOrder = { 'high': 3, 'medium': 2, 'low': 1 };
+          const priorityOrder = { 'HIGH': 3, 'MEDIUM': 2, 'LOW': 1 };
           aValue = priorityOrder[a.priority];
           bValue = priorityOrder[b.priority];
           break;
@@ -305,7 +305,7 @@ export class FollowupsPage implements ViewDidEnter {
       const assignment = {
         followupId: this.selectedFollowupForAssign.id,
         assignedTo: assignmentForm.assignedTo,
-        priority: assignmentForm.priority as 'high' | 'medium' | 'low',
+        priority: assignmentForm.priority as 'HIGH' | 'MEDIUM' | 'LOW',
         dueDate: assignmentForm.dueDate ? convertLocalToUTC(assignmentForm.dueDate) : undefined,
         notes: assignmentForm.notes
       };
@@ -315,7 +315,7 @@ export class FollowupsPage implements ViewDidEnter {
       // Update local data
       this.selectedFollowupForAssign.assignedTo = assignmentForm.assignedTo;
       this.selectedFollowupForAssign.notes = assignmentForm.notes;
-      this.selectedFollowupForAssign.priority = assignmentForm.priority as 'high' | 'medium' | 'low';
+      this.selectedFollowupForAssign.priority = assignmentForm.priority as 'HIGH' | 'MEDIUM' | 'LOW';
       
       if (assignmentForm.dueDate) {
         this.selectedFollowupForAssign.dueDate = new Date(assignmentForm.dueDate);
@@ -381,6 +381,16 @@ export class FollowupsPage implements ViewDidEnter {
     if (!due) return false;
     due.setHours(0, 0, 0, 0);
     return due < today;
+  }
+
+  isDueToday(dueDate: Date | string | undefined): boolean {
+    if (!dueDate) return false;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const due = convertUTCToLocalDate(dueDate);
+    if (!due) return false;
+    due.setHours(0, 0, 0, 0);
+    return due.getTime() === today.getTime();
   }
 
   addNewFollowup() {

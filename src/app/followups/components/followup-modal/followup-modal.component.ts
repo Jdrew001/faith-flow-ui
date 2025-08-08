@@ -26,6 +26,7 @@ export class FollowupModalComponent implements OnInit {
   followupTypes: ReferenceOption[] = [];
   priorities: ReferenceOption[] = [];
   statuses: ReferenceOption[] = [];
+  assigneeOptions: any[] = [];
 
   constructor(
     private modalController: ModalController,
@@ -43,6 +44,12 @@ export class FollowupModalComponent implements OnInit {
     
     // Load reference data
     await this.loadReferenceData();
+    
+    // Prepare assignee options with an unassigned option
+    this.assigneeOptions = [
+      { value: '', label: 'Unassigned' },
+      ...this.getAssigneesList()
+    ];
     
     if (this.followupId) {
       // Load followup data from backend using single service call

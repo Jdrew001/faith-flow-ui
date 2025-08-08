@@ -91,14 +91,14 @@ export class ReferenceService {
         { value: 'New Member', label: 'New Member' }
       ],
       priorities: [
-        { value: 'high', label: 'High' },
-        { value: 'medium', label: 'Medium' },
-        { value: 'low', label: 'Low' }
+        { value: 'HIGH', label: 'High' },
+        { value: 'MEDIUM', label: 'Medium' },
+        { value: 'LOW', label: 'Low' }
       ],
       statuses: [
-        { value: 'pending', label: 'Pending' },
-        { value: 'in-progress', label: 'In Progress' },
-        { value: 'completed', label: 'Completed' }
+        { value: 'OPEN', label: 'Open' },
+        { value: 'IN_PROGRESS', label: 'In Progress' },
+        { value: 'COMPLETED', label: 'Completed' }
       ]
     };
   }

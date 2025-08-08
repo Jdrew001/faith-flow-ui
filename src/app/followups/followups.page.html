@@ -75,22 +75,22 @@
         </button>
         <button 
           class="priority-pill high"
-          [class.active]="selectedPriority === 'high'"
-          (click)="setPriority('high')">
+          [class.active]="selectedPriority === 'HIGH'"
+          (click)="setPriority('HIGH')">
           <span class="priority-dot"></span>
           High
         </button>
         <button 
           class="priority-pill medium"
-          [class.active]="selectedPriority === 'medium'"
-          (click)="setPriority('medium')">
+          [class.active]="selectedPriority === 'MEDIUM'"
+          (click)="setPriority('MEDIUM')">
           <span class="priority-dot"></span>
           Medium
         </button>
         <button 
           class="priority-pill low"
-          [class.active]="selectedPriority === 'low'"
-          (click)="setPriority('low')">
+          [class.active]="selectedPriority === 'LOW'"
+          (click)="setPriority('LOW')">
           <span class="priority-dot"></span>
           Low
         </button>
@@ -125,14 +125,20 @@
           (click)="openFollowupDetail(followup)">
           
           <!-- Priority Indicator -->
-          <div class="priority-indicator" [class]="followup.priority"></div>
+          <div class="priority-indicator" 
+               [class.high]="followup.priority === 'HIGH'"
+               [class.medium]="followup.priority === 'MEDIUM'"
+               [class.low]="followup.priority === 'LOW'"></div>
           
           <!-- Card Content -->
           <div class="card-body">
             <!-- Header Section -->
             <div class="followup-header">
               <div class="person-info">
-                <div class="person-avatar" [class]="followup.priority">
+                <div class="person-avatar" 
+                     [class.high]="followup.priority === 'HIGH'"
+                     [class.medium]="followup.priority === 'MEDIUM'"
+                     [class.low]="followup.priority === 'LOW'">
                   {{ getInitials(followup.personName) }}
                 </div>
                 <div class="person-details">
@@ -183,11 +189,12 @@
               <div class="footer-info">
                 <div class="info-item" *ngIf="followup.assignedTo">
                   <ion-icon name="person-outline"></ion-icon>
-                  <span>{{ followup.assignedTo }}</span>
+                  <span>{{ getAssigneeName(followup.assignedTo) }}</span>
                 </div>
                 <div class="info-item" *ngIf="followup.dueDate">
                   <ion-icon name="calendar-outline"></ion-icon>
-                  <span [class.overdue-text]="isOverdue(followup.dueDate)">
+                  <span [class.overdue-text]="isOverdue(followup.dueDate)"
+                        [class.today-text]="isDueToday(followup.dueDate)">
                     {{ followup.dueDate | localDate:'display' }}
                   </span>
                 </div>

@@ -305,10 +305,71 @@
     }
     
     &.overdue {
-      border-color: rgba(255, 59, 48, 0.3);
+      border-color: rgba(255, 59, 48, 0.5);
+      background: linear-gradient(135deg, #3a3a3c 0%, rgba(255, 59, 48, 0.08) 100%);
       
       .priority-indicator {
         background: #ff3b30;
+        animation: pulse-red 2s infinite;
+      }
+      
+      .card-body {
+        &::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          right: 0;
+          width: 80px;
+          height: 80px;
+          background: radial-gradient(circle at top right, rgba(255, 59, 48, 0.15), transparent);
+          pointer-events: none;
+        }
+      }
+    }
+    
+    &.due-today {
+      border-color: rgba(255, 204, 0, 0.5);
+      background: linear-gradient(135deg, #3a3a3c 0%, rgba(255, 204, 0, 0.08) 100%);
+      
+      .priority-indicator {
+        background: linear-gradient(180deg, #ffcc00, #ff9500);
+        animation: pulse-yellow 2s infinite;
+      }
+      
+      .card-body {
+        &::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          right: 0;
+          width: 80px;
+          height: 80px;
+          background: radial-gradient(circle at top right, rgba(255, 204, 0, 0.15), transparent);
+          pointer-events: none;
+        }
+      }
+      
+      .due-today-badge {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: linear-gradient(135deg, #ffcc00, #ff9500);
+        color: #1c1c1e;
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        animation: pulse-badge 2s infinite;
+        z-index: 2;
+        
+        ion-icon {
+          font-size: 14px;
+        }
       }
     }
     
@@ -329,18 +390,18 @@
       left: 0;
       top: 0;
       bottom: 0;
-      width: 4px;
+      width: 5px;
       
       &.high {
-        background: #ff3b30;
+        background: linear-gradient(180deg, #ff3b30, #ff1744);
       }
       
       &.medium {
-        background: #ff9500;
+        background: linear-gradient(180deg, #ff9500, #ff6b00);
       }
       
       &.low {
-        background: #34c759;
+        background: linear-gradient(180deg, #34c759, #28a745);
       }
     }
     
@@ -350,6 +411,7 @@
       display: flex;
       flex-direction: column;
       gap: 12px;
+      position: relative;
     }
     
     // Header Section
@@ -604,6 +666,15 @@
           .overdue-text {
             color: #ff3b30;
             font-weight: 500;
+          }
+          
+          .today-text {
+            color: #ffcc00;
+            font-weight: 600;
+            background: rgba(255, 204, 0, 0.1);
+            padding: 2px 8px;
+            border-radius: 12px;
+            display: inline-block;
           }
         }
       }
@@ -1401,3 +1472,4 @@ ion-select-option {
     transform: scale(1);
   }
 }
+
