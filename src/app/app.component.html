@@ -1,8 +1,8 @@
 <ion-app>
     <ion-menu contentId="main-content" type="overlay">
-        <ion-content>
-        <app-menu></app-menu>
+        <ion-content class="menu-content">
+            <app-menu></app-menu>
         </ion-content>
     </ion-menu>
-    <ion-router-outlet id="main-content"></ion-router-outlet>
+    <ion-router-outlet id="main-content" [swipeGesture]="false"></ion-router-outlet>
 </ion-app>

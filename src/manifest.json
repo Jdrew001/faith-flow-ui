@@ -1,0 +1,12 @@
+{
+  "name": "Faith Flow",
+  "short_name": "FaithFlow",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "icons": [
+    
+  ]
+}

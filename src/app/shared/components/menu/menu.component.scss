@@ -10,40 +10,44 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  background: #2c2c2e;
 }
 
 // User Profile Section - Premium Design
 .user-profile-section {
-  background: rgba(255, 255, 255, 0.03);
+  background: linear-gradient(135deg, rgba(74, 144, 226, 0.15) 0%, rgba(74, 144, 226, 0.05) 100%);
   padding: 20px;
-  padding-top: calc(20px + var(--ion-safe-area-top, 0px));
+  // Use env() for iOS safe area, with fallback for Android
+  padding-top: calc(20px + env(safe-area-inset-top, 20px));
   display: flex;
   align-items: center;
   gap: 12px;
   position: relative;
-  min-height: 80px;
+  min-height: 100px;
   overflow: hidden;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   margin-bottom: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   
   
   .user-avatar-container {
     position: relative;
     
     .user-avatar {
-      width: 44px;
-      height: 44px;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
-      background: rgba(74, 144, 226, 0.1);
-      border: 2px solid rgba(74, 144, 226, 0.2);
+      background: linear-gradient(135deg, #007aff, #4a90e2);
+      border: 2px solid rgba(255, 255, 255, 0.2);
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
       
       .avatar-initials {
-        color: #4a90e2;
-        font-size: 16px;
-        font-weight: 600;
+        color: #ffffff;
+        font-size: 18px;
+        font-weight: 700;
+        text-transform: uppercase;
       }
       
       img {
@@ -115,20 +119,23 @@
 // Main Navigation - Simplified
 .main-navigation {
   flex: 1;
-  padding: 24px 0;
+  padding: 16px 0;
   overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .nav-section {
   margin-bottom: 32px;
   
   .nav-header {
-    color: rgba(255, 255, 255, 0.4);
-    font-size: 11px;
-    font-weight: 600;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 12px;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    margin: 0 0 16px 20px;
+    letter-spacing: 1.2px;
+    margin: 0 0 12px 20px;
+    padding-top: 8px;
   }
 }
 
@@ -137,18 +144,19 @@
   .nav-item {
     display: flex;
     align-items: center;
-    padding: 18px 20px;
-    margin: 0 12px 8px 12px;
+    padding: 16px 20px;
+    margin: 0 12px 6px 12px;
     border-radius: 12px;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     text-decoration: none;
     color: inherit;
     position: relative;
-    min-height: 56px; // Better touch target
+    min-height: 52px; // Better touch target
     
     &:hover {
-      background: rgba(255, 255, 255, 0.03);
+      background: rgba(255, 255, 255, 0.05);
+      transform: translateX(4px);
     }
     
     &.active {
@@ -253,8 +261,10 @@
 // Menu Footer - Simplified
 .menu-footer {
   padding: 16px 20px;
+  padding-bottom: calc(16px + var(--ion-safe-area-bottom, 0px));
   border-top: 1px solid rgba(255, 255, 255, 0.1);
   background: rgba(0, 0, 0, 0.2);
+  margin-top: auto;
   
   .app-info {
     display: flex;
@@ -264,16 +274,15 @@
     .app-logo {
       width: 32px;
       height: 32px;
-      background: rgba(74, 144, 226, 0.2);
-      border: 1px solid rgba(74, 144, 226, 0.3);
-      border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
       
-      .logo-icon {
-        font-size: 16px;
-        color: #4a90e2;
+      .app-icon-footer {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        border-radius: 8px;
       }
     }
     
