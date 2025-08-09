@@ -1,0 +1,25 @@
+// Disable swipe gestures globally
+ion-router-outlet {
+  --swipe-gesture: false !important;
+  touch-action: pan-y !important; // Only allow vertical scrolling
+}
+
+// Disable swipe on iOS specifically
+.ios ion-router-outlet {
+  --swipe-gesture: false !important;
+}
+
+// Prevent any swipe-back gesture area
+ion-router-outlet::part(outlet) {
+  touch-action: pan-y !important;
+}
+
+// Disable edge swipe gesture
+.ios ion-app {
+  --ion-swipe-gesture: false !important;
+}
+
+// Additional safeguard for the main content area
+#main-content {
+  touch-action: pan-y !important;
+}

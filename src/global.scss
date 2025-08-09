@@ -25,6 +25,9 @@
 @import '@ionic/angular/css/flex-utils.css';
 @import '@ionic/angular/css/display.css';
 
+/* Disable swipe gestures globally */
+@import 'app/styles/disable-swipe.scss';
+
 /**
  * Ionic Dark Palette
  * -----------------------------------------------------

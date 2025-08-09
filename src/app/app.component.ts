@@ -20,9 +20,19 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   ngAfterViewInit(): void {
     // Initialize the router outlet service with the router outlet instance
-    this.routerOutletService.init(this.routerOutlet);
-    // Disable swipe back globally for all pages
-    this.routerOutletService.disableSwipeBack();
+    if (this.routerOutlet) {
+      this.routerOutletService.init(this.routerOutlet);
+      // Forcefully disable swipe back globally for all pages
+      this.routerOutlet.swipeGesture = false;
+      this.routerOutletService.disableSwipeBack();
+      
+      // Double-check after a short delay to ensure it stays disabled
+      setTimeout(() => {
+        if (this.routerOutlet) {
+          this.routerOutlet.swipeGesture = false;
+        }
+      }, 100);
+    }
   }
 
   ngOnInit() {
