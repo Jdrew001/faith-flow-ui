@@ -64,20 +64,43 @@ export class MenuComponent implements OnInit, OnDestroy {
     this.navCtrl.navigateForward('/auth/register');
   }
 
+  navigateToPage(url: string) {
+    // Close menu first
+    this.menuCtrl.close();
+    // Use navigateRoot for clean navigation
+    this.navCtrl.navigateRoot(url);
+  }
+
+  isPageActive(url: string): boolean {
+    // Check if the current URL matches the page URL
+    return this.router.url === url || this.router.url.startsWith(url + '/');
+  }
+
   handleQuickAction(action: string) {
+    // Close menu first for all actions
+    this.menuCtrl.close();
+    
     switch (action) {
       case 'addVisitor':
         console.log('Add visitor functionality');
+        // TODO: Navigate to add visitor page when ready
         break;
       case 'prayerRequest':
         console.log('Prayer request functionality');
+        // TODO: Navigate to prayer request page when ready
         break;
       case 'sendMessage':
         console.log('Send message functionality');
+        // TODO: Navigate to send message page when ready
         break;
       case 'createSession':
-        this.navCtrl.navigateForward('/attendance', { queryParams: { action: 'create' } });
-        this.menuCtrl.close();
+        this.navCtrl.navigateRoot('/attendance').then(() => {
+          // After navigation, trigger the create action
+          setTimeout(() => {
+            // You can emit an event or use a service to trigger the create modal
+            console.log('Trigger create session modal');
+          }, 500);
+        });
         break;
       default:
         console.log('Unknown action:', action);

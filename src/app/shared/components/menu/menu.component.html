@@ -24,10 +24,10 @@
     <div class="nav-section">
       <h4 class="nav-header">Main Menu</h4>
       <div class="nav-items">
-        <ion-menu-toggle auto-hide="true" *ngFor="let page of appPages">
+        <div *ngFor="let page of appPages">
           <div class="nav-item" 
-                [routerLink]="[page.url]" 
-                routerLinkActive="active">
+                (click)="navigateToPage(page.url)"
+                [class.active]="isPageActive(page.url)">
             <div class="nav-item-icon">
               <ion-icon [name]="page.icon + '-outline'"></ion-icon>
             </div>
@@ -35,7 +35,7 @@
               <span class="nav-item-title">{{ page.title }}</span>
             </div>
           </div>
-        </ion-menu-toggle>
+        </div>
       </div>
     </div>
 
@@ -43,15 +43,14 @@
     <div class="nav-section">
       <h4 class="nav-header">Quick Actions</h4>
       <div class="quick-actions-grid">
-        <ion-menu-toggle auto-hide="true" *ngFor="let action of quickActions">
-          <div class="quick-action-item" 
-                (click)="handleQuickAction(action.action)">
-            <div class="quick-action-icon">
-              <ion-icon [name]="action.icon"></ion-icon>
-            </div>
-            <span class="quick-action-title">{{ action.title }}</span>
+        <div *ngFor="let action of quickActions"
+             class="quick-action-item" 
+             (click)="handleQuickAction(action.action)">
+          <div class="quick-action-icon">
+            <ion-icon [name]="action.icon"></ion-icon>
           </div>
-        </ion-menu-toggle>
+          <span class="quick-action-title">{{ action.title }}</span>
+        </div>
       </div>
     </div>
   </div>
