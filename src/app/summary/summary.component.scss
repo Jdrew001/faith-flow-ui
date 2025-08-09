@@ -12,11 +12,72 @@
   flex-direction: column;
 }
 
-// Header
+// Header with Stats Bar
 .dashboard-header {
   position: relative;
   z-index: 100;
   flex-shrink: 0;
+  
+  ion-toolbar {
+    --background: #1c1c1e;
+    --border-width: 0;
+    
+    ion-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #ffffff;
+    }
+    
+    ion-button {
+      --color: #8e8e93;
+    }
+  }
+  
+  // Stats Bar
+  .stats-bar {
+    background: #2c2c2e;
+    padding: 12px 20px;
+    border-bottom: 1px solid #48484a;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    .welcome-text {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      
+      .greeting {
+        font-size: 16px;
+        font-weight: 600;
+        color: #ffffff;
+      }
+      
+      .date {
+        font-size: 12px;
+        color: #8e8e93;
+      }
+    }
+    
+    .stat-item {
+      text-align: center;
+      
+      .stat-value {
+        font-size: 22px;
+        font-weight: 700;
+        color: #007aff;
+        margin-bottom: 2px;
+      }
+      
+      .stat-label {
+        font-size: 11px;
+        color: #8e8e93;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+    }
+  }
 }
 
 // Content
@@ -26,52 +87,6 @@
   --padding-end: 0;
   flex: 1;
   overflow: hidden;
-}
-
-// Welcome Banner
-.welcome-banner {
-  background: #3a3a3c;
-  padding: 20px;
-  border-bottom: 1px solid #48484a;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  
-  .welcome-content {
-    h1 {
-      font-size: 24px;
-      font-weight: 600;
-      color: #ffffff;
-      margin: 0 0 4px 0;
-    }
-    
-    p {
-      font-size: 14px;
-      color: #8e8e93;
-      margin: 0;
-    }
-  }
-  
-  .welcome-stats {
-    .quick-stat {
-      text-align: center;
-      
-      .stat-number {
-        display: block;
-        font-size: 28px;
-        font-weight: 700;
-        color: #007aff;
-        line-height: 1;
-      }
-      
-      .stat-label {
-        display: block;
-        font-size: 12px;
-        color: #8e8e93;
-        margin-top: 4px;
-      }
-    }
-  }
 }
 
 // Dashboard Grid

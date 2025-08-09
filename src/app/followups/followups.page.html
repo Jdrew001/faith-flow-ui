@@ -14,23 +14,29 @@
           color="light">
         </ion-back-button>
       </ion-buttons>
+      <ion-title>Follow-up Management</ion-title>
+      <ion-buttons slot="end">
+        <ion-button (click)="refreshData()">
+          <ion-icon name="refresh-outline" slot="icon-only"></ion-icon>
+        </ion-button>
+      </ion-buttons>
     </ion-toolbar>
 
-    <!-- Welcome Banner Style Stats -->
-    <div class="welcome-banner">
-      <div class="banner-content">
-        <h2>Follow-up Management</h2>
-        <p>Track and manage your congregation's needs</p>
+    <!-- Stats Bar -->
+    <div class="stats-bar">
+      <div class="stat-item">
+        <div class="stat-value">{{ getPendingCount() }}</div>
+        <div class="stat-label">Pending</div>
       </div>
-      <div class="banner-stats">
-        <div class="quick-stat">
-          <span class="stat-number">{{ getPendingCount() }}</span>
-          <span class="stat-label">Pending</span>
-        </div>
-        <div class="quick-stat accent">
-          <span class="stat-number">{{ getOverdueCount() }}</span>
-          <span class="stat-label">Overdue</span>
-        </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item highlight">
+        <div class="stat-value">{{ getOverdueCount() }}</div>
+        <div class="stat-label">Overdue</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item success">
+        <div class="stat-value">{{ getCompletedCount() }}</div>
+        <div class="stat-label">Completed</div>
       </div>
     </div>
   </ion-header>

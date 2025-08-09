@@ -438,6 +438,10 @@ export class FollowupsPage implements ViewDidEnter {
     }).length;
   }
   
+  getCompletedCount(): number {
+    return this.followups.filter(f => f.status === 'COMPLETED').length;
+  }
+  
   onStatusChange(event: any) {
     this.selectedStatus = event.detail.value;
     this.filterFollowups();

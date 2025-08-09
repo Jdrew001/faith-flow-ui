@@ -21,66 +21,66 @@
   }
 }
 
-// Header with Welcome Banner
+// Header with Stats Bar
 .attendance-header {
   position: relative;
   z-index: 100;
   flex-shrink: 0;
   
-  // Welcome Banner - Same style as follow-ups
-  .welcome-banner {
-    background: #3a3a3c;
-    padding: 20px;
+  ion-toolbar {
+    --background: #1c1c1e;
+    --border-width: 0;
+    
+    ion-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #ffffff;
+    }
+    
+    ion-button {
+      --color: #8e8e93;
+    }
+  }
+  
+  // Stats Bar
+  .stats-bar {
+    background: #2c2c2e;
+    padding: 12px 20px;
     border-bottom: 1px solid #48484a;
     display: flex;
-    justify-content: space-between;
+    justify-content: space-around;
     align-items: center;
     
-    .banner-content {
+    .stat-item {
       flex: 1;
+      text-align: center;
       
-      h2 {
-        font-size: 24px;
-        font-weight: 600;
+      .stat-value {
+        font-size: 22px;
+        font-weight: 700;
         color: #ffffff;
-        margin: 0 0 4px 0;
+        margin-bottom: 2px;
       }
       
-      p {
-        font-size: 14px;
+      .stat-label {
+        font-size: 11px;
         color: #8e8e93;
-        margin: 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      
+      &.highlight {
+        .stat-value {
+          color: #34c759;
+        }
       }
     }
     
-    .banner-stats {
-      display: flex;
-      gap: 24px;
-      
-      .quick-stat {
-        text-align: center;
-        
-        .stat-number {
-          display: block;
-          font-size: 28px;
-          font-weight: 700;
-          color: #007aff;
-          line-height: 1;
-        }
-        
-        .stat-label {
-          display: block;
-          font-size: 12px;
-          color: #8e8e93;
-          margin-top: 4px;
-        }
-        
-        &.primary {
-          .stat-number {
-            color: #34c759;
-          }
-        }
-      }
+    .stat-divider {
+      width: 1px;
+      height: 32px;
+      background: #48484a;
+      margin: 0 16px;
     }
   }
 }
@@ -469,26 +469,16 @@ ion-fab {
 
 // Responsive Design
 @media (min-width: 768px) {
-  .welcome-banner {
-    padding: 24px 40px;
+  .stats-bar {
+    padding: 16px 40px;
     
-    .banner-content {
-      h2 {
-        font-size: 28px;
+    .stat-item {
+      .stat-value {
+        font-size: 26px;
       }
       
-      p {
-        font-size: 15px;
-      }
-    }
-    
-    .banner-stats {
-      gap: 32px;
-      
-      .quick-stat {
-        .stat-number {
-          font-size: 32px;
-        }
+      .stat-label {
+        font-size: 12px;
       }
     }
   }
@@ -506,34 +496,21 @@ ion-fab {
 
 // iPhone SE and smaller
 @media screen and (max-width: 375px) {
-  .welcome-banner {
-    padding: 16px;
-    flex-direction: column;
-    gap: 16px;
-    text-align: center;
+  .stats-bar {
+    padding: 10px 16px;
     
-    .banner-content {
-      h2 {
-        font-size: 20px;
+    .stat-item {
+      .stat-value {
+        font-size: 18px;
       }
       
-      p {
-        font-size: 13px;
+      .stat-label {
+        font-size: 10px;
       }
     }
     
-    .banner-stats {
-      gap: 32px;
-      
-      .quick-stat {
-        .stat-number {
-          font-size: 24px;
-        }
-        
-        .stat-label {
-          font-size: 11px;
-        }
-      }
+    .stat-divider {
+      margin: 0 8px;
     }
   }
   

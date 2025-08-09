@@ -11,6 +11,7 @@ import { BulkAttendanceModalComponent } from './components/bulk-attendance-modal
 import { SessionMembersComponent } from './components/session-members/session-members.component';
 import { CreateSessionModalComponent } from './components/create-session-modal/create-session-modal.component';
 import { convertUTCToLocalDate } from '../shared/utils/date-timezone.util';
+import { MemberService, MemberStats } from '../services/member.service';
 
 @Component({
   selector: 'app-attendance',
@@ -31,6 +32,12 @@ export class AttendancePage implements OnInit, OnDestroy {
     weeklyGrowth: 0,
     mostPopularSession: ''
   };
+  memberStats: MemberStats = {
+    totalMembers: 0,
+    activeMembers: 0,
+    inactiveMembers: 0,
+    recentlyAdded: 0
+  };
 
   searchControl = new FormControl('');
   selectedTimeFilter = 'today';
@@ -41,7 +48,8 @@ export class AttendancePage implements OnInit, OnDestroy {
   constructor(
     private attendanceService: AttendanceService,
     private modalController: ModalController,
-    private toastController: ToastController
+    private toastController: ToastController,
+    private memberService: MemberService
   ) {}
 
   ngOnInit() {
@@ -75,6 +83,14 @@ export class AttendancePage implements OnInit, OnDestroy {
       // Fetch filtered data from backend
       this.sessions = await this.attendanceService.getSessions(filters);
       this.attendanceStats = await this.attendanceService.getAttendanceStats();
+      
+      // Fetch member statistics
+      try {
+        this.memberStats = await this.memberService.getMemberStats();
+      } catch (memberError) {
+        console.error('Error loading member stats:', memberError);
+        // Continue even if member stats fail
+      }
       
       // Since data is already filtered by backend, just assign
       this.filteredSessions = [...this.sessions];
