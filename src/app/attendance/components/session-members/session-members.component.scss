@@ -1,6 +1,9 @@
 // Session Members Page - Refined Dark Theme Design
 // Clean, professional, and consistent with app theme
 
+// Import animation mixins
+@import '../../../shared/styles/animations';
+
 .session-members-page {
   display: flex;
   flex-direction: column;
@@ -388,13 +391,10 @@
       border-radius: 12px;
       overflow: hidden;
       cursor: pointer;
-      transition: all 0.2s ease;
       position: relative;
       
-      &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-      }
+      // Apply consistent card animation
+      @include card-animation();
       
       &.selected {
         box-shadow: 0 0 0 2px #007aff;
@@ -1023,3 +1023,6 @@
     }
   }
 }
+
+// Staggered animation for member cards
+@include staggered-animation('.members-grid', '.member-card', 0.05s, 30);

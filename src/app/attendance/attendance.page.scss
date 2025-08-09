@@ -1,6 +1,9 @@
 // Refined Attendance Page - Clean & Modern Design
 // Simplified, focused, and mobile-optimized
 
+// Import animation mixins
+@import '../shared/styles/animations';
+
 // Base Layout
 .ion-page {
   --background: #2c2c2e;
@@ -164,6 +167,7 @@
     justify-content: center;
     min-height: 300px;
     color: #8e8e93;
+    @include loading-animation();
     
     ion-spinner {
       --color: #007aff;
@@ -207,22 +211,12 @@
     border-radius: 16px;
     padding: 16px;
     cursor: pointer;
-    transition: all 0.2s ease;
     position: relative;
     overflow: hidden;
     border: 1px solid #48484a;
     
-    // Subtle animation on load
-    animation: slideIn 0.3s ease-out;
-    
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-    }
-    
-    &:active {
-      transform: scale(0.98);
-    }
+    // Apply consistent card animation
+    @include card-animation();
     
     // Session Header
     .session-header {
@@ -368,6 +362,7 @@
   justify-content: center;
   min-height: 400px;
   padding: 40px;
+  @include empty-state-animation();
   
   .empty-content {
     text-align: center;
@@ -446,26 +441,10 @@ ion-fab {
   }
 }
 
-// Animations
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
 // Add staggered animation for cards
-.session-cards .session-card {
-  @for $i from 1 through 10 {
-    &:nth-child(#{$i}) {
-      animation-delay: #{$i * 0.05}s;
-    }
-  }
-}
+// Staggered animation for cards
+@include staggered-animation('.session-cards', '.session-card', 0.05s, 20);
 
 // Responsive Design
 @media (min-width: 768px) {

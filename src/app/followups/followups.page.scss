@@ -1,6 +1,9 @@
 // Modern Follow-ups Page - Clean & Professional Design
 // Consistent with app theme and other refined pages
 
+// Import animation mixins
+@import '../shared/styles/animations';
+
 // Base Layout
 .ion-page {
   --background: #2c2c2e;
@@ -266,6 +269,7 @@
     justify-content: center;
     min-height: 300px;
     color: #8e8e93;
+    @include loading-animation();
     
     ion-spinner {
       --color: #007aff;
@@ -293,22 +297,14 @@
     position: relative;
     overflow: hidden;
     cursor: pointer;
-    transition: all 0.2s ease;
     border: 1px solid transparent;
-    animation: slideIn 0.3s ease-out;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     min-height: 180px;
     display: flex;
     flex-direction: column;
     
-    &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-    }
-    
-    &:active {
-      transform: scale(0.98);
-    }
+    // Apply consistent card animation
+    @include card-animation();
     
     &.overdue {
       border-color: rgba(255, 59, 48, 0.3);
@@ -737,6 +733,7 @@
   justify-content: center;
   min-height: 400px;
   padding: 40px;
+  @include empty-state-animation();
   
   .empty-content {
     text-align: center;
@@ -1294,25 +1291,10 @@ ion-select-option {
 }
 
 // Animations
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+// Animation keyframes are now imported from shared animations
 
 // Staggered animation for cards
-.followup-cards .followup-card {
-  @for $i from 1 through 10 {
-    &:nth-child(#{$i}) {
-      animation-delay: #{$i * 0.05}s;
-    }
-  }
-}
+@include staggered-animation('.followup-cards', '.followup-card', 0.05s, 20);
 
 // Responsive Design
 @media (min-width: 768px) {
@@ -1450,19 +1432,5 @@ ion-select-option {
   --ion-text-color: #ffffff;
 }
 
-// Pulse animation for pending status
-@keyframes pulse {
-  0% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.6;
-    transform: scale(1.2);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
+// Pulse animation is now imported from shared animations
 

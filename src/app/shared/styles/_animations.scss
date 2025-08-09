@@ -1,0 +1,93 @@
+// Global Animation Styles and Mixins
+// Consistent animations for all cards throughout the app
+
+// Animation Keyframes
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+// Card Animation Mixin
+@mixin card-animation($delay-increment: 0.05s, $max-items: 20) {
+  animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+              box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+              opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, opacity;
+  
+  &:hover {
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  }
+  
+  &:active {
+    transform: scale(0.99);
+  }
+}
+
+// Staggered Animation Mixin
+@mixin staggered-animation($parent-selector, $child-selector, $delay-increment: 0.05s, $max-items: 20) {
+  #{$parent-selector} #{$child-selector} {
+    @for $i from 1 through $max-items {
+      &:nth-child(#{$i}) {
+        animation-delay: #{$i * $delay-increment};
+      }
+    }
+  }
+}
+
+// Loading State Animation Mixin
+@mixin loading-animation {
+  animation: fadeIn 0.3s ease-out;
+}
+
+// Empty State Animation Mixin
+@mixin empty-state-animation {
+  animation: fadeInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+// Smooth Transition Mixin
+@mixin smooth-transition($properties: all, $duration: 0.3s) {
+  transition: $properties $duration cubic-bezier(0.4, 0, 0.2, 1);
+}

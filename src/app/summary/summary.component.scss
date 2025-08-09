@@ -1,6 +1,9 @@
 // Refined Dashboard - Clean & Modern Design
 // Consistent with app theme and attendance page styling
 
+// Import animation mixins
+@import '../shared/styles/animations';
+
 // Base Layout
 .ion-page {
   --background: #2c2c2e;
@@ -106,18 +109,10 @@
   border-radius: 16px;
   border: 1px solid #48484a;
   overflow: hidden;
-  transition: all 0.2s ease;
   cursor: pointer;
-  animation: slideIn 0.3s ease-out;
   
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-  }
-  
-  &:active {
-    transform: scale(0.98);
-  }
+  // Apply consistent card animation
+  @include card-animation();
   
   .card-header {
     padding: 16px;
@@ -616,26 +611,10 @@
   }
 }
 
-// Animations
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+// Animation keyframes are now imported from shared animations
 
-// Staggered animations
-.dashboard-card {
-  @for $i from 1 through 6 {
-    &:nth-child(#{$i}) {
-      animation-delay: #{$i * 0.05}s;
-    }
-  }
-}
+// Staggered animations for dashboard cards
+@include staggered-animation('.dashboard-grid', '.dashboard-card', 0.08s, 10);
 
 // Responsive Design
 @media (min-width: 768px) {
