@@ -17,7 +17,11 @@
       "Bash(npm test)",
       "Bash(npm test:*)",
       "Bash(npx vitest run:*)",
-      "Bash(npm start)"
+      "Bash(npm start)",
+      "Bash(copy srcassetsiconsicon-192x192.png srcassetsiconsapple-touch-icon-180x180.png)",
+      "Bash(copy srcassetsiconsicon-192x192.png srcassetsiconsapple-touch-icon-167x167.png)",
+      "Bash(copy srcassetsiconsicon-152x152.png srcassetsiconsapple-touch-icon-152x152.png)",
+      "Bash(copy srcassetsiconsicon-128x128.png srcassetsiconsapple-touch-icon-120x120.png)"
     ],
     "deny": []
   }
