@@ -1,60 +1,66 @@
 {
   "$schema": "./node_modules/@angular/service-worker/config/schema.json",
   "index": "/index.html",
-  "appData": {
-    "version": "1.0.0",
-    "timestamp": ""
-  },
+
+  "appData": { "version": "1.0.0" },
+
   "assetGroups": [
     {
-      "name": "app",
+      "name": "app-shell",
       "installMode": "prefetch",
       "updateMode": "prefetch",
       "resources": {
         "files": [
-          "/favicon.ico",
-          "/index.csr.html",
           "/index.html",
           "/manifest.webmanifest",
+          "/favicon.ico",
           "/*.css",
           "/*.js"
         ]
       }
     },
     {
-      "name": "assets",
+      "name": "assets-safe",
       "installMode": "lazy",
       "updateMode": "prefetch",
       "resources": {
         "files": [
-          "/**/*.(svg|cur|jpg|jpeg|png|apng|webp|avif|gif|otf|ttf|woff|woff2)"
+          "/assets/**"
         ]
       }
     }
   ],
+
   "dataGroups": [
     {
-      "name": "api-cache",
+      "name": "external-images",
       "urls": [
-        "/api/**"
+        "https://your-cdn.example.com/**"
       ],
       "cacheConfig": {
-        "strategy": "freshness",
-        "maxSize": 100,
-        "maxAge": "1h",
-        "timeout": "10s"
+        "strategy": "performance",
+        "maxSize": 200,
+        "maxAge": "30d"
       }
     },
     {
-      "name": "api-performance",
+      "name": "external-fonts",
       "urls": [
-        "/api/static/**"
+        "https://fonts.googleapis.com/**",
+        "https://fonts.gstatic.com/**"
       ],
       "cacheConfig": {
         "strategy": "performance",
         "maxSize": 50,
-        "maxAge": "1d"
+        "maxAge": "180d"
       }
     }
+  ],
+
+  "navigationUrls": [
+    "/**",
+    "!/**/*.*",
+    "!/**/*__*",
+    "!/**/*.json"
   ]
 }
