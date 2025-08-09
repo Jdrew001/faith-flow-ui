@@ -57,6 +57,7 @@ export class AttendancePage implements OnInit, OnDestroy {
     this.setupSearchFilter();
   }
 
+
   ngOnDestroy() {
     this.destroy$.next();
     this.destroy$.complete();

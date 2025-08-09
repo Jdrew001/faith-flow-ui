@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { SwUpdate } from '@angular/service-worker';
-import { ModalController } from '@ionic/angular';
+import { ModalController, IonRouterOutlet } from '@ionic/angular';
 import { UpdateModalComponent } from './shared/components/update-modal/update-modal.component';
+import { RouterOutletService } from './services/router-outlet.service';
 
 @Component({
   selector: 'app-root',
@@ -9,11 +10,20 @@ import { UpdateModalComponent } from './shared/components/update-modal/update-mo
   styleUrls: ['app.component.scss'],
   standalone: false,
 })
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, AfterViewInit {
+  @ViewChild(IonRouterOutlet, { static: false }) routerOutlet!: IonRouterOutlet;
   constructor(
     private swUpdate: SwUpdate,
-    private modalController: ModalController
+    private modalController: ModalController,
+    private routerOutletService: RouterOutletService
   ) {}
+
+  ngAfterViewInit(): void {
+    // Initialize the router outlet service with the router outlet instance
+    this.routerOutletService.init(this.routerOutlet);
+    // Disable swipe back globally for all pages
+    this.routerOutletService.disableSwipeBack();
+  }
 
   ngOnInit() {
     if (this.swUpdate.isEnabled) {
