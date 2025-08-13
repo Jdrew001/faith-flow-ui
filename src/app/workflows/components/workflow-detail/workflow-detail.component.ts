@@ -169,9 +169,13 @@ export class WorkflowDetailComponent implements OnInit, OnDestroy {
     this.workflowService.toggleWorkflowStatus(this.workflowId, newStatus)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: () => {
-          this.loadWorkflow();
-          this.showToast(`Workflow ${newStatus === 'active' ? 'activated' : 'paused'}`, 'success');
+        next: (response) => {
+          if (response.success) {
+            this.loadWorkflow();
+            this.showToast(`Workflow ${newStatus === 'active' ? 'activated' : 'paused'}`, 'success');
+          } else {
+            this.showToast('Failed to update workflow status', 'danger');
+          }
         },
         error: (error) => {
           console.error('Error toggling status:', error);
@@ -330,18 +334,21 @@ export class WorkflowDetailComponent implements OnInit, OnDestroy {
   }
 
   doManualTrigger(memberIds: string[]) {
-    this.workflowService.triggerWorkflowManually(this.workflowId, memberIds)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (instances) => {
-          this.showToast(`Workflow triggered for ${instances.length} member(s)`, 'success');
-          this.loadInstances();
-        },
-        error: (error) => {
-          console.error('Error triggering workflow:', error);
-          this.showToast('Failed to trigger workflow', 'danger');
-        }
-      });
+    // For manual trigger, we need to start workflow for each member
+    const triggers = memberIds.map(memberId => 
+      this.workflowService.startWorkflow(this.workflowId, memberId)
+    );
+    
+    Promise.all(triggers.map(t => t.toPromise())).then(
+      (instances) => {
+        this.showToast(`Workflow triggered for ${instances.length} member(s)`, 'success');
+        this.loadInstances();
+      },
+      (error) => {
+        console.error('Error triggering workflow:', error);
+        this.showToast('Failed to trigger workflow', 'danger');
+      }
+    );
   }
 
   viewInstance(instance: WorkflowInstance) {

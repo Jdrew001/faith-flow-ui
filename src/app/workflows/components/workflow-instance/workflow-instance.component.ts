@@ -193,7 +193,7 @@ export class WorkflowInstanceComponent implements OnInit, OnDestroy {
   doCompleteStep(stepId: string, notes?: string) {
     if (!this.instance) return;
 
-    this.workflowService.completeWorkflowStep(this.instance.id, stepId, notes)
+    this.workflowService.completeWorkflowStep(stepId, notes)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
@@ -248,7 +248,7 @@ export class WorkflowInstanceComponent implements OnInit, OnDestroy {
   doSkipStep(stepId: string, reason: string) {
     if (!this.instance) return;
 
-    this.workflowService.skipWorkflowStep(this.instance.id, stepId, reason)
+    this.workflowService.skipWorkflowStep(stepId, reason)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {

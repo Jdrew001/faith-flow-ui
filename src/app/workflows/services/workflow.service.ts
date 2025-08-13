@@ -18,7 +18,7 @@ import {
   providedIn: 'root'
 })
 export class WorkflowService {
-  private apiUrl = `${environment.apiUrl}/workflows`;
+  private apiUrl = `${environment.apiUrl}/api/workflows`;
   private workflowsSubject = new BehaviorSubject<Workflow[]>([]);
   public workflows$ = this.workflowsSubject.asObservable();
   
@@ -32,8 +32,9 @@ export class WorkflowService {
     this.loadTemplates();
   }
 
+  // Template Management
   getWorkflows(): Observable<Workflow[]> {
-    return this.http.get<Workflow[]>(this.apiUrl).pipe(
+    return this.http.get<Workflow[]>(`${this.apiUrl}/templates`).pipe(
       tap(workflows => this.workflowsSubject.next(workflows)),
       catchError(error => {
         console.error('Error loading workflows:', error);
@@ -43,49 +44,74 @@ export class WorkflowService {
   }
 
   getWorkflow(id: string): Observable<Workflow> {
-    return this.http.get<Workflow>(`${this.apiUrl}/${id}`);
+    return this.http.get<Workflow>(`${this.apiUrl}/templates/${id}`);
   }
 
   createWorkflow(workflow: Partial<Workflow>): Observable<Workflow> {
-    return this.http.post<Workflow>(this.apiUrl, workflow).pipe(
+    return this.http.post<Workflow>(`${this.apiUrl}/templates`, workflow).pipe(
       tap(() => this.getWorkflows().subscribe())
     );
   }
 
   updateWorkflow(id: string, workflow: Partial<Workflow>): Observable<Workflow> {
-    return this.http.put<Workflow>(`${this.apiUrl}/${id}`, workflow).pipe(
+    return this.http.put<Workflow>(`${this.apiUrl}/templates/${id}`, workflow).pipe(
       tap(() => this.getWorkflows().subscribe())
     );
   }
 
   deleteWorkflow(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+    return this.http.delete<void>(`${this.apiUrl}/templates/${id}`).pipe(
       tap(() => this.getWorkflows().subscribe())
     );
   }
 
-  toggleWorkflowStatus(id: string, status: 'active' | 'paused'): Observable<Workflow> {
-    return this.http.patch<Workflow>(`${this.apiUrl}/${id}/status`, { status }).pipe(
+  toggleWorkflowStatus(id: string, status: 'active' | 'paused'): Observable<{ success: boolean }> {
+    const endpoint = status === 'active' ? 'activate' : 'archive';
+    return this.http.post<{ success: boolean }>(`${this.apiUrl}/templates/${id}/${endpoint}`, {}).pipe(
       tap(() => this.getWorkflows().subscribe())
     );
   }
 
-  duplicateWorkflow(id: string): Observable<Workflow> {
-    return this.http.post<Workflow>(`${this.apiUrl}/${id}/duplicate`, {}).pipe(
+  duplicateWorkflow(id: string, name?: string): Observable<Workflow> {
+    return this.http.post<Workflow>(`${this.apiUrl}/templates/${id}/duplicate`, { name: name || 'Copy' }).pipe(
       tap(() => this.getWorkflows().subscribe())
     );
   }
 
+  getTemplateProgress(id: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/templates/${id}/progress`);
+  }
+
+  getTemplateOverview(): Observable<any> {
+    return this.http.get(`${this.apiUrl}/templates/overview`);
+  }
+
+  // Workflow History & Statistics
   getWorkflowHistory(id: string): Observable<WorkflowHistory[]> {
     return this.http.get<WorkflowHistory[]>(`${this.apiUrl}/${id}/history`);
   }
 
-  testWorkflow(workflow: Partial<Workflow>): Observable<{ affectedMembers: number; previewData: any }> {
-    return this.http.post<{ affectedMembers: number; previewData: any }>(`${this.apiUrl}/test`, workflow);
+  getWorkflowStatistics(workflowId: string, period: 'day' | 'week' | 'month' | 'all' = 'week'): Observable<WorkflowStatistics> {
+    return this.http.get<WorkflowStatistics>(`${this.apiUrl}/${workflowId}/statistics?period=${period}`);
+  }
+
+  // Workflow Instances
+  startWorkflow(templateId: string, memberId: string): Observable<WorkflowInstance> {
+    return this.http.post<WorkflowInstance>(`${this.apiUrl}/start`, {
+      templateId,
+      memberId
+    }).pipe(
+      tap(() => this.getWorkflowInstances().subscribe())
+    );
   }
   
-  getWorkflowInstances(workflowId?: string): Observable<WorkflowInstance[]> {
-    const url = workflowId ? `${this.apiUrl}/${workflowId}/instances` : `${this.apiUrl}/instances`;
+  getWorkflowInstances(status?: string, limit: number = 20): Observable<WorkflowInstance[]> {
+    let url = `${this.apiUrl}/instances`;
+    const params: string[] = [];
+    if (status) params.push(`status=${status}`);
+    params.push(`limit=${limit}`);
+    if (params.length > 0) url += '?' + params.join('&');
+    
     return this.http.get<WorkflowInstance[]>(url).pipe(
       tap(instances => this.instancesSubject.next(instances)),
       catchError(error => {
@@ -96,44 +122,79 @@ export class WorkflowService {
   }
   
   getWorkflowInstance(instanceId: string): Observable<WorkflowInstance> {
-    return this.http.get<WorkflowInstance>(`${this.apiUrl}/instances/${instanceId}`);
+    return this.http.get<WorkflowInstance>(`${this.apiUrl}/${instanceId}`);
+  }
+
+  pauseWorkflow(id: string): Observable<{ success: boolean }> {
+    return this.http.post<{ success: boolean }>(`${this.apiUrl}/${id}/pause`, {}).pipe(
+      tap(() => this.getWorkflowInstances().subscribe())
+    );
+  }
+
+  resumeWorkflow(id: string): Observable<{ success: boolean }> {
+    return this.http.post<{ success: boolean }>(`${this.apiUrl}/${id}/resume`, {}).pipe(
+      tap(() => this.getWorkflowInstances().subscribe())
+    );
+  }
+
+  cancelWorkflowInstance(instanceId: string, reason?: string): Observable<{ success: boolean }> {
+    return this.http.post<{ success: boolean }>(
+      `${this.apiUrl}/${instanceId}/cancel`,
+      { reason }
+    ).pipe(
+      tap(() => this.getWorkflowInstances().subscribe())
+    );
   }
   
-  completeWorkflowStep(instanceId: string, stepId: string, notes?: string): Observable<WorkflowInstance> {
-    return this.http.post<WorkflowInstance>(
-      `${this.apiUrl}/instances/${instanceId}/steps/${stepId}/complete`,
+  // Workflow Steps
+  completeWorkflowStep(stepId: string, notes?: string): Observable<{ success: boolean; nextStep?: any }> {
+    return this.http.post<{ success: boolean; nextStep?: any }>(
+      `${this.apiUrl}/steps/${stepId}/complete`,
       { notes }
     ).pipe(
       tap(() => this.getWorkflowInstances().subscribe())
     );
   }
   
-  skipWorkflowStep(instanceId: string, stepId: string, reason?: string): Observable<WorkflowInstance> {
-    return this.http.post<WorkflowInstance>(
-      `${this.apiUrl}/instances/${instanceId}/steps/${stepId}/skip`,
+  skipWorkflowStep(stepId: string, reason: string): Observable<{ success: boolean }> {
+    return this.http.post<{ success: boolean }>(
+      `${this.apiUrl}/steps/${stepId}/skip`,
       { reason }
     ).pipe(
       tap(() => this.getWorkflowInstances().subscribe())
     );
   }
-  
-  cancelWorkflowInstance(instanceId: string, reason?: string): Observable<void> {
-    return this.http.post<void>(
-      `${this.apiUrl}/instances/${instanceId}/cancel`,
-      { reason }
-    ).pipe(
-      tap(() => this.getWorkflowInstances().subscribe())
+
+  // Assignment completion (for manual tasks)
+  completeAssignment(assignmentId: string, notes?: string): Observable<{ success: boolean; message: string }> {
+    return this.http.post<{ success: boolean; message: string }>(
+      `${environment.apiUrl}/api/followups/assignments/${assignmentId}/complete`,
+      { notes }
     );
   }
   
-  getWorkflowStatistics(workflowId: string, period: 'day' | 'week' | 'month' | 'all' = 'all'): Observable<WorkflowStatistics> {
-    return this.http.get<WorkflowStatistics>(`${this.apiUrl}/${workflowId}/statistics?period=${period}`);
+  // Triggers & Automation
+  checkTriggers(): Observable<{ triggered: number; members: any[] }> {
+    return this.http.post<{ triggered: number; members: any[] }>(`${this.apiUrl}/triggers/check`, {});
   }
-  
-  triggerWorkflowManually(workflowId: string, memberIds: string[]): Observable<WorkflowInstance[]> {
-    return this.http.post<WorkflowInstance[]>(`${this.apiUrl}/${workflowId}/trigger`, { memberIds }).pipe(
-      tap(() => this.getWorkflowInstances().subscribe())
+
+  checkMemberTriggers(memberId: string): Observable<{ shouldTrigger: boolean; workflows: Workflow[] }> {
+    return this.http.post<{ shouldTrigger: boolean; workflows: Workflow[] }>(
+      `${this.apiUrl}/triggers/check/${memberId}`, 
+      {}
     );
+  }
+
+  previewTriggers(days: number = 21): Observable<{ affectedMembers: any[]; patterns: any[] }> {
+    return this.http.get<{ affectedMembers: any[]; patterns: any[] }>(
+      `${this.apiUrl}/triggers/preview?days=${days}`
+    );
+  }
+
+  getAttendancePatterns(days: number = 21, eventId?: string): Observable<any[]> {
+    let url = `${this.apiUrl}/triggers/patterns?days=${days}`;
+    if (eventId) url += `&eventId=${eventId}`;
+    return this.http.get<any[]>(url);
   }
 
   getEvents(): Observable<WorkflowEvent[]> {
