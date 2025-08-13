@@ -1,0 +1,75 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Workflow Templates</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">
+        <ion-icon slot="icon-only" name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <div class="templates-header">
+    <h2>Quick Start Templates</h2>
+    <p>Choose a template to get started quickly with pre-configured workflows</p>
+  </div>
+
+  <div class="templates-grid">
+    <div 
+      class="template-card" 
+      *ngFor="let template of templates"
+      [class.selected]="selectedTemplate?.id === template.id"
+      (click)="selectTemplate(template)">
+      
+      <div class="template-icon">
+        <ion-icon [name]="template.icon"></ion-icon>
+      </div>
+      
+      <div class="template-content">
+        <h3>{{ template.name }}</h3>
+        <p>{{ template.description }}</p>
+        
+        <div class="template-meta">
+          <ion-chip size="small" color="medium">
+            <ion-icon name="git-branch-outline"></ion-icon>
+            <ion-label>{{ getTemplateTriggerType(template) }}</ion-label>
+          </ion-chip>
+          <ion-chip size="small" color="medium">
+            <ion-icon name="list-outline"></ion-icon>
+            <ion-label>{{ getTemplateStepsCount(template) }} steps</ion-label>
+          </ion-chip>
+        </div>
+      </div>
+      
+      <div class="selected-indicator" *ngIf="selectedTemplate?.id === template.id">
+        <ion-icon name="checkmark-circle" color="primary"></ion-icon>
+      </div>
+    </div>
+  </div>
+
+  <div class="blank-template">
+    <ion-button 
+      expand="block" 
+      fill="outline" 
+      (click)="dismiss()">
+      <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+      Start from Scratch
+    </ion-button>
+  </div>
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()">Cancel</ion-button>
+      <ion-button 
+        (click)="useTemplate()" 
+        [disabled]="!selectedTemplate"
+        color="primary"
+        fill="solid">
+        Use Template
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-footer>

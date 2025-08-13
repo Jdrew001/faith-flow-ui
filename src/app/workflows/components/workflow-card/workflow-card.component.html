@@ -1,0 +1,61 @@
+<ion-card button>
+  <ion-card-header>
+    <ion-card-subtitle>
+      <ion-chip [color]="statusColor" size="small">
+        <ion-icon [name]="statusIcon"></ion-icon>
+        <ion-label>{{ workflow.status | uppercase }}</ion-label>
+      </ion-chip>
+      <ion-button 
+        fill="clear" 
+        size="small" 
+        class="action-button"
+        (click)="onActionClick($event)">
+        <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
+      </ion-button>
+    </ion-card-subtitle>
+    <ion-card-title>{{ workflow.name }}</ion-card-title>
+  </ion-card-header>
+
+  <ion-card-content>
+    <div class="workflow-info">
+      <div class="info-row">
+        <ion-icon name="git-branch-outline" color="primary"></ion-icon>
+        <span class="trigger-text">{{ triggerDescription }}</span>
+      </div>
+      
+      <div class="info-row">
+        <ion-icon name="list-outline" color="primary"></ion-icon>
+        <span class="steps-text">{{ stepsSummary }}</span>
+      </div>
+
+      <div class="stats-row" *ngIf="workflow.stats">
+        <div class="stat">
+          <span class="stat-value">{{ workflow.stats.activeInstances }}</span>
+          <span class="stat-label">Active</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">{{ workflow.stats.totalTriggers }}</span>
+          <span class="stat-label">Triggers</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">{{ workflow.stats.successRate }}%</span>
+          <span class="stat-label">Success</span>
+        </div>
+      </div>
+
+      <div class="footer-row" *ngIf="workflow.lastTriggeredAt">
+        <ion-note>
+          <ion-icon name="time-outline"></ion-icon>
+          Last triggered {{ workflow.lastTriggeredAt | date:'short' }}
+        </ion-note>
+      </div>
+      
+      <div class="footer-row" *ngIf="workflow.testMode">
+        <ion-chip color="tertiary" size="small">
+          <ion-icon name="flask-outline"></ion-icon>
+          <ion-label>Test Mode</ion-label>
+        </ion-chip>
+      </div>
+    </div>
+  </ion-card-content>
+</ion-card>

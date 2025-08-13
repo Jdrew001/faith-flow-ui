@@ -1,0 +1,153 @@
+ion-card {
+  margin: 0;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+  }
+}
+
+ion-card-header {
+  padding-bottom: 8px;
+  
+  ion-card-subtitle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    
+    ion-chip {
+      margin: 0;
+      height: 24px;
+      
+      ion-icon {
+        margin-right: 4px;
+        font-size: 14px;
+      }
+      
+      ion-label {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+      }
+    }
+    
+    .action-button {
+      --padding-start: 4px;
+      --padding-end: 4px;
+      margin: 0;
+      height: 32px;
+    }
+  }
+  
+  ion-card-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ion-color-dark);
+    line-height: 1.4;
+  }
+}
+
+ion-card-content {
+  padding-top: 0;
+  
+  .workflow-info {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .info-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    
+    ion-icon {
+      font-size: 18px;
+      margin-top: 2px;
+      flex-shrink: 0;
+    }
+    
+    .trigger-text,
+    .steps-text {
+      font-size: 14px;
+      color: var(--ion-color-medium-shade);
+      line-height: 1.4;
+    }
+  }
+  
+  .stats-row {
+    display: flex;
+    justify-content: space-around;
+    padding: 12px 0;
+    border-top: 1px solid var(--ion-color-light-shade);
+    border-bottom: 1px solid var(--ion-color-light-shade);
+    margin: 8px 0;
+    
+    .stat {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      
+      .stat-value {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--ion-color-primary);
+      }
+      
+      .stat-label {
+        font-size: 11px;
+        color: var(--ion-color-medium);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+    }
+  }
+  
+  .footer-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    ion-note {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 12px;
+      color: var(--ion-color-medium);
+      
+      ion-icon {
+        font-size: 14px;
+      }
+    }
+    
+    ion-chip {
+      margin: 0;
+      height: 22px;
+      
+      ion-icon {
+        margin-right: 4px;
+        font-size: 12px;
+      }
+      
+      ion-label {
+        font-size: 11px;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  ion-card {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    
+    &:hover {
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+    }
+  }
+}

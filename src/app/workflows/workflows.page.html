@@ -1,0 +1,128 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Workflows</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="openTemplates()">
+        <ion-icon slot="icon-only" name="library-outline"></ion-icon>
+      </ion-button>
+      <ion-button (click)="openWorkflowCreator()">
+        <ion-icon slot="icon-only" name="add-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  
+  <ion-toolbar>
+    <ion-searchbar 
+      [(ngModel)]="searchQuery"
+      (ionInput)="onSearchChange()"
+      placeholder="Search workflows..."
+      [debounce]="300">
+    </ion-searchbar>
+  </ion-toolbar>
+  
+  <ion-toolbar>
+    <ion-segment [(ngModel)]="filterStatus" (ionChange)="onFilterChange()">
+      <ion-segment-button value="all">
+        <ion-label>All</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="active">
+        <ion-label>Active</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="paused">
+        <ion-label>Paused</ion-label>
+      </ion-segment-button>
+      <ion-segment-button value="draft">
+        <ion-label>Draft</ion-label>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content>
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Toggle between workflows and instances -->
+  <div class="view-toggle">
+    <ion-chip [color]="!showInstances ? 'primary' : 'medium'" (click)="toggleView()">
+      <ion-label>Workflows ({{ workflows.length }})</ion-label>
+    </ion-chip>
+    <ion-chip [color]="showInstances ? 'primary' : 'medium'" (click)="toggleView()">
+      <ion-label>Active Instances ({{ activeInstances.length }})</ion-label>
+    </ion-chip>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-container">
+    <ion-spinner name="crescent"></ion-spinner>
+    <p>Loading workflows...</p>
+  </div>
+
+  <!-- Workflows View -->
+  <div *ngIf="!isLoading && !showInstances">
+    <!-- Empty State -->
+    <div *ngIf="filteredWorkflows.length === 0" class="empty-state">
+      <ion-icon name="git-branch-outline"></ion-icon>
+      <h3>No workflows found</h3>
+      <p>{{ searchQuery ? 'Try adjusting your search' : 'Create your first workflow to get started' }}</p>
+      <ion-button *ngIf="!searchQuery" (click)="openTemplates()" fill="outline">
+        <ion-icon slot="start" name="library-outline"></ion-icon>
+        Browse Templates
+      </ion-button>
+    </div>
+
+    <!-- Workflow Cards -->
+    <div class="workflow-list" *ngIf="filteredWorkflows.length > 0">
+      <app-workflow-card
+        *ngFor="let workflow of filteredWorkflows"
+        [workflow]="workflow"
+        (click)="viewWorkflowDetail(workflow)"
+        (action)="showWorkflowActions(workflow)">
+      </app-workflow-card>
+    </div>
+  </div>
+
+  <!-- Active Instances View -->
+  <div *ngIf="!isLoading && showInstances">
+    <!-- Empty State -->
+    <div *ngIf="activeInstances.length === 0" class="empty-state">
+      <ion-icon name="checkmark-circle-outline"></ion-icon>
+      <h3>No active instances</h3>
+      <p>All workflows are idle or completed</p>
+    </div>
+
+    <!-- Instance Cards -->
+    <ion-list *ngIf="activeInstances.length > 0">
+      <ion-item *ngFor="let instance of activeInstances" (click)="viewInstance(instance)" button detail>
+        <ion-avatar slot="start">
+          <div class="avatar-placeholder">{{ instance.memberName.charAt(0) }}</div>
+        </ion-avatar>
+        <ion-label>
+          <h2>{{ instance.memberName }}</h2>
+          <p>{{ instance.workflowName }}</p>
+          <ion-progress-bar 
+            [value]="instance.currentStepIndex / instance.steps.length"
+            color="primary">
+          </ion-progress-bar>
+          <p class="step-info">
+            Step {{ instance.currentStepIndex + 1 }} of {{ instance.steps.length }}
+          </p>
+        </ion-label>
+        <ion-note slot="end">
+          {{ instance.startedAt | date:'short' }}
+        </ion-note>
+      </ion-item>
+    </ion-list>
+  </div>
+
+  <!-- Floating Action Button -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="openWorkflowCreator()">
+      <ion-icon name="add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>
