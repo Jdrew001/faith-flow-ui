@@ -18,7 +18,7 @@ import {
   providedIn: 'root'
 })
 export class WorkflowService {
-  private apiUrl = `${environment.apiUrl}/api/workflows`;
+  private apiUrl = `${environment.apiUrl}/faith-flow-service/workflows`;
   private workflowsSubject = new BehaviorSubject<Workflow[]>([]);
   public workflows$ = this.workflowsSubject.asObservable();
   
@@ -168,7 +168,7 @@ export class WorkflowService {
   // Assignment completion (for manual tasks)
   completeAssignment(assignmentId: string, notes?: string): Observable<{ success: boolean; message: string }> {
     return this.http.post<{ success: boolean; message: string }>(
-      `${environment.apiUrl}/api/followups/assignments/${assignmentId}/complete`,
+      `${environment.apiUrl}/faith-flow-service/followups/assignments/${assignmentId}/complete`,
       { notes }
     );
   }
