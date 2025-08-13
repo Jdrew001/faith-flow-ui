@@ -1,0 +1,198 @@
+<!-- Add Step Button -->
+<div class="add-step-buttons" *ngIf="!showEditor">
+  <ion-button expand="block" fill="outline" (click)="openStepEditor('task')">
+    <ion-icon slot="start" name="add-circle-outline"></ion-icon>
+    Add Step
+  </ion-button>
+  
+  <div class="quick-add-buttons">
+    <ion-chip *ngFor="let type of stepTypes" (click)="openStepEditor(type.type)">
+      <ion-icon [name]="type.icon"></ion-icon>
+      <ion-label>{{ type.label }}</ion-label>
+    </ion-chip>
+  </div>
+</div>
+
+<!-- Step Editor -->
+<div class="step-editor" *ngIf="showEditor">
+  <div class="editor-header">
+    <h4>{{ selectedStepType ? getStepTypeLabel(selectedStepType) : 'Add Step' }}</h4>
+    <ion-button fill="clear" size="small" (click)="cancelEditor()">
+      <ion-icon slot="icon-only" name="close"></ion-icon>
+    </ion-button>
+  </div>
+  
+  <form [formGroup]="stepForm">
+    <!-- Common Fields -->
+    <ion-item>
+      <ion-label position="stacked">Step Name *</ion-label>
+      <ion-input formControlName="name" placeholder="e.g., Send Welcome Email"></ion-input>
+    </ion-item>
+    
+    <!-- Task Configuration -->
+    <div *ngIf="selectedStepType === 'task'" class="step-config">
+      <ion-item>
+        <ion-label position="stacked">Task Title *</ion-label>
+        <ion-input formControlName="taskTitle" placeholder="e.g., Follow up with new visitor"></ion-input>
+      </ion-item>
+      
+      <ion-item>
+        <ion-label position="stacked">Instructions *</ion-label>
+        <ion-textarea 
+          formControlName="taskDescription" 
+          placeholder="Describe what needs to be done..."
+          rows="3">
+        </ion-textarea>
+      </ion-item>
+      
+      <ion-item>
+        <ion-label>Assignment Strategy</ion-label>
+        <ion-select formControlName="assignmentStrategy" interface="popover">
+          <ion-select-option *ngFor="let strategy of assignmentStrategies" [value]="strategy.value">
+            {{ strategy.label }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+      
+      <div class="due-date-config">
+        <ion-label>Due Date</ion-label>
+        <div class="due-date-inputs">
+          <ion-input 
+            type="number" 
+            formControlName="dueDateValue" 
+            min="1"
+            placeholder="24">
+          </ion-input>
+          <ion-select formControlName="dueDateUnit" interface="popover">
+            <ion-select-option *ngFor="let unit of timeUnits" [value]="unit.value">
+              {{ unit.label }}
+            </ion-select-option>
+          </ion-select>
+        </div>
+      </div>
+    </div>
+    
+    <!-- SMS Configuration -->
+    <div *ngIf="selectedStepType === 'sms'" class="step-config">
+      <ion-item>
+        <ion-label position="stacked">Message *</ion-label>
+        <ion-textarea 
+          formControlName="smsMessage" 
+          placeholder="Type your message..."
+          rows="3"
+          maxlength="160">
+        </ion-textarea>
+      </ion-item>
+      <div class="char-counter">{{ getRemainingChars() }} characters remaining</div>
+      
+      <ion-item>
+        <ion-label>Send To</ion-label>
+        <ion-select formControlName="smsRecipientType" interface="popover">
+          <ion-select-option *ngFor="let type of recipientTypes" [value]="type.value">
+            {{ type.label }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+      
+      <ion-item *ngIf="stepForm.get('smsRecipientType')?.value === 'custom'">
+        <ion-label position="stacked">Phone Number</ion-label>
+        <ion-input formControlName="smsCustomNumber" type="tel" placeholder="+1234567890"></ion-input>
+      </ion-item>
+      
+      <ion-item>
+        <ion-label>Delay (hours)</ion-label>
+        <ion-input 
+          type="number" 
+          formControlName="smsDelayHours" 
+          min="0"
+          placeholder="0">
+        </ion-input>
+      </ion-item>
+    </div>
+    
+    <!-- Email Configuration -->
+    <div *ngIf="selectedStepType === 'email'" class="step-config">
+      <ion-item>
+        <ion-label position="stacked">Subject *</ion-label>
+        <ion-input formControlName="emailSubject" placeholder="e.g., Welcome to our church!"></ion-input>
+      </ion-item>
+      
+      <ion-item>
+        <ion-label position="stacked">Message Body *</ion-label>
+        <ion-textarea 
+          formControlName="emailBody" 
+          placeholder="Type your email message..."
+          rows="5">
+        </ion-textarea>
+      </ion-item>
+      
+      <ion-item>
+        <ion-label>Send To</ion-label>
+        <ion-select formControlName="emailRecipientType" interface="popover">
+          <ion-select-option *ngFor="let type of recipientTypes" [value]="type.value">
+            {{ type.label }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+      
+      <ion-item *ngIf="stepForm.get('emailRecipientType')?.value === 'custom'">
+        <ion-label position="stacked">Email Address</ion-label>
+        <ion-input formControlName="emailCustomEmail" type="email" placeholder="email@example.com"></ion-input>
+      </ion-item>
+      
+      <ion-item>
+        <ion-label>Delay (hours)</ion-label>
+        <ion-input 
+          type="number" 
+          formControlName="emailDelayHours" 
+          min="0"
+          placeholder="0">
+        </ion-input>
+      </ion-item>
+    </div>
+    
+    <!-- Wait Configuration -->
+    <div *ngIf="selectedStepType === 'wait'" class="step-config">
+      <div class="wait-config">
+        <ion-label>Wait Duration</ion-label>
+        <div class="wait-inputs">
+          <ion-input 
+            type="number" 
+            formControlName="waitValue" 
+            min="1"
+            placeholder="1">
+          </ion-input>
+          <ion-select formControlName="waitUnit" interface="popover">
+            <ion-select-option *ngFor="let unit of timeUnits" [value]="unit.value">
+              {{ unit.label }}
+            </ion-select-option>
+          </ion-select>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Note Configuration -->
+    <div *ngIf="selectedStepType === 'note'" class="step-config">
+      <ion-item>
+        <ion-label position="stacked">Note Content *</ion-label>
+        <ion-textarea 
+          formControlName="noteContent" 
+          placeholder="Enter the note to be logged..."
+          rows="4">
+        </ion-textarea>
+      </ion-item>
+      
+      <ion-item>
+        <ion-checkbox slot="start" formControlName="noteAttachToMember"></ion-checkbox>
+        <ion-label>Attach to member profile</ion-label>
+      </ion-item>
+    </div>
+  </form>
+  
+  <div class="editor-actions">
+    <ion-button fill="clear" (click)="cancelEditor()">Cancel</ion-button>
+    <ion-button fill="solid" (click)="saveStep()" [disabled]="!stepForm.valid">
+      Add Step
+    </ion-button>
+  </div>
+</div>

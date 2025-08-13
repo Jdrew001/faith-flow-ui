@@ -1,0 +1,425 @@
+.step-indicator {
+  background: white;
+  padding: 16px;
+  border-bottom: 1px solid var(--ion-color-light-shade);
+  
+  .step-progress {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    padding: 0 20px;
+    
+    .step-dot {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--ion-color-light);
+      border: 2px solid var(--ion-color-medium);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--ion-color-medium);
+      z-index: 2;
+      position: relative;
+      transition: all 0.3s ease;
+      
+      &.active {
+        background: var(--ion-color-primary);
+        border-color: var(--ion-color-primary);
+        color: white;
+        transform: scale(1.1);
+      }
+      
+      &.completed {
+        background: var(--ion-color-success);
+        border-color: var(--ion-color-success);
+        color: white;
+        
+        span {
+          display: none;
+        }
+        
+        &::after {
+          content: '✓';
+          color: white;
+          font-size: 16px;
+        }
+      }
+    }
+    
+    .step-line {
+      position: absolute;
+      top: 16px;
+      left: 20px;
+      right: 20px;
+      height: 2px;
+      background: var(--ion-color-medium);
+      z-index: 1;
+      transition: width 0.3s ease;
+      
+      &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        background: var(--ion-color-success);
+        transition: width 0.3s ease;
+      }
+    }
+  }
+  
+  .step-title {
+    text-align: center;
+    
+    h3 {
+      font-size: 14px;
+      color: var(--ion-color-medium);
+      margin: 0 0 4px 0;
+    }
+    
+    p {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--ion-color-dark);
+      margin: 0;
+    }
+  }
+}
+
+.wizard-step {
+  padding: 16px;
+  min-height: calc(100vh - 200px);
+}
+
+.form-section {
+  margin-bottom: 24px;
+  
+  h4 {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 8px 0;
+    color: var(--ion-color-dark);
+  }
+  
+  .section-description {
+    font-size: 14px;
+    color: var(--ion-color-medium);
+    margin: 0 0 16px 0;
+  }
+  
+  ion-item {
+    --background: white;
+    --padding-start: 16px;
+    --inner-padding-end: 16px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    border: 1px solid var(--ion-color-light-shade);
+  }
+}
+
+.trigger-option {
+  margin-bottom: 12px;
+  
+  ion-item {
+    --background: white;
+    --border-radius: 8px;
+    --padding-top: 12px;
+    --padding-bottom: 12px;
+    border: 2px solid var(--ion-color-light-shade);
+    transition: all 0.3s ease;
+    
+    &:hover:not([disabled]) {
+      border-color: var(--ion-color-primary-tint);
+      transform: translateX(4px);
+    }
+    
+    ion-label {
+      h3 {
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+      
+      p {
+        font-size: 13px;
+        color: var(--ion-color-medium);
+      }
+    }
+  }
+}
+
+.attendance-type-selector {
+  margin: 16px 0;
+  
+  ion-segment {
+    background: var(--ion-color-light);
+    border-radius: 8px;
+    padding: 4px;
+    
+    ion-segment-button {
+      --indicator-height: 0;
+      --background-checked: white;
+      --color-checked: var(--ion-color-primary);
+      border-radius: 6px;
+      min-height: 48px;
+      
+      ion-icon {
+        font-size: 20px;
+        margin-bottom: 4px;
+      }
+      
+      ion-label {
+        font-size: 12px;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+.frequency-selector {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid var(--ion-color-light-shade);
+  margin: 16px 0;
+  
+  ion-label {
+    font-weight: 500;
+  }
+  
+  .number-stepper {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    
+    ion-button {
+      --padding-start: 8px;
+      --padding-end: 8px;
+      width: 36px;
+      height: 36px;
+    }
+    
+    .frequency-value {
+      font-size: 24px;
+      font-weight: 600;
+      color: var(--ion-color-primary);
+      min-width: 40px;
+      text-align: center;
+    }
+  }
+}
+
+.trigger-preview {
+  margin: 24px 0;
+  
+  ion-card {
+    background: var(--ion-color-primary-contrast);
+    border-left: 4px solid var(--ion-color-primary);
+    margin: 0;
+    
+    ion-card-content {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 16px;
+      
+      ion-icon {
+        font-size: 24px;
+        flex-shrink: 0;
+      }
+      
+      p {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.5;
+        color: var(--ion-color-dark);
+      }
+    }
+  }
+}
+
+.accordion-content {
+  padding: 16px;
+  background: var(--ion-color-light);
+}
+
+.manual-trigger-info {
+  padding: 24px 0;
+  
+  ion-card {
+    text-align: center;
+    padding: 24px;
+    
+    ion-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+    }
+    
+    h3 {
+      font-size: 20px;
+      font-weight: 600;
+      margin: 0 0 12px 0;
+    }
+    
+    p {
+      font-size: 14px;
+      color: var(--ion-color-medium);
+      line-height: 1.5;
+      margin: 0;
+    }
+  }
+}
+
+.add-step-section {
+  margin-bottom: 24px;
+}
+
+.steps-list {
+  ion-item {
+    --background: white;
+    --padding-start: 8px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    border: 1px solid var(--ion-color-light-shade);
+    
+    ion-label {
+      h3 {
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+      
+      p {
+        font-size: 13px;
+        color: var(--ion-color-medium);
+      }
+    }
+  }
+}
+
+.empty-steps {
+  text-align: center;
+  padding: 48px 24px;
+  
+  ion-icon {
+    font-size: 64px;
+    color: var(--ion-color-medium);
+    margin-bottom: 16px;
+  }
+  
+  p {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    color: var(--ion-color-medium-shade);
+    
+    &.hint {
+      font-size: 14px;
+      color: var(--ion-color-medium);
+    }
+  }
+}
+
+.review-section {
+  ion-card {
+    margin-bottom: 16px;
+    
+    ion-card-header {
+      padding-bottom: 8px;
+      
+      ion-card-subtitle {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--ion-color-medium);
+      }
+      
+      ion-card-title {
+        font-size: 18px;
+        font-weight: 600;
+      }
+    }
+    
+    ion-list {
+      background: transparent;
+      padding: 8px 0 0 0;
+      
+      ion-item {
+        --padding-start: 0;
+        --inner-padding-end: 0;
+        
+        .step-number {
+          font-weight: 600;
+          color: var(--ion-color-primary);
+          margin-right: 8px;
+        }
+      }
+    }
+  }
+}
+
+.activation-options {
+  margin-top: 24px;
+  
+  ion-item {
+    --background: var(--ion-color-primary-contrast);
+    border: 2px solid var(--ion-color-primary-tint);
+    border-radius: 8px;
+    
+    ion-label {
+      h3 {
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+      
+      p {
+        font-size: 13px;
+        color: var(--ion-color-medium);
+      }
+    }
+  }
+}
+
+ion-footer {
+  ion-toolbar {
+    --background: white;
+    --border-color: var(--ion-color-light-shade);
+    padding: 8px;
+    
+    ion-buttons {
+      ion-button {
+        font-weight: 500;
+        
+        &[fill="solid"] {
+          --padding-start: 24px;
+          --padding-end: 24px;
+        }
+      }
+    }
+  }
+}
+
+// Helper methods styles
+.getStepIcon {
+  &-task { content: 'clipboard-outline'; }
+  &-email { content: 'mail-outline'; }
+  &-sms { content: 'chatbubble-outline'; }
+  &-wait { content: 'time-outline'; }
+  &-note { content: 'document-text-outline'; }
+}
+
+@media (prefers-color-scheme: dark) {
+  .step-indicator,
+  .form-section ion-item,
+  .trigger-option ion-item,
+  .frequency-selector,
+  .steps-list ion-item,
+  ion-footer ion-toolbar {
+    --background: var(--ion-color-dark-tint);
+    background: var(--ion-color-dark-tint);
+  }
+}

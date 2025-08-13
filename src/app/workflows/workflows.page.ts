@@ -12,6 +12,7 @@ import { Router } from '@angular/router';
   selector: 'app-workflows',
   templateUrl: './workflows.page.html',
   styleUrls: ['./workflows.page.scss'],
+  standalone: false
 })
 export class WorkflowsPage implements OnInit, OnDestroy {
   workflows: Workflow[] = [];

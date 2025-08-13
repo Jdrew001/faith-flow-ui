@@ -4,7 +4,8 @@ import { Workflow } from '../../models';
 @Component({
   selector: 'app-workflow-card',
   templateUrl: './workflow-card.component.html',
-  styleUrls: ['./workflow-card.component.scss']
+  styleUrls: ['./workflow-card.component.scss'],
+  standalone: false
 })
 export class WorkflowCardComponent {
   @Input() workflow!: Workflow;
@@ -69,11 +70,11 @@ export class WorkflowCardComponent {
     }, {} as Record<string, number>);
     
     const summaryParts = [];
-    if (stepTypes.task) summaryParts.push(`${stepTypes.task} task${stepTypes.task > 1 ? 's' : ''}`);
-    if (stepTypes.email) summaryParts.push(`${stepTypes.email} email${stepTypes.email > 1 ? 's' : ''}`);
-    if (stepTypes.sms) summaryParts.push(`${stepTypes.sms} SMS`);
-    if (stepTypes.wait) summaryParts.push(`${stepTypes.wait} wait${stepTypes.wait > 1 ? 's' : ''}`);
-    if (stepTypes.note) summaryParts.push(`${stepTypes.note} note${stepTypes.note > 1 ? 's' : ''}`);
+    if (stepTypes['task']) summaryParts.push(`${stepTypes['task']} task${stepTypes['task'] > 1 ? 's' : ''}`);
+    if (stepTypes['email']) summaryParts.push(`${stepTypes['email']} email${stepTypes['email'] > 1 ? 's' : ''}`);
+    if (stepTypes['sms']) summaryParts.push(`${stepTypes['sms']} SMS`);
+    if (stepTypes['wait']) summaryParts.push(`${stepTypes['wait']} wait${stepTypes['wait'] > 1 ? 's' : ''}`);
+    if (stepTypes['note']) summaryParts.push(`${stepTypes['note']} note${stepTypes['note'] > 1 ? 's' : ''}`);
     
     return summaryParts.join(', ') || 'No steps';
   }

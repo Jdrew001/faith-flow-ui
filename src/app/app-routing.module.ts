@@ -37,6 +37,11 @@ const routes: Routes = [
     path: 'attendance',
     loadChildren: () => import('./attendance/attendance.module').then(m => m.AttendancePageModule),
     canActivate: [AuthGuard]
+  },
+  {
+    path: 'workflows',
+    loadChildren: () => import('./workflows/workflows.module').then(m => m.WorkflowsPageModule),
+    canActivate: [AuthGuard]
   }
 ];
 

@@ -1,0 +1,80 @@
+<div class="trigger-builder">
+  <form [formGroup]="triggerForm">
+    
+    <!-- Attendance Type Selector -->
+    <div class="attendance-selector">
+      <h4>Attendance Type</h4>
+      <ion-segment formControlName="attendanceType">
+        <ion-segment-button 
+          *ngFor="let type of attendanceTypes" 
+          [value]="type.value">
+          <div class="segment-content">
+            <ion-icon [name]="type.icon" [color]="type.color"></ion-icon>
+            <ion-label>{{ type.label }}</ion-label>
+          </div>
+        </ion-segment-button>
+      </ion-segment>
+    </div>
+    
+    <!-- Frequency Selector -->
+    <div class="frequency-selector">
+      <h4>Frequency</h4>
+      <div class="frequency-control">
+        <ion-label>Number of times</ion-label>
+        <div class="stepper">
+          <ion-button 
+            fill="outline" 
+            size="small" 
+            (click)="decrementFrequency()"
+            [disabled]="triggerForm.get('frequency')?.value <= 1">
+            <ion-icon name="remove"></ion-icon>
+          </ion-button>
+          
+          <span class="frequency-value">
+            {{ triggerForm.get('frequency')?.value }}
+          </span>
+          
+          <ion-button 
+            fill="outline" 
+            size="small" 
+            (click)="incrementFrequency()">
+            <ion-icon name="add"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Time Window Selector -->
+    <div class="time-window-selector">
+      <h4>Time Window</h4>
+      <ion-item>
+        <ion-label>Look back period</ion-label>
+        <ion-select 
+          formControlName="timeWindowDays" 
+          interface="popover">
+          <ion-select-option 
+            *ngFor="let window of timeWindows" 
+            [value]="window.value">
+            Past {{ window.label }}
+          </ion-select-option>
+        </ion-select>
+      </ion-item>
+    </div>
+    
+    <!-- Trigger Preview -->
+    <div class="trigger-preview">
+      <ion-card>
+        <ion-card-content>
+          <div class="preview-content">
+            <ion-icon name="information-circle-outline" color="primary"></ion-icon>
+            <div class="preview-text">
+              <strong>Trigger Preview</strong>
+              <p>{{ getTriggerDescription() }}</p>
+            </div>
+          </div>
+        </ion-card-content>
+      </ion-card>
+    </div>
+    
+  </form>
+</div>

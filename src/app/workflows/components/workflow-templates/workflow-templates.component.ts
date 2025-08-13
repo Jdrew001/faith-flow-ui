@@ -6,7 +6,8 @@ import { WorkflowTemplate } from '../../models';
 @Component({
   selector: 'app-workflow-templates',
   templateUrl: './workflow-templates.component.html',
-  styleUrls: ['./workflow-templates.component.scss']
+  styleUrls: ['./workflow-templates.component.scss'],
+  standalone: false
 })
 export class WorkflowTemplatesComponent implements OnInit {
   templates: WorkflowTemplate[] = [];
