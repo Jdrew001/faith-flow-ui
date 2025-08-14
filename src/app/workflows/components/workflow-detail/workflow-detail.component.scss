@@ -256,82 +256,34 @@ ion-content {
     }
   }
   
-  .actions-section {
+  .actions-card {
     margin-bottom: 32px;
     
-    h3 {
-      font-size: 18px;
-      font-weight: 600;
-      margin: 0 0 20px 0;
-      color: #ffffff;
-    }
-    
-    .action-buttons-container {
-      overflow-x: auto;
-      overflow-y: hidden;
-      margin: 0 -20px;
-      padding: 0 20px;
-      -webkit-overflow-scrolling: touch;
-      
-      &::-webkit-scrollbar {
-        height: 6px;
-      }
-      
-      &::-webkit-scrollbar-track {
-        background: #2c2c2e;
-        border-radius: 3px;
-      }
-      
-      &::-webkit-scrollbar-thumb {
-        background: #48484a;
-        border-radius: 3px;
+    ion-list {
+      ion-item {
+        --padding-top: 12px;
+        --padding-bottom: 12px;
+        --min-height: 48px;
+        transition: all 0.2s ease;
+        cursor: pointer;
         
         &:hover {
-          background: #5a5a5c;
-        }
-      }
-    }
-    
-    .action-buttons {
-      display: flex;
-      gap: 12px;
-      min-width: min-content;
-      padding-bottom: 8px;
-      
-      ion-button {
-        --border-radius: 12px;
-        margin: 0;
-        font-weight: 500;
-        font-size: 14px;
-        height: 44px;
-        min-width: 140px;
-        flex-shrink: 0;
-        
-        &[fill="outline"] {
-          --background: transparent;
-          --border-color: #48484a;
-          --border-width: 1px;
-          --color: #ffffff;
-          
-          &:hover {
-            --background: rgba(255, 255, 255, 0.05);
-            --border-color: #007aff;
-          }
-          
-          &[color="danger"] {
-            --color: #ff3b30;
-            --border-color: rgba(255, 59, 48, 0.3);
-            
-            &:hover {
-              --background: rgba(255, 59, 48, 0.1);
-              --border-color: #ff3b30;
-            }
-          }
+          --background: rgba(255, 255, 255, 0.05);
+          transform: translateX(4px);
         }
         
         ion-icon {
-          margin-right: 8px;
-          font-size: 18px;
+          font-size: 20px;
+          margin-right: 12px;
+        }
+        
+        ion-label {
+          font-weight: 500;
+          font-size: 15px;
+          
+          &[color="danger"] {
+            --color: #ff3b30;
+          }
         }
       }
     }

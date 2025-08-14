@@ -137,46 +137,34 @@
         </div>
         
         <!-- Quick Actions -->
-        <div class="actions-section">
-          <h3>Actions</h3>
-          <div class="action-buttons-container">
-            <div class="action-buttons">
-            <ion-button 
-              expand="block" 
-              fill="outline"
-              (click)="testWorkflow()">
-              <ion-icon slot="start" name="flask-outline"></ion-icon>
-              Test Workflow
-            </ion-button>
-            
-            <ion-button 
-              expand="block" 
-              fill="outline"
-              (click)="manualTrigger()"
-              *ngIf="workflow.triggerType === 'manual'">
-              <ion-icon slot="start" name="hand-left-outline"></ion-icon>
-              Trigger Manually
-            </ion-button>
-            
-            <ion-button 
-              expand="block" 
-              fill="outline"
-              (click)="duplicateWorkflow()">
-              <ion-icon slot="start" name="copy-outline"></ion-icon>
-              Duplicate
-            </ion-button>
-            
-            <ion-button 
-              expand="block" 
-              fill="outline"
-              color="danger"
-              (click)="deleteWorkflow()">
-              <ion-icon slot="start" name="trash-outline"></ion-icon>
-              Delete
-            </ion-button>
-            </div>
-          </div>
-        </div>
+        <ion-card class="actions-card">
+          <ion-card-header>
+            <ion-card-subtitle>Quick Actions</ion-card-subtitle>
+          </ion-card-header>
+          <ion-card-content>
+            <ion-list lines="none">
+              <ion-item button (click)="testWorkflow()">
+                <ion-icon slot="start" name="flask-outline" color="primary"></ion-icon>
+                <ion-label>Test Workflow</ion-label>
+              </ion-item>
+              
+              <ion-item button (click)="manualTrigger()" *ngIf="workflow.triggerType === 'manual'">
+                <ion-icon slot="start" name="hand-left-outline" color="secondary"></ion-icon>
+                <ion-label>Trigger Manually</ion-label>
+              </ion-item>
+              
+              <ion-item button (click)="duplicateWorkflow()">
+                <ion-icon slot="start" name="copy-outline" color="tertiary"></ion-icon>
+                <ion-label>Duplicate Workflow</ion-label>
+              </ion-item>
+              
+              <ion-item button (click)="deleteWorkflow()">
+                <ion-icon slot="start" name="trash-outline" color="danger"></ion-icon>
+                <ion-label color="danger">Delete Workflow</ion-label>
+              </ion-item>
+            </ion-list>
+          </ion-card-content>
+        </ion-card>
         
         <!-- Metadata -->
         <ion-card>

@@ -30,6 +30,7 @@
       "Bash(npx ng build:*)",
       "Bash(timeout:*)"
     ],
-    "deny": []
+    "deny": [],
+    "defaultMode": "acceptEdits"
   }
 }

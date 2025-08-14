@@ -202,7 +202,7 @@
     .custom-input,
     .custom-textarea {
       width: 100%;
-      padding: 20px 16px 8px 48px;
+      padding: 24px 16px 12px 48px;
       background: transparent;
       border: none;
       color: #ffffff;
@@ -218,6 +218,7 @@
     .custom-textarea {
       min-height: 100px;
       line-height: 1.5;
+      padding-top: 28px;
     }
     
     .floating-label {
@@ -229,39 +230,60 @@
       font-size: 15px;
       pointer-events: none;
       transition: all 0.3s ease;
-      background: #3a3a3c;
+      background: transparent;
       padding: 0 4px;
+      z-index: 2;
     }
     
     .custom-textarea ~ .floating-label {
-      top: 20px;
+      top: 10px;
       transform: translateY(0);
     }
   }
   
   &.has-value {
     .floating-label {
-      top: 10px;
+      top: 8px;
       transform: translateY(0);
-      font-size: 12px;
+      font-size: 11px;
       color: #8e8e93;
+      background: #3a3a3c;
     }
   }
   
-  .input-wrapper:focus-within .floating-label {
-    top: 10px;
+  .input-wrapper:focus-within .custom-input ~ .floating-label {
+    top: 8px;
     transform: translateY(0);
-    font-size: 12px;
+    font-size: 11px;
     color: #007aff;
+    background: #3a3a3c;
+  }
+  
+  .input-wrapper:focus-within .custom-textarea ~ .floating-label {
+    top: 0px;
+    transform: translateY(0);
+    font-size: 11px;
+    color: #007aff;
+    background: #3a3a3c;
+    padding: 0 6px;
   }
   
   // Auto-float label when input has content
-  .custom-input:not(:placeholder-shown) ~ .floating-label,
-  .custom-textarea:not(:placeholder-shown) ~ .floating-label {
-    top: 10px;
+  .custom-input:not(:placeholder-shown) ~ .floating-label {
+    top: 8px;
     transform: translateY(0);
-    font-size: 12px;
+    font-size: 11px;
     color: #8e8e93;
+    background: #3a3a3c;
+  }
+  
+  .custom-textarea:not(:placeholder-shown) ~ .floating-label {
+    top: 0px;
+    transform: translateY(0);
+    font-size: 11px;
+    color: #8e8e93;
+    background: #3a3a3c;
+    padding: 0 6px;
   }
   
   &.error {

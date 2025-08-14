@@ -202,7 +202,7 @@
           background: #2c2c2e;
           border: 2px solid #48484a;
           border-radius: 12px;
-          padding: 20px 16px 20px 48px;
+          padding: 24px 16px 12px 48px;
           font-size: 1rem;
           color: #ffffff;
           transition: all 0.3s ease;
@@ -218,12 +218,13 @@
             background: #1c1c1e;
             
             ~ .floating-label {
-              top: -10px;
-              left: 44px;
-              font-size: 0.85rem;
+              top: 8px;
+              left: 48px;
+              transform: translateY(0);
+              font-size: 11px;
               color: #007aff;
-              background: #3a3a3c;
-              padding: 0 8px;
+              background: #2c2c2e;
+              padding: 0 6px;
             }
             
             ~ .field-icon {
@@ -241,24 +242,27 @@
         .floating-label {
           position: absolute;
           left: 48px;
-          top: 20px;
-          font-size: 1rem;
+          top: 50%;
+          transform: translateY(-50%);
+          font-size: 15px;
           color: #8e8e93;
           transition: all 0.3s ease;
           pointer-events: none;
           background: transparent;
           font-weight: 500;
+          z-index: 2;
         }
       }
       
       &.has-value {
         .floating-label {
-          top: -10px;
-          left: 44px;
-          font-size: 0.85rem;
+          top: 8px;
+          left: 48px;
+          transform: translateY(0);
+          font-size: 11px;
           color: #8e8e93;
-          background: #3a3a3c;
-          padding: 0 8px;
+          background: #2c2c2e;
+          padding: 0 6px;
         }
         
         .custom-input,
@@ -272,12 +276,13 @@
       // Auto-float label when input has content
       .custom-input:not(:placeholder-shown) ~ .floating-label,
       .custom-textarea:not(:placeholder-shown) ~ .floating-label {
-        top: -10px;
-        left: 44px;
-        font-size: 0.85rem;
+        top: 8px;
+        left: 48px;
+        transform: translateY(0);
+        font-size: 11px;
         color: #8e8e93;
-        background: #3a3a3c;
-        padding: 0 8px;
+        background: #2c2c2e;
+        padding: 0 6px;
       }
       
       &.inline-field {
