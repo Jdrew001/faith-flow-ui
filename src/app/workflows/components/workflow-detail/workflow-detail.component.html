@@ -83,18 +83,32 @@
         <div class="statistics-section">
           <div class="statistics-header">
             <h3>Statistics</h3>
-            <ion-select 
-              [(ngModel)]="statisticsPeriod" 
-              (ionChange)="onPeriodChange($event)"
-              interface="popover">
-              <ion-select-option value="day">Today</ion-select-option>
-              <ion-select-option value="week">This Week</ion-select-option>
-              <ion-select-option value="month">This Month</ion-select-option>
-              <ion-select-option value="all">All Time</ion-select-option>
-            </ion-select>
+            <div class="period-selector">
+              <button class="period-btn" 
+                      [class.active]="statisticsPeriod === 'day'"
+                      (click)="setPeriod('day')">
+                Today
+              </button>
+              <button class="period-btn" 
+                      [class.active]="statisticsPeriod === 'week'"
+                      (click)="setPeriod('week')">
+                Week
+              </button>
+              <button class="period-btn" 
+                      [class.active]="statisticsPeriod === 'month'"
+                      (click)="setPeriod('month')">
+                Month
+              </button>
+              <button class="period-btn" 
+                      [class.active]="statisticsPeriod === 'all'"
+                      (click)="setPeriod('all')">
+                All
+              </button>
+            </div>
           </div>
           
-          <div class="stats-grid">
+          <div class="stats-scroll-container">
+            <div class="stats-grid">
             <div class="stat-card">
               <ion-icon name="flash-outline" color="primary"></ion-icon>
               <div class="stat-value">{{ statistics?.totalTriggers || 0 }}</div>
@@ -118,13 +132,15 @@
               <div class="stat-value">{{ statistics?.successRate || 0 }}%</div>
               <div class="stat-label">Success Rate</div>
             </div>
+            </div>
           </div>
         </div>
         
         <!-- Quick Actions -->
         <div class="actions-section">
           <h3>Actions</h3>
-          <div class="action-buttons">
+          <div class="action-buttons-container">
+            <div class="action-buttons">
             <ion-button 
               expand="block" 
               fill="outline"
@@ -158,6 +174,7 @@
               <ion-icon slot="start" name="trash-outline"></ion-icon>
               Delete
             </ion-button>
+            </div>
           </div>
         </div>
         

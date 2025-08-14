@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter, OnInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ModalController, PopoverController } from '@ionic/angular';
 import { WorkflowStep, WorkflowStepType } from '../../models';
@@ -10,7 +10,9 @@ import { WorkflowStep, WorkflowStepType } from '../../models';
   standalone: false
 })
 export class WorkflowStepEditorComponent implements OnInit {
+  @Input() steps: WorkflowStep[] = [];
   @Output() stepAdded = new EventEmitter<WorkflowStep>();
+  @Output() stepsChange = new EventEmitter<WorkflowStep[]>();
   
   showEditor = false;
   selectedStepType: WorkflowStepType | null = null;
@@ -221,11 +223,16 @@ export class WorkflowStepEditorComponent implements OnInit {
       id: stepId,
       type: this.selectedStepType,
       name: formValue.name,
-      order: 0, // Will be set by parent component
+      order: this.steps.length + 1,
       config
     };
     
+    // Add to local steps array
+    this.steps = [...this.steps, step];
+    
+    // Emit both events
     this.stepAdded.emit(step);
+    this.stepsChange.emit(this.steps);
     this.cancelEditor();
   }
 
@@ -241,5 +248,53 @@ export class WorkflowStepEditorComponent implements OnInit {
   getStepTypeLabel(type: WorkflowStepType): string {
     const typeInfo = this.stepTypes.find(t => t.type === type);
     return typeInfo ? typeInfo.label : '';
+  }
+
+  removeStep(index: number) {
+    this.steps = this.steps.filter((_, i) => i !== index);
+    // Re-order remaining steps
+    this.steps.forEach((step, i) => {
+      step.order = i + 1;
+    });
+    this.stepsChange.emit(this.steps);
+  }
+
+  reorderSteps(event: any) {
+    const itemMove = this.steps.splice(event.detail.from, 1)[0];
+    this.steps.splice(event.detail.to, 0, itemMove);
+    event.detail.complete();
+    
+    // Update order property
+    this.steps.forEach((step, index) => {
+      step.order = index + 1;
+    });
+    this.stepsChange.emit(this.steps);
+  }
+
+  getStepIcon(type: WorkflowStepType): string {
+    const typeInfo = this.stepTypes.find(t => t.type === type);
+    return typeInfo ? typeInfo.icon : 'help-outline';
+  }
+
+  getStepDescription(step: WorkflowStep): string {
+    switch (step.type) {
+      case 'task':
+        const taskConfig = step.config as any;
+        return `${taskConfig.title} - Due in ${taskConfig.dueDateOffset?.value} ${taskConfig.dueDateOffset?.unit}`;
+      case 'email':
+        const emailConfig = step.config as any;
+        return `Subject: ${emailConfig.subject}`;
+      case 'sms':
+        const smsConfig = step.config as any;
+        return `Message: ${smsConfig.message?.substring(0, 50)}...`;
+      case 'wait':
+        const waitConfig = step.config as any;
+        return `Wait ${waitConfig.duration?.value} ${waitConfig.duration?.unit}`;
+      case 'note':
+        const noteConfig = step.config as any;
+        return `Note: ${noteConfig.content?.substring(0, 50)}...`;
+      default:
+        return '';
+    }
   }
 }

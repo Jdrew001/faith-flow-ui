@@ -121,6 +121,11 @@ export class WorkflowDetailComponent implements OnInit, OnDestroy {
     this.loadStatistics();
   }
 
+  setPeriod(period: 'day' | 'week' | 'month' | 'all') {
+    this.statisticsPeriod = period;
+    this.loadStatistics();
+  }
+
   async editWorkflow() {
     const modal = await this.modalController.create({
       component: WorkflowCreatorComponent,
@@ -286,7 +291,7 @@ export class WorkflowDetailComponent implements OnInit, OnDestroy {
     this.workflowService.testWorkflow(this.workflow)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: async (result) => {
+        next: async (result: { affectedMembers: number; previewData: any }) => {
           const alert = await this.alertController.create({
             header: 'Test Results',
             message: `This workflow would affect ${result.affectedMembers} member(s).`,
@@ -294,7 +299,7 @@ export class WorkflowDetailComponent implements OnInit, OnDestroy {
           });
           await alert.present();
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Error testing workflow:', error);
           this.showToast('Failed to test workflow', 'danger');
         }

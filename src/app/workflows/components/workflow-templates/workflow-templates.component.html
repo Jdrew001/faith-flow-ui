@@ -1,19 +1,20 @@
-<ion-header>
+<ion-header class="modal-header">
   <ion-toolbar>
     <ion-title>Workflow Templates</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="dismiss()">
+      <ion-button (click)="dismiss()" class="close-button">
         <ion-icon slot="icon-only" name="close"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
-<ion-content>
-  <div class="templates-header">
-    <h2>Quick Start Templates</h2>
-    <p>Choose a template to get started quickly with pre-configured workflows</p>
-  </div>
+<ion-content class="modal-content">
+  <div class="templates-container">
+    <div class="templates-header">
+      <h2>Quick Start Templates</h2>
+      <p>Choose a template to get started quickly with pre-configured workflows</p>
+    </div>
 
   <div class="templates-grid">
     <div 
@@ -48,28 +49,24 @@
     </div>
   </div>
 
-  <div class="blank-template">
-    <ion-button 
-      expand="block" 
-      fill="outline" 
-      (click)="dismiss()">
-      <ion-icon slot="start" name="add-circle-outline"></ion-icon>
-      Start from Scratch
-    </ion-button>
+    <div class="blank-template">
+      <div class="blank-card" (click)="dismiss()">
+        <div class="blank-icon">
+          <ion-icon name="add-circle-outline"></ion-icon>
+        </div>
+        <h3>Start from Scratch</h3>
+        <p>Create a custom workflow tailored to your needs</p>
+      </div>
+    </div>
+    
+    <div class="modal-actions">
+      <ion-button 
+        expand="block" 
+        [disabled]="!selectedTemplate"
+        (click)="useTemplate()">
+        <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
+        Use Selected Template
+      </ion-button>
+    </div>
   </div>
 </ion-content>
-
-<ion-footer>
-  <ion-toolbar>
-    <ion-buttons slot="end">
-      <ion-button (click)="dismiss()">Cancel</ion-button>
-      <ion-button 
-        (click)="useTemplate()" 
-        [disabled]="!selectedTemplate"
-        color="primary"
-        fill="solid">
-        Use Template
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-footer>

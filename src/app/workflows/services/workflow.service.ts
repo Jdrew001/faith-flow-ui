@@ -18,7 +18,7 @@ import {
   providedIn: 'root'
 })
 export class WorkflowService {
-  private apiUrl = `${environment.apiUrl}/faith-flow-service/workflows`;
+  private apiUrl = `${environment.apiUrl}/workflows`;
   private workflowsSubject = new BehaviorSubject<Workflow[]>([]);
   public workflows$ = this.workflowsSubject.asObservable();
   
@@ -168,7 +168,7 @@ export class WorkflowService {
   // Assignment completion (for manual tasks)
   completeAssignment(assignmentId: string, notes?: string): Observable<{ success: boolean; message: string }> {
     return this.http.post<{ success: boolean; message: string }>(
-      `${environment.apiUrl}/faith-flow-service/followups/assignments/${assignmentId}/complete`,
+      `${environment.apiUrl}/followups/assignments/${assignmentId}/complete`,
       { notes }
     );
   }
@@ -203,6 +203,13 @@ export class WorkflowService {
         console.error('Error loading events:', error);
         return of(this.getMockEvents());
       })
+    );
+  }
+
+  testWorkflow(workflow: Workflow): Observable<{ affectedMembers: number; previewData: any }> {
+    return this.http.post<{ affectedMembers: number; previewData: any }>(
+      `${this.apiUrl}/templates/${workflow.id}/test`,
+      workflow
     );
   }
 

@@ -229,6 +229,63 @@ export class WorkflowCreatorComponent implements OnInit {
     }
   }
 
+  onTriggerTypeChange(event: any) {
+    const triggerType = event.detail.value;
+    console.log('Trigger type changed to:', triggerType);
+    
+    // Clear trigger rules when changing type
+    if (triggerType === 'manual') {
+      // Clear attendance-specific fields
+      this.triggerRulesForm.patchValue({
+        events: [],
+        allEvents: false,
+        attendanceType: 'missed',
+        frequency: 3,
+        timeWindowDays: 21
+      });
+    }
+  }
+
+  selectTriggerType(value: string) {
+    this.nameAndTriggerForm.patchValue({ triggerType: value });
+    this.onTriggerTypeChange({ detail: { value } });
+  }
+
+  selectAttendanceType(value: string) {
+    this.triggerRulesForm.patchValue({ attendanceType: value });
+  }
+
+  onStepsChange(steps: WorkflowStep[]) {
+    this.workflowSteps = steps;
+  }
+
+  async createWorkflow() {
+    // Determine if we should save as active or draft based on button clicked
+    const workflow = this.buildWorkflowObject('active');
+    await this.saveWorkflow(workflow);
+  }
+
+  getTriggerTypeLabel(): string {
+    const type = this.nameAndTriggerForm.get('triggerType')?.value;
+    const triggerType = this.triggerTypes.find(t => t.value === type);
+    return triggerType?.label || '';
+  }
+
+  getStepTitle(): string {
+    switch(this.currentStep) {
+      case 1:
+        return 'Basic Information';
+      case 2:
+        return 'Trigger Configuration';
+      case 3:
+        return 'Workflow Steps';
+      case 4:
+        return 'Review & Activate';
+      default:
+        return '';
+    }
+  }
+
   incrementFrequency() {
     const current = this.triggerRulesForm.get('frequency')?.value || 1;
     this.triggerRulesForm.patchValue({ frequency: current + 1 });
@@ -242,7 +299,11 @@ export class WorkflowCreatorComponent implements OnInit {
   }
 
   addWorkflowStep(step: WorkflowStep) {
+    // Set the order for the new step
+    step.order = this.workflowSteps.length + 1;
     this.workflowSteps.push(step);
+    // Emit the change
+    this.onStepsChange([...this.workflowSteps]);
   }
 
   removeWorkflowStep(index: number) {

@@ -46,19 +46,45 @@
     <ion-refresher-content></ion-refresher-content>
   </ion-refresher>
 
+  <!-- Stats Bar -->
+  <div class="stats-bar">
+    <div class="stat-item">
+      <span class="stat-value active">{{ getStatusCount('active') }}</span>
+      <span class="stat-label">Active</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value paused">{{ getStatusCount('paused') }}</span>
+      <span class="stat-label">Paused</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value draft">{{ getStatusCount('draft') }}</span>
+      <span class="stat-label">Draft</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-value">{{ activeInstances.length }}</span>
+      <span class="stat-label">Running</span>
+    </div>
+  </div>
+
   <!-- Toggle between workflows and instances -->
   <div class="view-toggle">
-    <ion-chip [color]="!showInstances ? 'primary' : 'medium'" (click)="toggleView()">
-      <ion-label>Workflows ({{ workflows.length }})</ion-label>
-    </ion-chip>
-    <ion-chip [color]="showInstances ? 'primary' : 'medium'" (click)="toggleView()">
-      <ion-label>Active Instances ({{ activeInstances.length }})</ion-label>
-    </ion-chip>
+    <div class="toggle-chip" [class.active]="!showInstances" (click)="toggleView()">
+      <ion-icon name="git-branch-outline"></ion-icon>
+      <span class="chip-label">Workflows</span>
+      <span class="chip-count">{{ workflows.length }}</span>
+    </div>
+    <div class="toggle-chip" [class.active]="showInstances" (click)="toggleView()">
+      <ion-icon name="sync-circle-outline"></ion-icon>
+      <span class="chip-label">Active Instances</span>
+      <span class="chip-count">{{ activeInstances.length }}</span>
+    </div>
   </div>
 
   <!-- Loading State -->
   <div *ngIf="isLoading" class="loading-container">
-    <ion-spinner name="crescent"></ion-spinner>
+    <div class="loading-spinner-wrapper">
+      <ion-spinner name="crescent"></ion-spinner>
+    </div>
     <p>Loading workflows...</p>
   </div>
 
@@ -66,23 +92,93 @@
   <div *ngIf="!isLoading && !showInstances">
     <!-- Empty State -->
     <div *ngIf="filteredWorkflows.length === 0" class="empty-state">
-      <ion-icon name="git-branch-outline"></ion-icon>
+      <div class="empty-icon-wrapper">
+        <ion-icon name="git-branch-outline"></ion-icon>
+      </div>
       <h3>No workflows found</h3>
-      <p>{{ searchQuery ? 'Try adjusting your search' : 'Create your first workflow to get started' }}</p>
-      <ion-button *ngIf="!searchQuery" (click)="openTemplates()" fill="outline">
+      <p>{{ searchQuery ? 'Try adjusting your search' : 'Create your first workflow to automate member engagement' }}</p>
+      <ion-button *ngIf="!searchQuery" (click)="openTemplates()" fill="solid">
         <ion-icon slot="start" name="library-outline"></ion-icon>
         Browse Templates
       </ion-button>
     </div>
 
     <!-- Workflow Cards -->
-    <div class="workflow-list" *ngIf="filteredWorkflows.length > 0">
-      <app-workflow-card
-        *ngFor="let workflow of filteredWorkflows"
-        [workflow]="workflow"
-        (click)="viewWorkflowDetail(workflow)"
-        (action)="showWorkflowActions(workflow)">
-      </app-workflow-card>
+    <div class="workflow-grid" *ngIf="filteredWorkflows.length > 0">
+      <div class="workflow-card" *ngFor="let workflow of filteredWorkflows" (click)="viewWorkflowDetail(workflow)">
+        <div class="workflow-header">
+          <div class="workflow-title-row">
+            <div class="workflow-icon">
+              <ion-icon name="git-branch-outline"></ion-icon>
+            </div>
+            <div class="workflow-title-text">
+              <h3>{{ workflow.name }}</h3>
+              <div class="workflow-trigger" *ngIf="workflow.trigger">
+                <ion-icon name="timer-outline"></ion-icon>
+                <span>{{ getTriggerText(workflow.trigger) }}</span>
+              </div>
+            </div>
+            <div class="workflow-status" [ngClass]="workflow.status || 'draft'">
+              {{ workflow.status || 'Draft' }}
+            </div>
+          </div>
+        </div>
+        
+        <div class="workflow-content">
+          <p class="workflow-description">{{ workflow.description }}</p>
+          
+          <div class="workflow-stats">
+            <div class="stat-box">
+              <span class="stat-value">{{ workflow.steps?.length || 0 }}</span>
+              <span class="stat-label">Steps</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-value">{{ workflow.stats?.totalTriggers || 0 }}</span>
+              <span class="stat-label">Runs</span>
+            </div>
+            <div class="stat-box">
+              <span class="stat-value">{{ workflow.stats?.successRate || 100 }}%</span>
+              <span class="stat-label">Success</span>
+            </div>
+          </div>
+          
+          <div class="workflow-steps-preview" *ngIf="workflow.steps && workflow.steps.length > 0">
+            <div class="steps-header">
+              <span>Workflow Steps</span>
+            </div>
+            <div class="steps-list">
+              <div class="step-item" *ngFor="let step of workflow.steps.slice(0, 3); let i = index">
+                <div class="step-number">{{ i + 1 }}</div>
+                <span class="step-name">{{ step.name }}</span>
+                <span class="step-type">{{ step.type }}</span>
+              </div>
+              <div class="step-item" *ngIf="workflow.steps.length > 3">
+                <div class="step-number">...</div>
+                <span class="step-name">{{ workflow.steps.length - 3 }} more steps</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="workflow-footer">
+          <div class="last-run" *ngIf="workflow.lastTriggeredAt">
+            <ion-icon name="time-outline"></ion-icon>
+            <span>{{ workflow.lastTriggeredAt | date:'short' }}</span>
+          </div>
+          <div class="last-run" *ngIf="!workflow.lastTriggeredAt">
+            <ion-icon name="information-circle-outline"></ion-icon>
+            <span>Never run</span>
+          </div>
+          <div class="workflow-actions" (click)="$event.stopPropagation()">
+            <button (click)="toggleWorkflowStatus(workflow)">
+              <ion-icon [name]="workflow.status === 'active' ? 'pause-outline' : 'play-outline'"></ion-icon>
+            </button>
+            <button (click)="showWorkflowActions(workflow)">
+              <ion-icon name="ellipsis-vertical-outline"></ion-icon>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -90,33 +186,56 @@
   <div *ngIf="!isLoading && showInstances">
     <!-- Empty State -->
     <div *ngIf="activeInstances.length === 0" class="empty-state">
-      <ion-icon name="checkmark-circle-outline"></ion-icon>
+      <div class="empty-icon-wrapper">
+        <ion-icon name="checkmark-circle-outline"></ion-icon>
+      </div>
       <h3>No active instances</h3>
-      <p>All workflows are idle or completed</p>
+      <p>All workflows are idle. They'll run automatically based on their triggers.</p>
     </div>
 
     <!-- Instance Cards -->
-    <ion-list *ngIf="activeInstances.length > 0">
-      <ion-item *ngFor="let instance of activeInstances" (click)="viewInstance(instance)" button detail>
-        <ion-avatar slot="start">
-          <div class="avatar-placeholder">{{ instance.memberName.charAt(0) }}</div>
-        </ion-avatar>
-        <ion-label>
-          <h2>{{ instance.memberName }}</h2>
-          <p>{{ instance.workflowName }}</p>
-          <ion-progress-bar 
-            [value]="instance.currentStepIndex / instance.steps.length"
-            color="primary">
-          </ion-progress-bar>
-          <p class="step-info">
-            Step {{ instance.currentStepIndex + 1 }} of {{ instance.steps.length }}
-          </p>
-        </ion-label>
-        <ion-note slot="end">
-          {{ instance.startedAt | date:'short' }}
-        </ion-note>
-      </ion-item>
-    </ion-list>
+    <div class="instances-container" *ngIf="activeInstances.length > 0">
+      <div class="instance-card" *ngFor="let instance of activeInstances" (click)="viewInstance(instance)">
+        <div class="instance-header">
+          <div class="member-avatar">
+            {{ instance.memberName?.charAt(0) || '?' }}
+          </div>
+          <div class="instance-info">
+            <h3>{{ instance.memberName }}</h3>
+            <p>{{ instance.workflowName }}</p>
+          </div>
+          <div class="instance-time">
+            <span class="time-label">Started</span>
+            <span class="time-value">{{ instance.startedAt | date:'short' }}</span>
+          </div>
+        </div>
+        
+        <div class="instance-progress">
+          <div class="progress-header">
+            <span class="current-step">{{ getCurrentStepName(instance) }}</span>
+            <span class="step-count">Step {{ instance.currentStepIndex + 1 }} of {{ instance.steps?.length || 0 }}</span>
+          </div>
+          <div class="progress-bar-wrapper">
+            <div class="progress-bar-fill" [style.width.%]="getProgressPercentage(instance)"></div>
+          </div>
+        </div>
+        
+        <div class="instance-footer">
+          <div class="next-action" *ngIf="instance.status === 'active'">
+            <ion-icon name="hourglass-outline"></ion-icon>
+            <span>In Progress</span>
+          </div>
+          <div class="next-action" *ngIf="instance.status === 'completed'">
+            <ion-icon name="checkmark-circle-outline"></ion-icon>
+            <span>Completed</span>
+          </div>
+          <div class="view-details">
+            <span>View Details</span>
+            <ion-icon name="chevron-forward-outline"></ion-icon>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Floating Action Button -->

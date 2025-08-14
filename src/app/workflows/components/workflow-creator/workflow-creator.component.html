@@ -1,323 +1,361 @@
-<ion-header>
+<ion-header class="modal-header">
   <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-button (click)="dismiss()">
-        <ion-icon slot="icon-only" name="close"></ion-icon>
+    <ion-title>{{ editingWorkflow ? 'Edit' : 'Create' }} Workflow</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="dismiss()" class="close-button">
+        <ion-icon name="close" slot="icon-only"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title>{{ editingWorkflow ? 'Edit Workflow' : 'Create Workflow' }}</ion-title>
   </ion-toolbar>
-  
-  <!-- Step Indicator -->
-  <div class="step-indicator">
-    <div class="step-progress">
-      <div 
-        class="step-dot" 
-        *ngFor="let step of [1,2,3,4]; let i = index"
-        [class.active]="currentStep === step"
-        [class.completed]="currentStep > step">
-        <span>{{ step }}</span>
-      </div>
-      <div class="step-line" [style.width.%]="((currentStep - 1) / 3) * 100"></div>
-    </div>
-    <div class="step-title">
-      <h3>Step {{ currentStep }} of {{ totalSteps }}</h3>
-      <p>{{ stepTitle }}</p>
-    </div>
-  </div>
 </ion-header>
 
-<ion-content>
-  <!-- Step 1: Name & Trigger Type -->
-  <div class="wizard-step" *ngIf="currentStep === 1">
+<!-- Step Indicator -->
+<div class="step-indicator">
+  <div class="step-progress">
+    <div class="step-line"></div>
+    <div class="step-dot" 
+         *ngFor="let step of [1,2,3,4]; let i = index"
+         [class.active]="currentStep === step"
+         [class.completed]="currentStep > step">
+      <span>{{ step }}</span>
+    </div>
+  </div>
+  <div class="step-title">
+    <h3>Step {{ currentStep }} of {{ totalSteps }}</h3>
+    <p>{{ getStepTitle() }}</p>
+  </div>
+</div>
+
+<ion-content class="wizard-content">
+  <!-- Step 1: Name and Trigger Type -->
+  <div class="wizard-step fade-in" *ngIf="currentStep === 1">
     <form [formGroup]="nameAndTriggerForm">
       <div class="form-section">
-        <ion-item>
-          <ion-label position="stacked">Workflow Name *</ion-label>
-          <ion-input 
-            formControlName="name" 
-            placeholder="e.g., New Visitor Follow-up"
-            maxlength="50">
-          </ion-input>
-        </ion-item>
+        <h4 class="section-title">
+          <ion-icon name="information-circle-outline" class="section-icon"></ion-icon>
+          Workflow Details
+        </h4>
         
-        <ion-item>
-          <ion-label position="stacked">Description (Optional)</ion-label>
-          <ion-textarea 
-            formControlName="description" 
-            placeholder="Briefly describe what this workflow does"
-            rows="3"
-            maxlength="200">
-          </ion-textarea>
-        </ion-item>
+        <!-- Name Field -->
+        <div class="form-field" [class.error]="nameAndTriggerForm.get('name')?.invalid && nameAndTriggerForm.get('name')?.touched" 
+             [class.has-value]="nameAndTriggerForm.get('name')?.value">
+          <div class="input-wrapper">
+            <ion-icon name="text-outline" class="field-icon"></ion-icon>
+            <input 
+              type="text"
+              formControlName="name"
+              class="custom-input"
+              id="workflow-name"
+              placeholder=" "
+              required>
+            <label for="workflow-name" class="floating-label">Workflow Name *</label>
+          </div>
+          <div class="error-message" *ngIf="nameAndTriggerForm.get('name')?.invalid && nameAndTriggerForm.get('name')?.touched">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            Workflow name is required (min 3 characters)
+          </div>
+        </div>
+
+        <!-- Description Field -->
+        <div class="form-field" [class.has-value]="nameAndTriggerForm.get('description')?.value">
+          <div class="input-wrapper">
+            <ion-icon name="document-text-outline" class="field-icon"></ion-icon>
+            <textarea 
+              formControlName="description"
+              class="custom-textarea"
+              id="workflow-description"
+              rows="3"
+              maxlength="200"
+              placeholder=" "></textarea>
+            <label for="workflow-description" class="floating-label">Description (Optional)</label>
+          </div>
+          <div class="char-counter">
+            {{ nameAndTriggerForm.get('description')?.value?.length || 0 }}/200
+          </div>
+        </div>
       </div>
       
       <div class="form-section">
-        <h4>Trigger Type</h4>
+        <h4 class="section-title">
+          <ion-icon name="git-branch-outline" class="section-icon"></ion-icon>
+          Trigger Type
+        </h4>
         <p class="section-description">How should this workflow be triggered?</p>
         
-        <ion-radio-group formControlName="triggerType">
-          <div class="trigger-option" *ngFor="let type of triggerTypes">
-            <ion-item [disabled]="type.disabled">
-              <ion-icon [name]="type.icon" slot="start" color="primary"></ion-icon>
-              <ion-label>
-                <h3>{{ type.label }}</h3>
-                <p>{{ type.description }}</p>
-              </ion-label>
-              <ion-radio slot="end" [value]="type.value"></ion-radio>
-            </ion-item>
+        <div class="trigger-options">
+          <div class="trigger-card" 
+               *ngFor="let type of triggerTypes"
+               [class.selected]="nameAndTriggerForm.get('triggerType')?.value === type.value"
+               [class.disabled]="type.disabled"
+               (click)="!type.disabled && selectTriggerType(type.value)">
+            <div class="trigger-card-header">
+              <ion-icon [name]="type.icon" [color]="type.disabled ? 'medium' : 'primary'"></ion-icon>
+              <ion-icon name="checkmark-circle" class="check-icon" *ngIf="nameAndTriggerForm.get('triggerType')?.value === type.value"></ion-icon>
+            </div>
+            <h3>{{ type.label }}</h3>
+            <p>{{ type.description }}</p>
+            <span class="coming-soon-badge" *ngIf="type.disabled">Coming Soon</span>
           </div>
-        </ion-radio-group>
+        </div>
       </div>
     </form>
   </div>
 
   <!-- Step 2: Trigger Rules -->
-  <div class="wizard-step" *ngIf="currentStep === 2">
+  <div class="wizard-step fade-in" *ngIf="currentStep === 2">
     <form [formGroup]="triggerRulesForm">
       <!-- For Attendance-based triggers -->
       <div *ngIf="nameAndTriggerForm.get('triggerType')?.value === 'attendance'">
         
         <!-- Event Selection -->
         <div class="form-section">
-          <h4>Select Events</h4>
+          <h4 class="section-title">
+            <ion-icon name="calendar-outline" class="section-icon"></ion-icon>
+            Select Events
+          </h4>
           <p class="section-description">Which events should this workflow monitor?</p>
           
-          <ion-item>
-            <ion-checkbox 
-              slot="start" 
-              (ionChange)="onAllEventsChange($event)"
-              [checked]="triggerRulesForm.get('allEvents')?.value">
-            </ion-checkbox>
-            <ion-label>All Events</ion-label>
-          </ion-item>
+          <div class="checkbox-field">
+            <label class="custom-checkbox">
+              <input type="checkbox" 
+                     [checked]="triggerRulesForm.get('allEvents')?.value"
+                     (change)="onAllEventsChange($event)">
+              <span class="checkbox-mark"></span>
+              <span class="checkbox-label">Monitor All Events</span>
+            </label>
+          </div>
           
-          <ion-item *ngIf="!triggerRulesForm.get('allEvents')?.value">
-            <ion-label position="stacked">Select specific events</ion-label>
-            <ion-select 
-              multiple="true" 
-              placeholder="Choose events"
-              (ionChange)="onEventSelectionChange($event)"
-              [value]="triggerRulesForm.get('events')?.value">
-              <ion-select-option *ngFor="let event of availableEvents" [value]="event">
-                {{ event.name }}
-              </ion-select-option>
-            </ion-select>
-          </ion-item>
+          <div class="select-field" *ngIf="!triggerRulesForm.get('allEvents')?.value">
+            <div class="input-wrapper">
+              <ion-icon name="calendar-outline" class="field-icon"></ion-icon>
+              <ion-select 
+                multiple="true" 
+                placeholder="Choose specific events"
+                (ionChange)="onEventSelectionChange($event)"
+                [value]="triggerRulesForm.get('events')?.value"
+                class="custom-select">
+                <ion-select-option *ngFor="let event of availableEvents" [value]="event">
+                  {{ event.name }}
+                </ion-select-option>
+              </ion-select>
+              <label class="floating-label">Select Events</label>
+            </div>
+          </div>
         </div>
         
         <!-- Pattern Builder -->
         <div class="form-section">
-          <h4>Define Trigger Pattern</h4>
+          <h4 class="section-title">
+            <ion-icon name="analytics-outline" class="section-icon"></ion-icon>
+            Define Trigger Pattern
+          </h4>
           <p class="section-description">When should this workflow trigger?</p>
           
           <!-- Attendance Type -->
           <div class="attendance-type-selector">
-            <ion-segment formControlName="attendanceType">
-              <ion-segment-button *ngFor="let type of attendanceTypes" [value]="type.value">
+            <label class="selector-label">Attendance Type</label>
+            <div class="type-cards">
+              <div class="type-card" 
+                   *ngFor="let type of attendanceTypes"
+                   [class.selected]="triggerRulesForm.get('attendanceType')?.value === type.value"
+                   (click)="selectAttendanceType(type.value)">
                 <ion-icon [name]="type.icon"></ion-icon>
-                <ion-label>{{ type.label }}</ion-label>
-              </ion-segment-button>
-            </ion-segment>
+                <span>{{ type.label }}</span>
+              </div>
+            </div>
           </div>
           
           <!-- Frequency -->
           <div class="frequency-selector">
-            <ion-label>Number of times</ion-label>
+            <label class="selector-label">Number of times</label>
             <div class="number-stepper">
-              <ion-button fill="outline" size="small" (click)="decrementFrequency()">
+              <button type="button" class="stepper-btn" (click)="decrementFrequency()">
                 <ion-icon name="remove"></ion-icon>
-              </ion-button>
+              </button>
               <span class="frequency-value">{{ triggerRulesForm.get('frequency')?.value }}</span>
-              <ion-button fill="outline" size="small" (click)="incrementFrequency()">
+              <button type="button" class="stepper-btn" (click)="incrementFrequency()">
                 <ion-icon name="add"></ion-icon>
-              </ion-button>
+              </button>
             </div>
           </div>
           
           <!-- Time Window -->
-          <ion-item>
-            <ion-label>Time window</ion-label>
-            <ion-select formControlName="timeWindowDays" interface="popover">
-              <ion-select-option *ngFor="let window of timeWindows" [value]="window.value">
-                in the past {{ window.label }}
-              </ion-select-option>
-            </ion-select>
-          </ion-item>
+          <div class="select-field">
+            <div class="input-wrapper">
+              <ion-icon name="time-outline" class="field-icon"></ion-icon>
+              <ion-select 
+                formControlName="timeWindowDays"
+                placeholder="Select time window"
+                class="custom-select">
+                <ion-select-option *ngFor="let window of timeWindows" [value]="window.value">
+                  {{ window.label }}
+                </ion-select-option>
+              </ion-select>
+              <label class="floating-label">Time Window</label>
+            </div>
+          </div>
         </div>
         
         <!-- Trigger Preview -->
-        <div class="trigger-preview">
-          <ion-card>
-            <ion-card-content>
-              <ion-icon name="information-circle-outline" color="primary"></ion-icon>
-              <p>{{ getTriggerDescription() }}</p>
-            </ion-card-content>
-          </ion-card>
+        <div class="trigger-preview" *ngIf="getTriggerDescription()">
+          <div class="preview-card">
+            <ion-icon name="information-circle" color="primary"></ion-icon>
+            <p>{{ getTriggerDescription() }}</p>
+          </div>
         </div>
-        
-        <!-- Advanced Filters (Collapsible) -->
-        <ion-accordion-group>
-          <ion-accordion value="filters">
-            <ion-item slot="header">
-              <ion-label>Advanced Filters (Optional)</ion-label>
-            </ion-item>
-            <div slot="content" class="accordion-content">
-              <ion-item>
-                <ion-label>Member Status</ion-label>
-                <ion-select multiple="true" formControlName="memberStatus" placeholder="All">
-                  <ion-select-option value="active">Active</ion-select-option>
-                  <ion-select-option value="inactive">Inactive</ion-select-option>
-                  <ion-select-option value="visitor">Visitor</ion-select-option>
-                </ion-select>
-              </ion-item>
-              
-              <ion-item>
-                <ion-label>Age Groups</ion-label>
-                <ion-select multiple="true" formControlName="ageGroups" placeholder="All">
-                  <ion-select-option value="children">Children</ion-select-option>
-                  <ion-select-option value="youth">Youth</ion-select-option>
-                  <ion-select-option value="young-adults">Young Adults</ion-select-option>
-                  <ion-select-option value="adults">Adults</ion-select-option>
-                  <ion-select-option value="seniors">Seniors</ion-select-option>
-                </ion-select>
-              </ion-item>
-            </div>
-          </ion-accordion>
-        </ion-accordion-group>
       </div>
       
       <!-- For Manual triggers -->
       <div *ngIf="nameAndTriggerForm.get('triggerType')?.value === 'manual'" class="manual-trigger-info">
-        <ion-card>
-          <ion-card-content>
-            <ion-icon name="hand-left-outline" color="primary"></ion-icon>
-            <h3>Manual Trigger</h3>
-            <p>This workflow will be triggered manually. You'll be able to select specific members and start the workflow from the member list or workflow details page.</p>
-          </ion-card-content>
-        </ion-card>
+        <div class="info-card">
+          <ion-icon name="hand-left-outline" color="primary"></ion-icon>
+          <h3>Manual Trigger</h3>
+          <p>This workflow will be triggered manually. You'll be able to select specific members and start the workflow from the member list or workflow details page.</p>
+        </div>
       </div>
     </form>
   </div>
 
   <!-- Step 3: Workflow Steps -->
-  <div class="wizard-step" *ngIf="currentStep === 3">
+  <div class="wizard-step fade-in" *ngIf="currentStep === 3">
     <div class="form-section">
-      <h4>Workflow Steps</h4>
-      <p class="section-description">Define what actions should happen</p>
+      <h4 class="section-title">
+        <ion-icon name="layers-outline" class="section-icon"></ion-icon>
+        Workflow Steps
+      </h4>
+      <p class="section-description">Define the actions that will be taken in this workflow</p>
       
-      <!-- Add Step Button -->
-      <div class="add-step-section">
-        <app-workflow-step-editor
-          (stepAdded)="addWorkflowStep($event)">
-        </app-workflow-step-editor>
-      </div>
+      <app-workflow-step-editor
+        [steps]="workflowSteps"
+        (stepsChange)="onStepsChange($event)">
+      </app-workflow-step-editor>
       
-      <!-- Steps List -->
-      <div class="steps-list" *ngIf="workflowSteps.length > 0">
-        <ion-reorder-group (ionItemReorder)="reorderSteps($event)" disabled="false">
-          <ion-item *ngFor="let step of workflowSteps; let i = index">
-            <ion-reorder slot="start"></ion-reorder>
-            <ion-icon [name]="getStepIcon(step.type)" slot="start" color="primary"></ion-icon>
-            <ion-label>
-              <h3>{{ step.name }}</h3>
-              <p>{{ getStepDescription(step) }}</p>
-            </ion-label>
-            <ion-button fill="clear" slot="end" (click)="removeWorkflowStep(i)">
-              <ion-icon slot="icon-only" name="trash-outline" color="danger"></ion-icon>
-            </ion-button>
-          </ion-item>
-        </ion-reorder-group>
-      </div>
-      
-      <!-- Empty State -->
       <div class="empty-steps" *ngIf="workflowSteps.length === 0">
-        <ion-icon name="list-outline"></ion-icon>
+        <div class="empty-icon-wrapper">
+          <ion-icon name="layers-outline"></ion-icon>
+        </div>
         <p>No steps added yet</p>
-        <p class="hint">Add at least one step to continue</p>
+        <p class="hint">Add steps to define your workflow actions</p>
       </div>
     </div>
   </div>
 
   <!-- Step 4: Review & Activate -->
-  <div class="wizard-step" *ngIf="currentStep === 4">
-    <form [formGroup]="reviewForm">
-      <div class="review-section">
-        <h4>Review Your Workflow</h4>
+  <div class="wizard-step fade-in" *ngIf="currentStep === 4">
+    <div class="review-section">
+      <div class="review-card">
+        <div class="card-header">
+          <h4 class="section-title">
+            <ion-icon name="checkmark-circle-outline" class="section-icon"></ion-icon>
+            Review Your Workflow
+          </h4>
+        </div>
         
-        <ion-card>
-          <ion-card-header>
-            <ion-card-subtitle>Workflow Name</ion-card-subtitle>
-            <ion-card-title>{{ nameAndTriggerForm.get('name')?.value }}</ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            <p *ngIf="nameAndTriggerForm.get('description')?.value">
-              {{ nameAndTriggerForm.get('description')?.value }}
-            </p>
-          </ion-card-content>
-        </ion-card>
+        <div class="review-item">
+          <label>Name</label>
+          <p>{{ nameAndTriggerForm.get('name')?.value }}</p>
+        </div>
         
-        <ion-card>
-          <ion-card-header>
-            <ion-card-subtitle>Trigger Configuration</ion-card-subtitle>
-          </ion-card-header>
-          <ion-card-content>
-            <p>{{ getTriggerDescription() }}</p>
-          </ion-card-content>
-        </ion-card>
+        <div class="review-item" *ngIf="nameAndTriggerForm.get('description')?.value">
+          <label>Description</label>
+          <p>{{ nameAndTriggerForm.get('description')?.value }}</p>
+        </div>
         
-        <ion-card>
-          <ion-card-header>
-            <ion-card-subtitle>Workflow Steps</ion-card-subtitle>
-          </ion-card-header>
-          <ion-card-content>
-            <p>{{ getStepsSummary() }}</p>
-            <ion-list *ngIf="workflowSteps.length > 0">
-              <ion-item *ngFor="let step of workflowSteps; let i = index" lines="none">
-                <ion-label>
-                  <span class="step-number">{{ i + 1 }}.</span> {{ step.name }}
-                </ion-label>
-              </ion-item>
-            </ion-list>
-          </ion-card-content>
-        </ion-card>
+        <div class="review-item">
+          <label>Trigger Type</label>
+          <p>{{ getTriggerTypeLabel() }}</p>
+        </div>
         
-        <div class="activation-options">
-          <ion-item>
-            <ion-checkbox slot="start" formControlName="testMode"></ion-checkbox>
-            <ion-label>
-              <h3>Test Mode</h3>
-              <p>Run in test mode for 7 days without creating real tasks</p>
-            </ion-label>
-          </ion-item>
+        <div class="review-item" *ngIf="nameAndTriggerForm.get('triggerType')?.value === 'attendance'">
+          <label>Trigger Pattern</label>
+          <p>{{ getTriggerDescription() }}</p>
+        </div>
+        
+        <div class="review-item">
+          <label>Workflow Steps</label>
+          <div class="steps-summary">
+            <div class="step-summary" *ngFor="let step of workflowSteps; let i = index">
+              <span class="step-number">{{ i + 1 }}</span>
+              <span class="step-name">{{ step.name }}</span>
+              <span class="step-type">{{ step.type }}</span>
+            </div>
+            <p *ngIf="workflowSteps.length === 0" class="no-steps">No steps defined</p>
+          </div>
         </div>
       </div>
-    </form>
+      
+      <div class="activation-options">
+        <label class="custom-checkbox">
+          <input type="checkbox" formControlName="testMode" [formGroup]="reviewForm">
+          <span class="checkbox-mark"></span>
+          <div class="checkbox-content">
+            <h3>Enable Test Mode</h3>
+            <p>Run in test mode first to see how it works without actually sending messages</p>
+          </div>
+        </label>
+      </div>
+    </div>
   </div>
 </ion-content>
 
-<ion-footer>
-  <ion-toolbar>
-    <ion-buttons slot="start">
-      <ion-button (click)="previousStep()" [disabled]="currentStep === 1">
-        <ion-icon slot="start" name="arrow-back"></ion-icon>
+<!-- Redesigned Footer -->
+<div class="wizard-footer">
+  <div class="footer-content">
+    <!-- Navigation buttons for non-final steps -->
+    <div class="navigation-buttons" *ngIf="currentStep < totalSteps">
+      <ion-button 
+        fill="clear" 
+        class="back-button"
+        (click)="previousStep()" 
+        [disabled]="currentStep === 1">
+        <ion-icon name="chevron-back" slot="start"></ion-icon>
         Back
       </ion-button>
-    </ion-buttons>
+      
+      <div class="step-indicator-mini">
+        <span class="current-step">{{ currentStep }}</span>
+        <span class="separator">/</span>
+        <span class="total-steps">{{ totalSteps }}</span>
+      </div>
+      
+      <ion-button 
+        fill="solid" 
+        class="next-button"
+        (click)="nextStep()" 
+        [disabled]="!isStepValid">
+        Continue
+        <ion-icon name="chevron-forward" slot="end"></ion-icon>
+      </ion-button>
+    </div>
     
-    <ion-buttons slot="end">
-      <ion-button (click)="nextStep()" *ngIf="currentStep < 4" [disabled]="!isStepValid">
-        Next
-        <ion-icon slot="end" name="arrow-forward"></ion-icon>
+    <!-- Final step actions -->
+    <div class="final-actions" *ngIf="currentStep === totalSteps">
+      <ion-button 
+        fill="clear" 
+        class="back-button"
+        (click)="previousStep()">
+        <ion-icon name="chevron-back" slot="start"></ion-icon>
+        Back
       </ion-button>
       
-      <ion-button (click)="saveAsDraft()" *ngIf="currentStep === 4" fill="outline">
-        Save as Draft
-      </ion-button>
-      
-      <ion-button (click)="activateWorkflow()" *ngIf="currentStep === 4" fill="solid" color="primary">
-        Activate Now
-      </ion-button>
-    </ion-buttons>
-  </ion-toolbar>
-</ion-footer>
+      <div class="action-buttons">
+        <ion-button 
+          fill="outline" 
+          class="save-draft-button"
+          (click)="saveAsDraft()">
+          <ion-icon name="save-outline" slot="start"></ion-icon>
+          Save as Draft
+        </ion-button>
+        
+        <ion-button 
+          fill="solid" 
+          class="activate-button"
+          (click)="activateWorkflow()" 
+          [disabled]="workflowSteps.length === 0">
+          <ion-icon name="rocket-outline" slot="start"></ion-icon>
+          {{ editingWorkflow ? 'Update' : 'Activate' }} Workflow
+        </ion-button>
+      </div>
+    </div>
+  </div>
+</div>

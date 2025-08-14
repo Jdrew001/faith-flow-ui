@@ -1,112 +1,403 @@
-.add-step-buttons {
-  ion-button {
-    --padding-top: 12px;
-    --padding-bottom: 12px;
-    font-weight: 500;
-    margin-bottom: 16px;
-  }
+// Import shared animations
+@import '../../../shared/styles/animations';
+
+:host {
+  display: block;
+}
+
+// Steps list styling
+.steps-list {
+  margin-bottom: 20px;
   
-  .quick-add-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 8px;
+  .step-item {
+    --background: #3a3a3c;
+    --color: #ffffff;
+    --border-color: #48484a;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    border: 1px solid #48484a;
     
-    ion-chip {
-      cursor: pointer;
-      transition: all 0.3s ease;
-      --background: var(--ion-color-light);
+    .step-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      padding: 8px 0;
       
-      &:hover {
-        --background: var(--ion-color-primary-tint);
-        transform: scale(1.05);
+      .step-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        
+        .step-number {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          background: #007aff;
+          color: #ffffff;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 12px;
+          font-weight: 600;
+        }
+        
+        .step-icon {
+          font-size: 18px;
+          color: #8e8e93;
+        }
+        
+        .step-name {
+          flex: 1;
+          font-size: 15px;
+          font-weight: 500;
+        }
+        
+        .step-type {
+          font-size: 11px;
+          padding: 2px 8px;
+          background: rgba(142, 142, 147, 0.1);
+          color: #8e8e93;
+          border-radius: 6px;
+        }
       }
       
-      ion-icon {
-        margin-right: 4px;
-        font-size: 16px;
+      .step-description {
+        font-size: 13px;
+        color: #8e8e93;
+        margin-left: 32px;
       }
     }
   }
 }
 
+// Add step buttons
+.add-step-buttons {
+  ion-button {
+    --background: transparent;
+    --color: #007aff;
+    --border-color: #007aff;
+    --border-width: 2px;
+    --border-style: solid;
+    --border-radius: 12px;
+    --padding-top: 14px;
+    --padding-bottom: 14px;
+    font-weight: 500;
+    margin-bottom: 20px;
+    
+    &:hover {
+      --background: rgba(0, 122, 255, 0.1);
+      transform: translateY(-1px);
+    }
+  }
+  
+  .quick-add-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 12px;
+    
+    ion-chip {
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      background: #3a3a3c;
+      color: #ffffff;
+      border: 1px solid #48484a;
+      padding: 8px 16px;
+      border-radius: 20px;
+      margin: 0;
+      
+      &:hover {
+        background: #007aff;
+        border-color: #007aff;
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0, 122, 255, 0.2);
+      }
+      
+      ion-icon {
+        margin-right: 6px;
+        font-size: 16px;
+      }
+      
+      ion-label {
+        font-size: 13px;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+// Step editor modal
 .step-editor {
-  background: white;
-  border-radius: 12px;
-  border: 2px solid var(--ion-color-primary-tint);
-  padding: 16px;
-  margin-bottom: 16px;
+  background: #3a3a3c;
+  border-radius: 16px;
+  border: 2px solid #007aff;
+  padding: 24px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+  animation: slideInUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #007aff, #34c759);
+  }
   
   .editor-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 16px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid var(--ion-color-light-shade);
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #48484a;
     
     h4 {
       margin: 0;
-      font-size: 18px;
+      font-size: 20px;
       font-weight: 600;
-      color: var(--ion-color-dark);
+      color: #ffffff;
     }
-  }
-  
-  form {
-    ion-item {
-      --background: var(--ion-color-light);
-      --padding-start: 12px;
-      --inner-padding-end: 12px;
-      margin-bottom: 12px;
-      border-radius: 8px;
-      
-      ion-label {
-        font-weight: 500;
-        margin-bottom: 8px;
-      }
-    }
-  }
-  
-  .step-config {
-    margin-top: 16px;
     
-    .due-date-config,
-    .wait-config {
-      padding: 12px;
-      background: var(--ion-color-light);
-      border-radius: 8px;
-      margin-bottom: 12px;
+    ion-button {
+      --padding-start: 8px;
+      --padding-end: 8px;
+      --background: transparent;
+      --color: #8e8e93;
       
-      ion-label {
-        display: block;
-        font-weight: 500;
-        margin-bottom: 8px;
-        color: var(--ion-color-dark);
+      &:hover {
+        --color: #ff3b30;
       }
+    }
+  }
+  
+  // Form with floating labels - Match follow-up modal exactly
+  .step-form {
+    .form-field {
+      margin-bottom: 28px;
+      position: relative;
       
-      .due-date-inputs,
-      .wait-inputs {
+      .input-wrapper {
+        position: relative;
         display: flex;
-        gap: 8px;
-        align-items: center;
+        align-items: flex-start;
         
-        ion-input {
-          flex: 1;
-          --background: white;
-          --padding-start: 12px;
-          --padding-end: 12px;
-          border: 1px solid var(--ion-color-light-shade);
-          border-radius: 6px;
+        .field-icon {
+          position: absolute;
+          left: 16px;
+          top: 20px;
+          font-size: 1.2rem;
+          color: #8e8e93;
+          transition: all 0.3s ease;
+          z-index: 1;
         }
         
-        ion-select {
-          flex: 2;
-          --background: white;
-          --padding-start: 12px;
-          --padding-end: 12px;
-          border: 1px solid var(--ion-color-light-shade);
-          border-radius: 6px;
+        .custom-input,
+        .custom-textarea {
+          width: 100%;
+          background: #2c2c2e;
+          border: 2px solid #48484a;
+          border-radius: 12px;
+          padding: 20px 16px 20px 48px;
+          font-size: 1rem;
+          color: #ffffff;
+          transition: all 0.3s ease;
+          outline: none;
+          
+          &::placeholder {
+            color: transparent;
+          }
+          
+          &:focus {
+            border-color: #007aff;
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+            background: #1c1c1e;
+            
+            ~ .floating-label {
+              top: -10px;
+              left: 44px;
+              font-size: 0.85rem;
+              color: #007aff;
+              background: #3a3a3c;
+              padding: 0 8px;
+            }
+            
+            ~ .field-icon {
+              color: #007aff;
+            }
+          }
+        }
+        
+        .custom-textarea {
+          resize: vertical;
+          min-height: 100px;
+          font-family: inherit;
+        }
+        
+        .floating-label {
+          position: absolute;
+          left: 48px;
+          top: 20px;
+          font-size: 1rem;
+          color: #8e8e93;
+          transition: all 0.3s ease;
+          pointer-events: none;
+          background: transparent;
+          font-weight: 500;
+        }
+      }
+      
+      &.has-value {
+        .floating-label {
+          top: -10px;
+          left: 44px;
+          font-size: 0.85rem;
+          color: #8e8e93;
+          background: #3a3a3c;
+          padding: 0 8px;
+        }
+        
+        .custom-input,
+        .custom-textarea {
+          &::placeholder {
+            color: transparent;
+          }
+        }
+      }
+      
+      // Auto-float label when input has content
+      .custom-input:not(:placeholder-shown) ~ .floating-label,
+      .custom-textarea:not(:placeholder-shown) ~ .floating-label {
+        top: -10px;
+        left: 44px;
+        font-size: 0.85rem;
+        color: #8e8e93;
+        background: #3a3a3c;
+        padding: 0 8px;
+      }
+      
+      &.inline-field {
+        flex: 1;
+        margin-bottom: 0;
+      }
+    }
+    
+    .select-field {
+      margin-bottom: 24px;
+      position: relative;
+      
+      .input-wrapper {
+        position: relative;
+        
+        .field-icon {
+          position: absolute;
+          left: 16px;
+          top: 50%;
+          transform: translateY(-50%);
+          font-size: 1.2rem;
+          color: #8e8e93;
+          z-index: 1;
+        }
+        
+        .custom-select {
+          width: 100%;
+          background: #2c2c2e;
+          border: 2px solid #48484a;
+          border-radius: 12px;
+          padding: 20px 16px 8px 48px;
+          font-size: 1rem;
+          color: #ffffff;
+          --placeholder-color: #8e8e93;
+          
+          &:hover {
+            border-color: #007aff;
+          }
+        }
+        
+        .floating-label {
+          position: absolute;
+          left: 48px;
+          top: 8px;
+          font-size: 0.85rem;
+          color: #8e8e93;
+          pointer-events: none;
+          background: #2c2c2e;
+          padding: 0 4px;
+        }
+      }
+      
+      &.inline-field {
+        flex: 1;
+        margin-bottom: 0;
+      }
+    }
+    
+    .checkbox-field {
+      margin-bottom: 20px;
+      
+      .custom-checkbox {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        position: relative;
+        padding: 12px;
+        background: #2c2c2e;
+        border-radius: 12px;
+        border: 1px solid #48484a;
+        transition: all 0.3s ease;
+        
+        &:hover {
+          border-color: #007aff;
+          background: rgba(0, 122, 255, 0.05);
+        }
+        
+        input[type="checkbox"] {
+          position: absolute;
+          opacity: 0;
+          cursor: pointer;
+          
+          &:checked ~ .checkbox-mark {
+            background: #007aff;
+            border-color: #007aff;
+            
+            &::after {
+              display: block;
+            }
+          }
+        }
+        
+        .checkbox-mark {
+          position: relative;
+          width: 20px;
+          height: 20px;
+          background: #3a3a3c;
+          border: 2px solid #48484a;
+          border-radius: 4px;
+          margin-right: 12px;
+          transition: all 0.3s ease;
+          
+          &::after {
+            content: '';
+            position: absolute;
+            display: none;
+            left: 6px;
+            top: 2px;
+            width: 5px;
+            height: 10px;
+            border: solid #ffffff;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+          }
+        }
+        
+        .checkbox-label {
+          font-size: 14px;
+          color: #ffffff;
+          font-weight: 500;
         }
       }
     }
@@ -114,34 +405,96 @@
     .char-counter {
       text-align: right;
       font-size: 12px;
-      color: var(--ion-color-medium);
-      margin: -8px 12px 12px 12px;
+      color: #8e8e93;
+      margin-top: 4px;
+      
+      &.warning {
+        color: #ff9500;
+      }
+      
+      &.error {
+        color: #ff3b30;
+      }
+    }
+  }
+  
+  .step-config {
+    margin-top: 24px;
+    
+    .duration-selector,
+    .section-selector {
+      margin-bottom: 24px;
+      
+      .section-label {
+        display: block;
+        font-size: 14px;
+        font-weight: 500;
+        color: #ffffff;
+        margin-bottom: 12px;
+      }
+      
+      .duration-inputs {
+        display: flex;
+        gap: 12px;
+        align-items: stretch;
+      }
     }
   }
   
   .editor-actions {
     display: flex;
     justify-content: flex-end;
-    gap: 8px;
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px solid var(--ion-color-light-shade);
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid #48484a;
     
     ion-button {
+      --border-radius: 12px;
       font-weight: 500;
+      
+      &[fill="clear"] {
+        --color: #8e8e93;
+        
+        &:hover {
+          --color: #ffffff;
+        }
+      }
+      
+      &[fill="solid"] {
+        --background: #007aff;
+        --color: #ffffff;
+        --padding-start: 24px;
+        --padding-end: 24px;
+        --box-shadow: 0 4px 12px rgba(0, 122, 255, 0.2);
+        
+        &:hover {
+          --background: #0051d5;
+        }
+        
+        &:disabled {
+          --background: #48484a;
+          --color: #8e8e93;
+          opacity: 0.6;
+        }
+      }
     }
   }
 }
 
-// Helper method for getting step type label
-.getStepTypeLabel {
-  &-task { content: 'Create Task'; }
-  &-sms { content: 'Send SMS'; }
-  &-email { content: 'Send Email'; }
-  &-wait { content: 'Add Wait Period'; }
-  &-note { content: 'Add Note'; }
+// Animations
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
+// Responsive design
 @media (min-width: 768px) {
   .add-step-buttons {
     .quick-add-buttons {
@@ -150,34 +503,10 @@
   }
   
   .step-editor {
-    max-width: 600px;
-    margin: 0 auto 16px;
+    max-width: 700px;
+    margin: 0 auto 20px;
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  .step-editor {
-    background: var(--ion-color-dark-tint);
-    border-color: var(--ion-color-primary-shade);
-    
-    form ion-item {
-      --background: var(--ion-color-dark);
-    }
-    
-    .step-config {
-      .due-date-config,
-      .wait-config {
-        background: var(--ion-color-dark);
-        
-        .due-date-inputs,
-        .wait-inputs {
-          ion-input,
-          ion-select {
-            --background: var(--ion-color-dark-tint);
-            border-color: var(--ion-color-medium-shade);
-          }
-        }
-      }
-    }
-  }
-}
+// Apply animations
+@include staggered-animation('.quick-add-buttons', 'ion-chip', 0.05s, 5);

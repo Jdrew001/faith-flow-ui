@@ -23,7 +23,12 @@
       "Bash(copy srcassetsiconsicon-152x152.png srcassetsiconsapple-touch-icon-152x152.png)",
       "Bash(copy srcassetsiconsicon-128x128.png srcassetsiconsapple-touch-icon-120x120.png)",
       "Bash(ng version)",
-      "Bash(del \"C:\\Users\\dtatk\\Documents\\Projects\\faith-flow-ui\\src\\app\\workflows\\services\\workflow-api.service.ts\")"
+      "Bash(del \"C:\\Users\\dtatk\\Documents\\Projects\\faith-flow-ui\\src\\app\\workflows\\services\\workflow-api.service.ts\")",
+      "Bash(npx tsc:*)",
+      "Bash(ng build:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(npx ng build:*)",
+      "Bash(timeout:*)"
     ],
     "deny": []
   }

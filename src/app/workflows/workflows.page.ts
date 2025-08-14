@@ -77,8 +77,7 @@ export class WorkflowsPage implements OnInit, OnDestroy {
   async openWorkflowCreator(template?: WorkflowTemplate) {
     const modal = await this.modalController.create({
       component: WorkflowCreatorComponent,
-      componentProps: { template },
-      cssClass: 'workflow-creator-modal'
+      componentProps: { template }
     });
 
     await modal.present();
@@ -92,8 +91,7 @@ export class WorkflowsPage implements OnInit, OnDestroy {
 
   async openTemplates() {
     const modal = await this.modalController.create({
-      component: WorkflowTemplatesComponent,
-      cssClass: 'workflow-templates-modal'
+      component: WorkflowTemplatesComponent
     });
 
     await modal.present();
@@ -164,14 +162,15 @@ export class WorkflowsPage implements OnInit, OnDestroy {
 
   toggleWorkflowStatus(workflow: Workflow) {
     const newStatus = workflow.status === 'active' ? 'paused' : 'active';
-    this.workflowService.toggleWorkflowStatus(workflow.id, newStatus)
+    this.workflowService.toggleWorkflowStatus(workflow.id!, newStatus)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
+          workflow.status = newStatus;
           this.loadWorkflows();
           this.showToast(`Workflow ${newStatus === 'active' ? 'activated' : 'paused'}`, 'success');
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Error toggling workflow status:', error);
           this.showToast('Failed to update workflow status', 'danger');
         }
@@ -217,10 +216,10 @@ export class WorkflowsPage implements OnInit, OnDestroy {
     this.workflowService.testWorkflow(workflow)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (result) => {
+        next: (result: { affectedMembers: number; previewData: any }) => {
           this.showTestResults(result);
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Error testing workflow:', error);
           this.showToast('Failed to test workflow', 'danger');
         }
@@ -255,6 +254,37 @@ export class WorkflowsPage implements OnInit, OnDestroy {
       ]
     });
     await alert.present();
+  }
+
+  getStatusCount(status: string): number {
+    return this.workflows.filter(w => (w.status || 'draft') === status).length;
+  }
+
+  getTriggerText(trigger: any): string {
+    if (!trigger) return '';
+    
+    if (trigger.type === 'attendance') {
+      const typeText = trigger.attendanceType === 'missed' ? 'Missed' : 
+                       trigger.attendanceType === 'attended' ? 'Attended' : 
+                       'First visit';
+      return `${typeText} ${trigger.frequency}x in ${trigger.timeWindowDays} days`;
+    } else if (trigger.type === 'manual') {
+      return 'Manual trigger';
+    } else if (trigger.type === 'schedule') {
+      return 'Scheduled';
+    }
+    return trigger.type;
+  }
+
+  getCurrentStepName(instance: any): string {
+    if (!instance.steps || instance.steps.length === 0) return 'No steps';
+    const currentStep = instance.steps[instance.currentStepIndex];
+    return currentStep ? currentStep.name : 'Unknown step';
+  }
+
+  getProgressPercentage(instance: any): number {
+    if (!instance.steps || instance.steps.length === 0) return 0;
+    return ((instance.currentStepIndex + 1) / instance.steps.length) * 100;
   }
 
   deleteWorkflow(workflow: Workflow) {
