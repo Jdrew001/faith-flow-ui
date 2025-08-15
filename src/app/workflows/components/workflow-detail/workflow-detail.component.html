@@ -26,18 +26,20 @@
   <!-- Main Content -->
   <div *ngIf="!isLoading && workflow" class="workflow-detail-container">
     
-    <!-- Hero Section -->
-    <div class="hero-section">
-      <div class="hero-background"></div>
-      <div class="hero-content">
-        <div class="workflow-icon-wrapper">
-          <ion-icon name="git-branch-outline"></ion-icon>
+    <!-- Compact Hero Section -->
+    <div class="hero-section-compact">
+      <div class="hero-top-row">
+        <div class="workflow-info">
+          <div class="workflow-icon-small">
+            <ion-icon name="git-branch-outline"></ion-icon>
+          </div>
+          <div class="workflow-text">
+            <h1 class="workflow-name">{{ workflow.name }}</h1>
+            <p class="workflow-description" *ngIf="workflow.description">{{ workflow.description }}</p>
+          </div>
         </div>
-        <h1 class="workflow-name">{{ workflow.name }}</h1>
-        <p class="workflow-description" *ngIf="workflow.description">{{ workflow.description }}</p>
         
-        <!-- Status and Actions -->
-        <div class="status-actions">
+        <div class="status-actions-row">
           <div class="status-badge" [class]="workflow.status?.toLowerCase() || 'draft'">
             <ion-icon [name]="getStatusIcon()"></ion-icon>
             <span>{{ workflow.status || 'DRAFT' }}</span>
@@ -46,33 +48,29 @@
           <div class="action-buttons">
             <button class="action-btn primary" (click)="toggleStatus()" [disabled]="workflow.status === 'DRAFT'">
               <ion-icon [name]="workflow.status === 'ACTIVE' ? 'pause-outline' : 'play-outline'"></ion-icon>
-              {{ workflow.status === 'ACTIVE' ? 'Pause' : 'Activate' }}
+              <span class="btn-text">{{ workflow.status === 'ACTIVE' ? 'Pause' : 'Activate' }}</span>
             </button>
             <button class="action-btn secondary" (click)="editWorkflow()">
               <ion-icon name="create-outline"></ion-icon>
-              Edit
+              <span class="btn-text">Edit</span>
             </button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Quick Stats -->
-    <div class="quick-stats">
+    <!-- Compact Quick Stats -->
+    <div class="quick-stats-compact">
       <div class="stat-item">
-        <div class="stat-icon">
-          <ion-icon name="flash-outline"></ion-icon>
-        </div>
+        <ion-icon name="flash-outline"></ion-icon>
         <div class="stat-content">
           <span class="stat-value">{{ workflow.stats?.totalTriggers || 0 }}</span>
-          <span class="stat-label">Total Runs</span>
+          <span class="stat-label">Runs</span>
         </div>
       </div>
       
       <div class="stat-item">
-        <div class="stat-icon">
-          <ion-icon name="sync-circle-outline"></ion-icon>
-        </div>
+        <ion-icon name="sync-circle-outline"></ion-icon>
         <div class="stat-content">
           <span class="stat-value">{{ workflow.stats?.activeInstances || 0 }}</span>
           <span class="stat-label">Active</span>
@@ -80,19 +78,15 @@
       </div>
       
       <div class="stat-item">
-        <div class="stat-icon">
-          <ion-icon name="checkmark-circle-outline"></ion-icon>
-        </div>
+        <ion-icon name="checkmark-circle-outline"></ion-icon>
         <div class="stat-content">
           <span class="stat-value">{{ workflow.stats?.successRate || 100 }}%</span>
-          <span class="stat-label">Success Rate</span>
+          <span class="stat-label">Success</span>
         </div>
       </div>
       
       <div class="stat-item">
-        <div class="stat-icon">
-          <ion-icon name="time-outline"></ion-icon>
-        </div>
+        <ion-icon name="time-outline"></ion-icon>
         <div class="stat-content">
           <span class="stat-value">{{ getLastTriggeredText() }}</span>
           <span class="stat-label">Last Run</span>
