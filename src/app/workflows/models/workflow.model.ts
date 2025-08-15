@@ -1,16 +1,18 @@
-export type WorkflowTriggerType = 'attendance' | 'manual' | 'schedule';
-export type AttendanceType = 'missed' | 'attended' | 'first_time';
-export type WorkflowStatus = 'active' | 'paused' | 'draft';
-export type WorkflowStepType = 'task' | 'sms' | 'email' | 'wait' | 'note';
+export type WorkflowTriggerType = 'attendance' | 'attendance_rule' | 'manual' | 'schedule';
+export type AttendanceCondition = 'missed_3_in_21_days' | 'first_time_visitor' | 'consistent_attendance';
+export type AttendanceType = 'missed' | 'first_time' | 'consistent';
+export type WorkflowStatus = 'ACTIVE' | 'PAUSED' | 'DRAFT';
+export type WorkflowStepType = 'manual_task' | 'task' | 'sms' | 'email' | 'wait' | 'note';
 export type AssignmentStrategy = 'admin' | 'role' | 'round-robin' | 'specific';
 
 export interface WorkflowTrigger {
   type: WorkflowTriggerType;
+  condition?: AttendanceCondition;
+  events?: WorkflowEvent[];
+  allEvents?: boolean;
   attendanceType?: AttendanceType;
   frequency?: number;
   timeWindowDays?: number;
-  events?: WorkflowEvent[];
-  allEvents?: boolean;
   filters?: {
     memberStatus?: ('active' | 'inactive' | 'visitor')[];
     ageGroups?: string[];
@@ -26,11 +28,19 @@ export interface WorkflowEvent {
 }
 
 export interface WorkflowStep {
-  id: string;
-  type: WorkflowStepType;
+  id?: string;
   name: string;
+  type: WorkflowStepType;
   order: number;
-  config: TaskStepConfig | SmsStepConfig | EmailStepConfig | WaitStepConfig | NoteStepConfig;
+  description?: string;
+  due_offset_hours?: number;
+  assignment_strategy?: AssignmentStrategy;
+  wait_hours?: number;
+  message?: string;
+  subject?: string;
+  body?: string;
+  content?: string;
+  config?: TaskStepConfig | SmsStepConfig | EmailStepConfig | WaitStepConfig | NoteStepConfig;
 }
 
 export interface TaskStepConfig {
@@ -112,24 +122,36 @@ export interface WorkflowHistory {
   outcome?: string;
 }
 
+export interface WorkflowDefinition {
+  name: string;
+  steps: WorkflowStep[];
+  trigger: WorkflowTrigger;
+}
+
 export interface Workflow {
   id: string;
   name: string;
   description?: string;
+  definition: WorkflowDefinition;
   status: WorkflowStatus;
-  triggerType: WorkflowTriggerType;
-  trigger: WorkflowTrigger;
-  steps: WorkflowStep[];
-  testMode: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  version: number;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
   lastTriggeredAt?: Date;
-  stats: {
+  stats?: {
     totalTriggers: number;
     activeInstances: number;
     completedInstances: number;
     successRate: number;
   };
+  // Convenience properties for easier access
+  trigger?: WorkflowTrigger;
+  triggerType?: WorkflowTriggerType;
+  steps?: WorkflowStep[];
+  testMode?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface WorkflowWizardState {

@@ -261,7 +261,7 @@ export class WorkflowCreatorComponent implements OnInit {
 
   async createWorkflow() {
     // Determine if we should save as active or draft based on button clicked
-    const workflow = this.buildWorkflowObject('active');
+    const workflow = this.buildWorkflowObject('ACTIVE');
     await this.saveWorkflow(workflow);
   }
 
@@ -379,16 +379,16 @@ export class WorkflowCreatorComponent implements OnInit {
   }
 
   async saveAsDraft() {
-    const workflow = this.buildWorkflowObject('draft');
+    const workflow = this.buildWorkflowObject('DRAFT');
     await this.saveWorkflow(workflow);
   }
 
   async activateWorkflow() {
-    const workflow = this.buildWorkflowObject('active');
+    const workflow = this.buildWorkflowObject('ACTIVE');
     await this.saveWorkflow(workflow);
   }
 
-  buildWorkflowObject(status: 'active' | 'draft'): Partial<Workflow> {
+  buildWorkflowObject(status: 'ACTIVE' | 'DRAFT'): Partial<Workflow> {
     const nameAndTrigger = this.nameAndTriggerForm.value;
     const triggerRules = this.triggerRulesForm.value;
     const review = this.reviewForm.value;
@@ -507,6 +507,7 @@ export class WorkflowCreatorComponent implements OnInit {
 
   getStepIcon(type: WorkflowStepType): string {
     const icons: Record<WorkflowStepType, string> = {
+      manual_task: 'clipboard-outline',
       task: 'clipboard-outline',
       email: 'mail-outline',
       sms: 'chatbubble-outline',

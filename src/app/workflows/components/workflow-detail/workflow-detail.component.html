@@ -5,360 +5,466 @@
         <ion-icon slot="icon-only" name="arrow-back"></ion-icon>
       </ion-button>
     </ion-buttons>
-    <ion-title>{{ workflow?.name || 'Workflow Details' }}</ion-title>
+    <ion-title>Workflow Details</ion-title>
     <ion-buttons slot="end">
-      <ion-button (click)="editWorkflow()">
-        <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+      <ion-button (click)="showMoreActions()">
+        <ion-icon slot="icon-only" name="ellipsis-vertical"></ion-icon>
       </ion-button>
     </ion-buttons>
   </ion-toolbar>
-  
-  <!-- Status Bar -->
-  <div class="status-bar" *ngIf="workflow">
-    <div class="status-info">
-      <ion-chip [color]="workflow.status === 'active' ? 'success' : 
-                        workflow.status === 'paused' ? 'warning' : 'medium'">
-        <ion-icon [name]="workflow.status === 'active' ? 'checkmark-circle' : 
-                         workflow.status === 'paused' ? 'pause-circle' : 'create-outline'">
-        </ion-icon>
-        <ion-label>{{ workflow.status | uppercase }}</ion-label>
-      </ion-chip>
-      <span class="last-triggered" *ngIf="workflow.lastTriggeredAt">
-        Last triggered {{ workflow.lastTriggeredAt | date:'short' }}
-      </span>
-    </div>
-    <ion-toggle 
-      [checked]="workflow.status === 'active'"
-      (ionChange)="toggleStatus()"
-      [disabled]="workflow.status === 'draft'">
-    </ion-toggle>
-  </div>
-  
-  <!-- Tabs -->
-  <ion-segment [(ngModel)]="selectedTab" (ionChange)="onTabChange($event)">
-    <ion-segment-button value="overview">
-      <ion-label>Overview</ion-label>
-    </ion-segment-button>
-    <ion-segment-button value="trigger">
-      <ion-label>Trigger</ion-label>
-    </ion-segment-button>
-    <ion-segment-button value="steps">
-      <ion-label>Steps</ion-label>
-    </ion-segment-button>
-    <ion-segment-button value="instances">
-      <ion-label>Instances</ion-label>
-    </ion-segment-button>
-    <ion-segment-button value="history">
-      <ion-label>History</ion-label>
-    </ion-segment-button>
-  </ion-segment>
 </ion-header>
 
 <ion-content>
-  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
-    <ion-refresher-content></ion-refresher-content>
-  </ion-refresher>
-
   <!-- Loading State -->
   <div *ngIf="isLoading" class="loading-container">
-    <ion-spinner name="crescent"></ion-spinner>
+    <div class="loading-spinner-wrapper">
+      <ion-spinner name="crescent"></ion-spinner>
+    </div>
     <p>Loading workflow details...</p>
   </div>
 
-  <!-- Content -->
-  <div *ngIf="!isLoading && workflow">
+  <!-- Main Content -->
+  <div *ngIf="!isLoading && workflow" class="workflow-detail-container">
     
-    <!-- Overview Tab -->
-    <div class="tab-content" *ngIf="selectedTab === 'overview'">
-      <div class="overview-section">
+    <!-- Hero Section -->
+    <div class="hero-section">
+      <div class="hero-background"></div>
+      <div class="hero-content">
+        <div class="workflow-icon-wrapper">
+          <ion-icon name="git-branch-outline"></ion-icon>
+        </div>
+        <h1 class="workflow-name">{{ workflow.name }}</h1>
+        <p class="workflow-description" *ngIf="workflow.description">{{ workflow.description }}</p>
         
-        <!-- Description -->
-        <ion-card *ngIf="workflow.description">
-          <ion-card-content>
-            <p>{{ workflow.description }}</p>
-          </ion-card-content>
-        </ion-card>
-        
-        <!-- Statistics -->
-        <div class="statistics-section">
-          <div class="statistics-header">
-            <h3>Statistics</h3>
-            <div class="period-selector">
-              <button class="period-btn" 
-                      [class.active]="statisticsPeriod === 'day'"
-                      (click)="setPeriod('day')">
-                Today
-              </button>
-              <button class="period-btn" 
-                      [class.active]="statisticsPeriod === 'week'"
-                      (click)="setPeriod('week')">
-                Week
-              </button>
-              <button class="period-btn" 
-                      [class.active]="statisticsPeriod === 'month'"
-                      (click)="setPeriod('month')">
-                Month
-              </button>
-              <button class="period-btn" 
-                      [class.active]="statisticsPeriod === 'all'"
-                      (click)="setPeriod('all')">
-                All
-              </button>
-            </div>
+        <!-- Status and Actions -->
+        <div class="status-actions">
+          <div class="status-badge" [class]="workflow.status?.toLowerCase() || 'draft'">
+            <ion-icon [name]="getStatusIcon()"></ion-icon>
+            <span>{{ workflow.status || 'DRAFT' }}</span>
           </div>
           
-          <div class="stats-scroll-container">
-            <div class="stats-grid">
-            <div class="stat-card">
-              <ion-icon name="flash-outline" color="primary"></ion-icon>
-              <div class="stat-value">{{ statistics?.totalTriggers || 0 }}</div>
-              <div class="stat-label">Total Triggers</div>
+          <div class="action-buttons">
+            <button class="action-btn primary" (click)="toggleStatus()" [disabled]="workflow.status === 'DRAFT'">
+              <ion-icon [name]="workflow.status === 'ACTIVE' ? 'pause-outline' : 'play-outline'"></ion-icon>
+              {{ workflow.status === 'ACTIVE' ? 'Pause' : 'Activate' }}
+            </button>
+            <button class="action-btn secondary" (click)="editWorkflow()">
+              <ion-icon name="create-outline"></ion-icon>
+              Edit
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="quick-stats">
+      <div class="stat-item">
+        <div class="stat-icon">
+          <ion-icon name="flash-outline"></ion-icon>
+        </div>
+        <div class="stat-content">
+          <span class="stat-value">{{ workflow.stats?.totalTriggers || 0 }}</span>
+          <span class="stat-label">Total Runs</span>
+        </div>
+      </div>
+      
+      <div class="stat-item">
+        <div class="stat-icon">
+          <ion-icon name="sync-circle-outline"></ion-icon>
+        </div>
+        <div class="stat-content">
+          <span class="stat-value">{{ workflow.stats?.activeInstances || 0 }}</span>
+          <span class="stat-label">Active</span>
+        </div>
+      </div>
+      
+      <div class="stat-item">
+        <div class="stat-icon">
+          <ion-icon name="checkmark-circle-outline"></ion-icon>
+        </div>
+        <div class="stat-content">
+          <span class="stat-value">{{ workflow.stats?.successRate || 100 }}%</span>
+          <span class="stat-label">Success Rate</span>
+        </div>
+      </div>
+      
+      <div class="stat-item">
+        <div class="stat-icon">
+          <ion-icon name="time-outline"></ion-icon>
+        </div>
+        <div class="stat-content">
+          <span class="stat-value">{{ getLastTriggeredText() }}</span>
+          <span class="stat-label">Last Run</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabs Section -->
+    <div class="custom-tabs">
+      <div class="tabs-header">
+        <button 
+          class="tab-button" 
+          [class.active]="selectedTab === 'overview'"
+          (click)="selectedTab = 'overview'">
+          <ion-icon name="information-circle-outline"></ion-icon>
+          <span>Overview</span>
+        </button>
+        <button 
+          class="tab-button" 
+          [class.active]="selectedTab === 'trigger'"
+          (click)="selectedTab = 'trigger'">
+          <ion-icon name="timer-outline"></ion-icon>
+          <span>Trigger</span>
+        </button>
+        <button 
+          class="tab-button" 
+          [class.active]="selectedTab === 'steps'"
+          (click)="selectedTab = 'steps'">
+          <ion-icon name="list-outline"></ion-icon>
+          <span>Steps</span>
+          <span class="tab-badge" *ngIf="workflow.steps && workflow.steps.length > 0">{{ workflow.steps.length }}</span>
+        </button>
+        <button 
+          class="tab-button" 
+          [class.active]="selectedTab === 'instances'"
+          (click)="selectedTab = 'instances'; loadInstances()">
+          <ion-icon name="layers-outline"></ion-icon>
+          <span>Instances</span>
+          <span class="tab-badge" *ngIf="instances.length">{{ instances.length }}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Tab Content -->
+    <div class="tab-content-wrapper">
+      
+      <!-- Overview Tab -->
+      <div class="tab-pane" *ngIf="selectedTab === 'overview'">
+        <!-- Workflow Info Card -->
+        <div class="info-card">
+          <div class="card-header">
+            <ion-icon name="information-circle" class="header-icon"></ion-icon>
+            <h3>Workflow Information</h3>
+          </div>
+          <div class="card-content">
+            <div class="info-row">
+              <span class="info-label">Created</span>
+              <span class="info-value">{{ workflow.created_at | date:'medium' }}</span>
             </div>
-            
-            <div class="stat-card">
-              <ion-icon name="play-circle-outline" color="warning"></ion-icon>
-              <div class="stat-value">{{ statistics?.activeInstances || 0 }}</div>
-              <div class="stat-label">Active</div>
+            <div class="info-row">
+              <span class="info-label">Last Updated</span>
+              <span class="info-value">{{ workflow.updated_at | date:'medium' }}</span>
             </div>
-            
-            <div class="stat-card">
-              <ion-icon name="checkmark-circle-outline" color="success"></ion-icon>
-              <div class="stat-value">{{ statistics?.completedInstances || 0 }}</div>
-              <div class="stat-label">Completed</div>
+            <div class="info-row">
+              <span class="info-label">Version</span>
+              <span class="info-value">v{{ workflow.version || 1 }}</span>
             </div>
-            
-            <div class="stat-card">
-              <ion-icon name="analytics-outline" color="tertiary"></ion-icon>
-              <div class="stat-value">{{ statistics?.successRate || 0 }}%</div>
-              <div class="stat-label">Success Rate</div>
-            </div>
+            <div class="info-row" *ngIf="workflow.created_by">
+              <span class="info-label">Created By</span>
+              <span class="info-value">{{ workflow.created_by }}</span>
             </div>
           </div>
         </div>
-        
-        <!-- Quick Actions -->
-        <ion-card class="actions-card">
-          <ion-card-header>
-            <ion-card-subtitle>Quick Actions</ion-card-subtitle>
-          </ion-card-header>
-          <ion-card-content>
-            <ion-list lines="none">
-              <ion-item button (click)="testWorkflow()">
-                <ion-icon slot="start" name="flask-outline" color="primary"></ion-icon>
-                <ion-label>Test Workflow</ion-label>
-              </ion-item>
+
+        <!-- Performance Metrics -->
+        <div class="metrics-card">
+          <div class="card-header">
+            <ion-icon name="analytics-outline" class="header-icon"></ion-icon>
+            <h3>Performance Metrics</h3>
+            <div class="period-selector">
+              <button 
+                *ngFor="let period of ['day', 'week', 'month', 'all']"
+                class="period-btn"
+                [class.active]="statisticsPeriod === period"
+                (click)="setPeriod($any(period))">
+                {{ period | titlecase }}
+              </button>
+            </div>
+          </div>
+          <div class="card-content">
+            <div class="metrics-grid">
+              <div class="metric-item">
+                <div class="metric-chart">
+                  <svg viewBox="0 0 36 36" class="circular-chart">
+                    <path class="circle-bg"
+                      d="M18 2.0845
+                        a 15.9155 15.9155 0 0 1 0 31.831
+                        a 15.9155 15.9155 0 0 1 0 -31.831"
+                    />
+                    <path class="circle"
+                      [style.stroke-dasharray]="getSuccessRateStroke()"
+                      d="M18 2.0845
+                        a 15.9155 15.9155 0 0 1 0 31.831
+                        a 15.9155 15.9155 0 0 1 0 -31.831"
+                    />
+                  </svg>
+                  <span class="metric-percentage">{{ statistics?.successRate || 0 }}%</span>
+                </div>
+                <span class="metric-label">Success Rate</span>
+              </div>
               
-              <ion-item button (click)="manualTrigger()" *ngIf="workflow.triggerType === 'manual'">
-                <ion-icon slot="start" name="hand-left-outline" color="secondary"></ion-icon>
-                <ion-label>Trigger Manually</ion-label>
-              </ion-item>
-              
-              <ion-item button (click)="duplicateWorkflow()">
-                <ion-icon slot="start" name="copy-outline" color="tertiary"></ion-icon>
-                <ion-label>Duplicate Workflow</ion-label>
-              </ion-item>
-              
-              <ion-item button (click)="deleteWorkflow()">
-                <ion-icon slot="start" name="trash-outline" color="danger"></ion-icon>
-                <ion-label color="danger">Delete Workflow</ion-label>
-              </ion-item>
-            </ion-list>
-          </ion-card-content>
-        </ion-card>
-        
-        <!-- Metadata -->
-        <ion-card>
-          <ion-card-header>
-            <ion-card-subtitle>Information</ion-card-subtitle>
-          </ion-card-header>
-          <ion-card-content>
-            <ion-list>
-              <ion-item lines="none">
-                <ion-label>Created</ion-label>
-                <ion-note slot="end">{{ workflow.createdAt | date:'medium' }}</ion-note>
-              </ion-item>
-              <ion-item lines="none">
-                <ion-label>Updated</ion-label>
-                <ion-note slot="end">{{ workflow.updatedAt | date:'medium' }}</ion-note>
-              </ion-item>
-              <ion-item lines="none" *ngIf="workflow.testMode">
-                <ion-label>Test Mode</ion-label>
-                <ion-badge slot="end" color="tertiary">Active</ion-badge>
-              </ion-item>
-            </ion-list>
-          </ion-card-content>
-        </ion-card>
+              <div class="metric-stats">
+                <div class="metric-stat">
+                  <span class="metric-stat-value">{{ statistics?.totalTriggers || 0 }}</span>
+                  <span class="metric-stat-label">Total Triggers</span>
+                </div>
+                <div class="metric-stat">
+                  <span class="metric-stat-value">{{ statistics?.completedInstances || 0 }}</span>
+                  <span class="metric-stat-label">Completed</span>
+                </div>
+                <div class="metric-stat">
+                  <span class="metric-stat-value">{{ statistics?.failedInstances || 0 }}</span>
+                  <span class="metric-stat-label">Failed</span>
+                </div>
+                <div class="metric-stat">
+                  <span class="metric-stat-value">{{ formatDuration(statistics?.averageCompletionTime) }}</span>
+                  <span class="metric-stat-label">Avg. Time</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-    
-    <!-- Trigger Tab -->
-    <div class="tab-content" *ngIf="selectedTab === 'trigger'">
-      <div class="trigger-section">
-        <ion-card>
-          <ion-card-header>
-            <ion-card-subtitle>Trigger Configuration</ion-card-subtitle>
-            <ion-card-title>{{ workflow.triggerType | titlecase }} Trigger</ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            <div class="trigger-description">
-              <ion-icon name="information-circle-outline" color="primary"></ion-icon>
-              <p>{{ getTriggerDescription() }}</p>
+
+      <!-- Trigger Tab -->
+      <div class="tab-pane" *ngIf="selectedTab === 'trigger'">
+        <div class="trigger-card">
+          <div class="trigger-header">
+            <div class="trigger-type-badge" [class]="workflow.trigger?.type || 'manual'">
+              <ion-icon [name]="getTriggerIcon()"></ion-icon>
+              <span>{{ (workflow.triggerType || workflow.trigger?.type || 'Manual') | titlecase }} Trigger</span>
+            </div>
+          </div>
+          
+          <div class="trigger-description-box">
+            <ion-icon name="information-circle" class="info-icon"></ion-icon>
+            <p>{{ getTriggerDescription() }}</p>
+          </div>
+          
+          <div class="trigger-config" *ngIf="workflow.trigger">
+            <!-- Attendance Configuration -->
+            <div class="config-section" *ngIf="workflow.trigger.type === 'attendance' || workflow.trigger.type === 'attendance_rule'">
+              <h4>Attendance Rules</h4>
+              <div class="config-grid">
+                <div class="config-item">
+                  <ion-icon name="person-outline"></ion-icon>
+                  <div class="config-content">
+                    <span class="config-label">Type</span>
+                    <span class="config-value">{{ workflow.trigger.attendanceType | titlecase }}</span>
+                  </div>
+                </div>
+                <div class="config-item">
+                  <ion-icon name="refresh-outline"></ion-icon>
+                  <div class="config-content">
+                    <span class="config-label">Frequency</span>
+                    <span class="config-value">{{ workflow.trigger.frequency }} times</span>
+                  </div>
+                </div>
+                <div class="config-item">
+                  <ion-icon name="calendar-outline"></ion-icon>
+                  <div class="config-content">
+                    <span class="config-label">Time Window</span>
+                    <span class="config-value">{{ workflow.trigger.timeWindowDays }} days</span>
+                  </div>
+                </div>
+              </div>
             </div>
             
-            <div class="trigger-details" *ngIf="workflow.trigger">
-              <ion-list>
-                <ion-item lines="none" *ngIf="workflow.trigger.events && workflow.trigger.events.length > 0">
-                  <ion-label>Events</ion-label>
-                  <ion-note slot="end">
-                    <ion-chip *ngFor="let event of workflow.trigger.events" size="small">
-                      {{ event.name }}
-                    </ion-chip>
-                  </ion-note>
-                </ion-item>
-                
-                <ion-item lines="none" *ngIf="workflow.trigger.allEvents">
-                  <ion-label>Events</ion-label>
-                  <ion-note slot="end">All Events</ion-note>
-                </ion-item>
-                
-                <ion-item lines="none" *ngIf="hasTriggerFilter('memberStatus')">
-                  <ion-label>Member Status</ion-label>
-                  <ion-note slot="end">{{ getTriggerFilterValue('memberStatus')?.join(', ') }}</ion-note>
-                </ion-item>
-                
-                <ion-item lines="none" *ngIf="hasTriggerFilter('ageGroups')">
-                  <ion-label>Age Groups</ion-label>
-                  <ion-note slot="end">{{ getTriggerFilterValue('ageGroups')?.join(', ') }}</ion-note>
-                </ion-item>
-              </ion-list>
+            <!-- Events Configuration -->
+            <div class="config-section" *ngIf="(workflow.trigger.events && workflow.trigger.events.length > 0) || workflow.trigger.allEvents">
+              <h4>Events</h4>
+              <div class="events-list" *ngIf="workflow.trigger.events && workflow.trigger.events.length > 0">
+                <div class="event-chip" *ngFor="let event of workflow.trigger.events">
+                  <ion-icon name="calendar"></ion-icon>
+                  {{ event.name }}
+                </div>
+              </div>
+              <div class="all-events-badge" *ngIf="workflow.trigger.allEvents">
+                <ion-icon name="globe-outline"></ion-icon>
+                All Events
+              </div>
             </div>
-          </ion-card-content>
-        </ion-card>
+            
+            <!-- Filters -->
+            <div class="config-section" *ngIf="hasAnyFilters()">
+              <h4>Filters</h4>
+              <div class="filters-grid">
+                <div class="filter-item" *ngIf="hasTriggerFilter('memberStatus')">
+                  <span class="filter-label">Member Status</span>
+                  <div class="filter-values">
+                    <span class="filter-chip" *ngFor="let status of getTriggerFilterValue('memberStatus')">
+                      {{ status | titlecase }}
+                    </span>
+                  </div>
+                </div>
+                <div class="filter-item" *ngIf="hasTriggerFilter('ageGroups')">
+                  <span class="filter-label">Age Groups</span>
+                  <div class="filter-values">
+                    <span class="filter-chip" *ngFor="let group of getTriggerFilterValue('ageGroups')">
+                      {{ group }}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </div>
-    
-    <!-- Steps Tab -->
-    <div class="tab-content" *ngIf="selectedTab === 'steps'">
-      <div class="steps-section">
-        <div class="steps-list" *ngIf="workflow.steps && workflow.steps.length > 0">
-          <ion-card *ngFor="let step of workflow.steps; let i = index">
-            <ion-card-header>
-              <ion-card-subtitle>
-                <ion-icon [name]="getStepIcon(step.type)"></ion-icon>
-                Step {{ i + 1 }}
-              </ion-card-subtitle>
-              <ion-card-title>{{ step.name }}</ion-card-title>
-            </ion-card-header>
-            <ion-card-content>
-              <p class="step-type">Type: {{ step.type | titlecase }}</p>
-              
-              <!-- Task Configuration -->
-              <div *ngIf="step.type === 'task'" class="step-config">
-                <p *ngIf="hasStepConfigProperty(step, 'title')"><strong>Title:</strong> {{ getStepConfig(step, 'title') }}</p>
-                <p *ngIf="hasStepConfigProperty(step, 'description')"><strong>Description:</strong> {{ getStepConfig(step, 'description') }}</p>
-                <p *ngIf="hasStepConfigProperty(step, 'assignmentStrategy')"><strong>Assignment:</strong> {{ getStepConfig(step, 'assignmentStrategy') | titlecase }}</p>
-                <p *ngIf="hasStepConfigProperty(step, 'dueDateOffset')"><strong>Due:</strong> {{ getStepConfig(step, 'dueDateOffset')?.value }} {{ getStepConfig(step, 'dueDateOffset')?.unit }}</p>
+
+      <!-- Steps Tab -->
+      <div class="tab-pane" *ngIf="selectedTab === 'steps'">
+        <div class="steps-timeline" *ngIf="workflow.steps && workflow.steps.length > 0">
+          <div class="step-card" *ngFor="let step of workflow.steps; let i = index; let isLast = last">
+            <div class="step-connector" *ngIf="!isLast"></div>
+            <div class="step-number">{{ i + 1 }}</div>
+            <div class="step-content">
+              <div class="step-header">
+                <div class="step-icon" [class]="step.type">
+                  <ion-icon [name]="getStepIcon(step.type)"></ion-icon>
+                </div>
+                <div class="step-title">
+                  <h4>{{ step.name }}</h4>
+                  <span class="step-type-badge">{{ getStepTypeLabel(step.type) }}</span>
+                </div>
               </div>
               
-              <!-- Email Configuration -->
-              <div *ngIf="step.type === 'email'" class="step-config">
-                <p *ngIf="hasStepConfigProperty(step, 'subject')"><strong>Subject:</strong> {{ getStepConfig(step, 'subject') }}</p>
-                <p *ngIf="hasStepConfigProperty(step, 'recipientType')"><strong>To:</strong> {{ getStepConfig(step, 'recipientType') | titlecase }}</p>
+              <div class="step-details">
+                <!-- Task Details -->
+                <div *ngIf="step.type === 'task' || step.type === 'manual_task'" class="detail-content">
+                  <div class="detail-row" *ngIf="hasStepConfigProperty(step, 'title')">
+                    <ion-icon name="text-outline"></ion-icon>
+                    <span>{{ getStepConfig(step, 'title') }}</span>
+                  </div>
+                  <div class="detail-row" *ngIf="hasStepConfigProperty(step, 'description')">
+                    <ion-icon name="document-text-outline"></ion-icon>
+                    <span>{{ getStepConfig(step, 'description') }}</span>
+                  </div>
+                  <div class="detail-row" *ngIf="hasStepConfigProperty(step, 'assignmentStrategy')">
+                    <ion-icon name="person-outline"></ion-icon>
+                    <span>Assigned to {{ getStepConfig(step, 'assignmentStrategy') | titlecase }}</span>
+                  </div>
+                  <div class="detail-row" *ngIf="hasStepConfigProperty(step, 'dueDateOffset')">
+                    <ion-icon name="time-outline"></ion-icon>
+                    <span>Due in {{ getStepConfig(step, 'dueDateOffset').value }} {{ getStepConfig(step, 'dueDateOffset').unit }}</span>
+                  </div>
+                </div>
+                
+                <!-- Email Details -->
+                <div *ngIf="step.type === 'email'" class="detail-content">
+                  <div class="detail-row" *ngIf="hasStepConfigProperty(step, 'subject')">
+                    <ion-icon name="mail-outline"></ion-icon>
+                    <span>{{ getStepConfig(step, 'subject') }}</span>
+                  </div>
+                  <div class="detail-row" *ngIf="hasStepConfigProperty(step, 'recipientType')">
+                    <ion-icon name="person-circle-outline"></ion-icon>
+                    <span>Send to {{ getStepConfig(step, 'recipientType') | titlecase }}</span>
+                  </div>
+                </div>
+                
+                <!-- SMS Details -->
+                <div *ngIf="step.type === 'sms'" class="detail-content">
+                  <div class="detail-row" *ngIf="hasStepConfigProperty(step, 'message')">
+                    <ion-icon name="chatbubble-outline"></ion-icon>
+                    <span>{{ getStepConfig(step, 'message') | slice:0:50 }}{{ getStepConfig(step, 'message')?.length > 50 ? '...' : '' }}</span>
+                  </div>
+                  <div class="detail-row" *ngIf="hasStepConfigProperty(step, 'recipientType')">
+                    <ion-icon name="person-circle-outline"></ion-icon>
+                    <span>Send to {{ getStepConfig(step, 'recipientType') | titlecase }}</span>
+                  </div>
+                </div>
+                
+                <!-- Wait Details -->
+                <div *ngIf="step.type === 'wait'" class="detail-content">
+                  <div class="detail-row" *ngIf="hasStepConfigProperty(step, 'duration')">
+                    <ion-icon name="hourglass-outline"></ion-icon>
+                    <span>Wait for {{ getStepConfig(step, 'duration').value }} {{ getStepConfig(step, 'duration').unit }}</span>
+                  </div>
+                </div>
+                
+                <!-- Note Details -->
+                <div *ngIf="step.type === 'note'" class="detail-content">
+                  <div class="detail-row" *ngIf="hasStepConfigProperty(step, 'content')">
+                    <ion-icon name="document-text-outline"></ion-icon>
+                    <span>{{ getStepConfig(step, 'content') | slice:0:100 }}{{ getStepConfig(step, 'content')?.length > 100 ? '...' : '' }}</span>
+                  </div>
+                </div>
               </div>
-              
-              <!-- SMS Configuration -->
-              <div *ngIf="step.type === 'sms'" class="step-config">
-                <p *ngIf="hasStepConfigProperty(step, 'message')"><strong>Message:</strong> {{ getStepConfig(step, 'message') }}</p>
-                <p *ngIf="hasStepConfigProperty(step, 'recipientType')"><strong>To:</strong> {{ getStepConfig(step, 'recipientType') | titlecase }}</p>
-              </div>
-              
-              <!-- Wait Configuration -->
-              <div *ngIf="step.type === 'wait'" class="step-config">
-                <p *ngIf="hasStepConfigProperty(step, 'duration')"><strong>Duration:</strong> {{ getStepConfig(step, 'duration')?.value }} {{ getStepConfig(step, 'duration')?.unit }}</p>
-              </div>
-              
-              <!-- Note Configuration -->
-              <div *ngIf="step.type === 'note'" class="step-config">
-                <p *ngIf="hasStepConfigProperty(step, 'content')"><strong>Content:</strong> {{ getStepConfig(step, 'content') }}</p>
-                <p *ngIf="hasStepConfigProperty(step, 'attachToMember')"><strong>Attach to Member:</strong> {{ getStepConfig(step, 'attachToMember') ? 'Yes' : 'No' }}</p>
-              </div>
-            </ion-card-content>
-          </ion-card>
+            </div>
+          </div>
         </div>
         
         <div class="empty-state" *ngIf="!workflow.steps || workflow.steps.length === 0">
           <ion-icon name="list-outline"></ion-icon>
           <h3>No Steps Configured</h3>
-          <p>This workflow has no steps defined.</p>
+          <p>This workflow doesn't have any steps yet.</p>
+          <button class="btn-primary" (click)="editWorkflow()">
+            <ion-icon name="add-outline"></ion-icon>
+            Add Steps
+          </button>
         </div>
       </div>
-    </div>
-    
-    <!-- Instances Tab -->
-    <div class="tab-content" *ngIf="selectedTab === 'instances'">
-      <div class="instances-section">
-        <ion-list *ngIf="instances.length > 0">
-          <ion-item 
-            *ngFor="let instance of instances" 
-            button 
-            (click)="viewInstance(instance)">
-            <ion-avatar slot="start">
-              <div class="avatar-placeholder">{{ instance.memberName.charAt(0) }}</div>
-            </ion-avatar>
-            <ion-label>
-              <h2>{{ instance.memberName }}</h2>
-              <p>Started {{ instance.startedAt | date:'short' }}</p>
-              <ion-progress-bar 
-                [value]="instance.currentStepIndex / instance.steps.length"
-                [color]="instance.status === 'active' ? 'primary' : 
-                        instance.status === 'completed' ? 'success' : 'medium'">
-              </ion-progress-bar>
-            </ion-label>
-            <ion-badge slot="end" [color]="instance.status === 'active' ? 'primary' : 
-                                          instance.status === 'completed' ? 'success' : 'medium'">
-              {{ instance.status }}
-            </ion-badge>
-          </ion-item>
-        </ion-list>
+
+      <!-- Instances Tab -->
+      <div class="tab-pane" *ngIf="selectedTab === 'instances'">
+        <div class="instances-list" *ngIf="instances.length > 0">
+          <div class="instance-card" *ngFor="let instance of instances" (click)="viewInstance(instance)">
+            <div class="instance-header">
+              <div class="instance-member">
+                <div class="member-avatar">
+                  {{ getInitials(instance.memberName) }}
+                </div>
+                <div class="member-info">
+                  <h4>{{ instance.memberName }}</h4>
+                  <span class="instance-date">Started {{ instance.startedAt | date:'short' }}</span>
+                </div>
+              </div>
+              <div class="instance-status" [class]="instance.status">
+                {{ instance.status | titlecase }}
+              </div>
+            </div>
+            
+            <div class="instance-progress">
+              <div class="progress-info">
+                <span>Step {{ instance.currentStepIndex + 1 }} of {{ instance.steps?.length || 0 }}</span>
+                <span class="progress-percentage">{{ getProgressPercentage(instance) }}%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-fill" [style.width.%]="getProgressPercentage(instance)"></div>
+              </div>
+            </div>
+            
+            <div class="instance-current-step">
+              <ion-icon name="arrow-forward-circle-outline"></ion-icon>
+              <span>{{ getCurrentStepName(instance) }}</span>
+            </div>
+          </div>
+        </div>
         
         <div class="empty-state" *ngIf="instances.length === 0">
-          <ion-icon name="people-outline"></ion-icon>
+          <ion-icon name="layers-outline"></ion-icon>
           <h3>No Active Instances</h3>
-          <p>There are no active workflow instances.</p>
-        </div>
-      </div>
-    </div>
-    
-    <!-- History Tab -->
-    <div class="tab-content" *ngIf="selectedTab === 'history'">
-      <div class="history-section">
-        <ion-list *ngIf="history.length > 0">
-          <ion-item *ngFor="let entry of history">
-            <ion-icon 
-              slot="start" 
-              [name]="entry.status === 'success' ? 'checkmark-circle' : 
-                     entry.status === 'failed' ? 'close-circle' : 'help-circle'"
-              [color]="entry.status === 'success' ? 'success' : 
-                      entry.status === 'failed' ? 'danger' : 'warning'">
-            </ion-icon>
-            <ion-label>
-              <h2>{{ entry.memberName }}</h2>
-              <p>{{ entry.triggeredAt | date:'medium' }}</p>
-              <p *ngIf="entry.outcome">{{ entry.outcome }}</p>
-            </ion-label>
-            <ion-badge slot="end" [color]="entry.status === 'success' ? 'success' : 
-                                          entry.status === 'failed' ? 'danger' : 'warning'">
-              {{ entry.status }}
-            </ion-badge>
-          </ion-item>
-        </ion-list>
-        
-        <div class="empty-state" *ngIf="history.length === 0">
-          <ion-icon name="time-outline"></ion-icon>
-          <h3>No History</h3>
-          <p>This workflow has not been triggered yet.</p>
+          <p>There are no running instances of this workflow.</p>
         </div>
       </div>
     </div>
   </div>
 </ion-content>
+
+<!-- Floating Action Button -->
+<ion-fab vertical="bottom" horizontal="end" slot="fixed" *ngIf="!isLoading && workflow">
+  <ion-fab-button>
+    <ion-icon name="add"></ion-icon>
+  </ion-fab-button>
+  <ion-fab-list side="top">
+    <ion-fab-button (click)="testWorkflow()" color="secondary">
+      <ion-icon name="flask-outline"></ion-icon>
+    </ion-fab-button>
+    <ion-fab-button (click)="duplicateWorkflow()" color="tertiary">
+      <ion-icon name="copy-outline"></ion-icon>
+    </ion-fab-button>
+    <ion-fab-button (click)="startManualRun()" color="success" *ngIf="workflow.trigger?.type === 'manual'">
+      <ion-icon name="play-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab-list>
+</ion-fab>

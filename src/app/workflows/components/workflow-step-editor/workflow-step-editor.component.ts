@@ -112,6 +112,7 @@ export class WorkflowStepEditorComponent implements OnInit {
     
     // Set default name based on type
     const defaultNames: Record<WorkflowStepType, string> = {
+      manual_task: 'Manual Task',
       task: 'Follow-up Task',
       sms: 'SMS Message',
       email: 'Email Message',

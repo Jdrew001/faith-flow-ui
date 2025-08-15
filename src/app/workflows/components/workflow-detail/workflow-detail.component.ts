@@ -145,13 +145,13 @@ export class WorkflowDetailComponent implements OnInit, OnDestroy {
   async toggleStatus() {
     if (!this.workflow) return;
     
-    const newStatus = this.workflow.status === 'active' ? 'paused' : 'active';
-    const message = newStatus === 'active' 
+    const newStatus = this.workflow.status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE';
+    const message = newStatus === 'ACTIVE' 
       ? 'Are you sure you want to activate this workflow?' 
       : 'Are you sure you want to pause this workflow?';
     
     const alert = await this.alertController.create({
-      header: newStatus === 'active' ? 'Activate Workflow' : 'Pause Workflow',
+      header: newStatus === 'ACTIVE' ? 'Activate Workflow' : 'Pause Workflow',
       message,
       buttons: [
         {
@@ -159,7 +159,7 @@ export class WorkflowDetailComponent implements OnInit, OnDestroy {
           role: 'cancel'
         },
         {
-          text: newStatus === 'active' ? 'Activate' : 'Pause',
+          text: newStatus === 'ACTIVE' ? 'Activate' : 'Pause',
           handler: () => {
             this.doToggleStatus(newStatus);
           }
@@ -170,14 +170,14 @@ export class WorkflowDetailComponent implements OnInit, OnDestroy {
     await alert.present();
   }
 
-  doToggleStatus(newStatus: 'active' | 'paused') {
+  doToggleStatus(newStatus: 'ACTIVE' | 'PAUSED') {
     this.workflowService.toggleWorkflowStatus(this.workflowId, newStatus)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
           if (response.success) {
             this.loadWorkflow();
-            this.showToast(`Workflow ${newStatus === 'active' ? 'activated' : 'paused'}`, 'success');
+            this.showToast(`Workflow ${newStatus === 'ACTIVE' ? 'activated' : 'paused'}`, 'success');
           } else {
             this.showToast('Failed to update workflow status', 'danger');
           }
@@ -371,8 +371,8 @@ export class WorkflowDetailComponent implements OnInit, OnDestroy {
       return 'Scheduled trigger - Runs on a schedule';
     } else if (trigger.type === 'attendance') {
       const typeText = trigger.attendanceType === 'missed' ? 'has missed' : 
-                       trigger.attendanceType === 'attended' ? 'has attended' : 
-                       'is a first-time visitor at';
+                       trigger.attendanceType === 'first_time' ? 'is a first-time visitor at' : 
+                       trigger.attendanceType === 'consistent' ? 'has consistently attended' : 'has attended';
       const frequencyText = trigger.frequency === 1 ? 'once' : `${trigger.frequency} times`;
       const windowText = `in the past ${trigger.timeWindowDays} days`;
       
@@ -405,8 +405,8 @@ export class WorkflowDetailComponent implements OnInit, OnDestroy {
   }
 
   getTriggerFilterValue(filterName: string): string[] | undefined {
-    if (this.workflow?.trigger?.filters) {
-      return (this.workflow.trigger.filters as any)[filterName];
+    if (this.workflow?.definition?.trigger?.filters) {
+      return (this.workflow.definition.trigger.filters as any)[filterName];
     }
     return undefined;
   }
@@ -443,5 +443,158 @@ export class WorkflowDetailComponent implements OnInit, OnDestroy {
     setTimeout(() => {
       event.target.complete();
     }, 1000);
+  }
+
+  getStatusIcon(): string {
+    switch (this.workflow?.status) {
+      case 'ACTIVE':
+        return 'checkmark-circle';
+      case 'PAUSED':
+        return 'pause-circle';
+      case 'DRAFT':
+        return 'create-outline';
+      default:
+        return 'help-circle';
+    }
+  }
+
+  getLastTriggeredText(): string {
+    if (this.workflow?.lastTriggeredAt) {
+      const date = new Date(this.workflow.lastTriggeredAt);
+      const now = new Date();
+      const diff = now.getTime() - date.getTime();
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      
+      if (days === 0) return 'Today';
+      if (days === 1) return 'Yesterday';
+      if (days < 7) return `${days} days ago`;
+      if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
+      return date.toLocaleDateString();
+    }
+    return 'Never';
+  }
+
+  getSuccessRateStroke(): string {
+    const percentage = this.statistics?.successRate || 0;
+    const circumference = 100;
+    const strokeDasharray = `${percentage} ${circumference - percentage}`;
+    return strokeDasharray;
+  }
+
+  formatDuration(milliseconds?: number): string {
+    if (!milliseconds) return '0s';
+    
+    const seconds = Math.floor(milliseconds / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+    
+    if (days > 0) return `${days}d`;
+    if (hours > 0) return `${hours}h`;
+    if (minutes > 0) return `${minutes}m`;
+    return `${seconds}s`;
+  }
+
+  getTriggerIcon(): string {
+    const type = this.workflow?.trigger?.type || this.workflow?.triggerType;
+    switch (type) {
+      case 'attendance':
+      case 'attendance_rule':
+        return 'calendar-outline';
+      case 'manual':
+        return 'hand-left-outline';
+      case 'schedule':
+        return 'time-outline';
+      default:
+        return 'timer-outline';
+    }
+  }
+
+  hasAnyFilters(): boolean {
+    return this.hasTriggerFilter('memberStatus') || 
+           this.hasTriggerFilter('ageGroups') || 
+           this.hasTriggerFilter('ministries') || 
+           this.hasTriggerFilter('tags');
+  }
+
+  getStepTypeLabel(type: string): string {
+    const labels: Record<string, string> = {
+      task: 'Manual Task',
+      manual_task: 'Manual Task',
+      email: 'Email',
+      sms: 'Text Message',
+      wait: 'Wait Period',
+      note: 'Add Note'
+    };
+    return labels[type] || type;
+  }
+
+  getInitials(name: string): string {
+    if (!name) return '?';
+    const parts = name.split(' ');
+    if (parts.length >= 2) {
+      return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+    }
+    return name.substring(0, 2).toUpperCase();
+  }
+
+  getProgressPercentage(instance: any): number {
+    if (!instance.steps || instance.steps.length === 0) return 0;
+    const completed = instance.steps.filter((s: any) => s.status === 'completed').length;
+    return Math.round((completed / instance.steps.length) * 100);
+  }
+
+  getCurrentStepName(instance: any): string {
+    if (!instance.steps || instance.steps.length === 0) return 'No steps';
+    const currentStep = instance.steps[instance.currentStepIndex];
+    return currentStep ? currentStep.name : 'Unknown step';
+  }
+
+  async showMoreActions() {
+    const actionSheet = await this.actionSheetController.create({
+      header: 'Workflow Actions',
+      buttons: [
+        {
+          text: 'Duplicate',
+          icon: 'copy-outline',
+          handler: () => {
+            this.duplicateWorkflow();
+          }
+        },
+        {
+          text: 'Test Workflow',
+          icon: 'flask-outline',
+          handler: () => {
+            this.testWorkflow();
+          }
+        },
+        {
+          text: 'Export',
+          icon: 'download-outline',
+          handler: () => {
+            // Export functionality
+          }
+        },
+        {
+          text: 'Delete',
+          icon: 'trash-outline',
+          role: 'destructive',
+          handler: () => {
+            this.deleteWorkflow();
+          }
+        },
+        {
+          text: 'Cancel',
+          icon: 'close',
+          role: 'cancel'
+        }
+      ]
+    });
+    await actionSheet.present();
+  }
+
+  async startManualRun() {
+    // Implementation for starting manual workflow run
+    this.showToast('Starting manual workflow run...', 'success');
   }
 }

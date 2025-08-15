@@ -13,11 +13,11 @@ export class WorkflowCardComponent {
 
   get statusColor(): string {
     switch (this.workflow.status) {
-      case 'active':
+      case 'ACTIVE':
         return 'success';
-      case 'paused':
+      case 'PAUSED':
         return 'warning';
-      case 'draft':
+      case 'DRAFT':
         return 'medium';
       default:
         return 'medium';
@@ -26,11 +26,11 @@ export class WorkflowCardComponent {
 
   get statusIcon(): string {
     switch (this.workflow.status) {
-      case 'active':
+      case 'ACTIVE':
         return 'checkmark-circle';
-      case 'paused':
+      case 'PAUSED':
         return 'pause-circle';
-      case 'draft':
+      case 'DRAFT':
         return 'create-outline';
       default:
         return 'help-circle';
@@ -48,8 +48,8 @@ export class WorkflowCardComponent {
       return 'Scheduled trigger';
     } else if (trigger.type === 'attendance') {
       const typeText = trigger.attendanceType === 'missed' ? 'Missed' : 
-                       trigger.attendanceType === 'attended' ? 'Attended' : 
-                       'First-time visitor';
+                       trigger.attendanceType === 'first_time' ? 'First-time visitor' : 
+                       trigger.attendanceType === 'consistent' ? 'Consistent' : 'Attendance';
       const frequencyText = trigger.frequency === 1 ? 'once' : `${trigger.frequency}+ times`;
       const windowText = `in ${trigger.timeWindowDays} days`;
       

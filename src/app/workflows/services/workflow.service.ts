@@ -32,9 +32,53 @@ export class WorkflowService {
     this.loadTemplates();
   }
 
+  private mapWorkflowData(workflow: any): Workflow {
+    // Map the nested structure to convenience properties
+    const mapped = {
+      ...workflow,
+      trigger: workflow.definition?.trigger || workflow.trigger,
+      triggerType: workflow.definition?.trigger?.type || workflow.triggerType,
+      steps: workflow.definition?.steps || workflow.steps,
+      createdAt: workflow.created_at,
+      updatedAt: workflow.updated_at
+    };
+    
+    console.log('Mapping workflow data:', {
+      original: workflow,
+      mapped: mapped,
+      trigger: mapped.trigger,
+      triggerType: mapped.triggerType
+    });
+    
+    return mapped;
+  }
+
+  private prepareWorkflowPayload(workflow: Partial<Workflow>): any {
+    // Prepare the payload structure expected by the API
+    const payload: any = {
+      name: workflow.name,
+      description: workflow.description,
+      status: workflow.status,
+      definition: {
+        name: workflow.name,
+        trigger: workflow.trigger,
+        steps: workflow.steps
+      }
+    };
+    
+    // Remove convenience properties that shouldn't be sent to API
+    delete payload.triggerType;
+    delete payload.testMode;
+    delete payload.createdAt;
+    delete payload.updatedAt;
+    
+    return payload;
+  }
+
   // Template Management
   getWorkflows(): Observable<Workflow[]> {
     return this.http.get<Workflow[]>(`${this.apiUrl}/templates`).pipe(
+      map(workflows => workflows.map(w => this.mapWorkflowData(w))),
       tap(workflows => this.workflowsSubject.next(workflows)),
       catchError(error => {
         console.error('Error loading workflows:', error);
@@ -44,17 +88,23 @@ export class WorkflowService {
   }
 
   getWorkflow(id: string): Observable<Workflow> {
-    return this.http.get<Workflow>(`${this.apiUrl}/templates/${id}`);
+    return this.http.get<Workflow>(`${this.apiUrl}/templates/${id}`).pipe(
+      map(workflow => this.mapWorkflowData(workflow))
+    );
   }
 
   createWorkflow(workflow: Partial<Workflow>): Observable<Workflow> {
-    return this.http.post<Workflow>(`${this.apiUrl}/templates`, workflow).pipe(
+    const payload = this.prepareWorkflowPayload(workflow);
+    return this.http.post<Workflow>(`${this.apiUrl}/templates`, payload).pipe(
+      map(response => this.mapWorkflowData(response)),
       tap(() => this.getWorkflows().subscribe())
     );
   }
 
   updateWorkflow(id: string, workflow: Partial<Workflow>): Observable<Workflow> {
-    return this.http.put<Workflow>(`${this.apiUrl}/templates/${id}`, workflow).pipe(
+    const payload = this.prepareWorkflowPayload(workflow);
+    return this.http.put<Workflow>(`${this.apiUrl}/templates/${id}`, payload).pipe(
+      map(response => this.mapWorkflowData(response)),
       tap(() => this.getWorkflows().subscribe())
     );
   }
@@ -65,8 +115,8 @@ export class WorkflowService {
     );
   }
 
-  toggleWorkflowStatus(id: string, status: 'active' | 'paused'): Observable<{ success: boolean }> {
-    const endpoint = status === 'active' ? 'activate' : 'archive';
+  toggleWorkflowStatus(id: string, status: 'ACTIVE' | 'PAUSED'): Observable<{ success: boolean }> {
+    const endpoint = status === 'ACTIVE' ? 'activate' : 'archive';
     return this.http.post<{ success: boolean }>(`${this.apiUrl}/templates/${id}/${endpoint}`, {}).pipe(
       tap(() => this.getWorkflows().subscribe())
     );
@@ -74,6 +124,7 @@ export class WorkflowService {
 
   duplicateWorkflow(id: string, name?: string): Observable<Workflow> {
     return this.http.post<Workflow>(`${this.apiUrl}/templates/${id}/duplicate`, { name: name || 'Copy' }).pipe(
+      map(response => this.mapWorkflowData(response)),
       tap(() => this.getWorkflows().subscribe())
     );
   }
