@@ -1,6 +1,6 @@
 <ion-header class="modal-header">
   <ion-toolbar>
-    <ion-title>Workflow Templates</ion-title>
+    <ion-title>Create Workflow</ion-title>
     <ion-buttons slot="end">
       <ion-button (click)="dismiss()" class="close-button">
         <ion-icon slot="icon-only" name="close"></ion-icon>
@@ -12,61 +12,59 @@
 <ion-content class="modal-content">
   <div class="templates-container">
     <div class="templates-header">
-      <h2>Quick Start Templates</h2>
-      <p>Choose a template to get started quickly with pre-configured workflows</p>
+      <h2>Choose How to Get Started</h2>
+      <p>Select a template for quick setup or start from scratch</p>
     </div>
 
-  <div class="templates-grid">
-    <div 
-      class="template-card" 
-      *ngFor="let template of templates"
-      [class.selected]="selectedTemplate?.id === template.id"
-      (click)="selectTemplate(template)">
-      
-      <div class="template-icon">
-        <ion-icon [name]="template.icon"></ion-icon>
+    <!-- Create from Scratch Option - Prominent at the top -->
+    <div class="create-options">
+      <div class="create-card primary-option" (click)="createFromScratch()">
+        <div class="create-icon">
+          <ion-icon name="create-outline"></ion-icon>
+        </div>
+        <div class="create-content">
+          <h3>Create Custom Workflow</h3>
+          <p>Build a workflow tailored to your specific needs</p>
+        </div>
+        <ion-icon name="chevron-forward-outline" class="arrow-icon"></ion-icon>
       </div>
-      
-      <div class="template-content">
-        <h3>{{ template.name }}</h3>
-        <p>{{ template.description }}</p>
+    </div>
+
+    <div class="divider-section">
+      <div class="divider-line"></div>
+      <span class="divider-text">Or choose a template</span>
+      <div class="divider-line"></div>
+    </div>
+
+    <!-- Template Grid -->
+    <div class="templates-grid">
+      <div 
+        class="template-card" 
+        *ngFor="let template of templates"
+        (click)="useTemplateDirectly(template)">
         
-        <div class="template-meta">
-          <ion-chip size="small" color="medium">
-            <ion-icon name="git-branch-outline"></ion-icon>
-            <ion-label>{{ getTemplateTriggerType(template) }}</ion-label>
-          </ion-chip>
-          <ion-chip size="small" color="medium">
-            <ion-icon name="list-outline"></ion-icon>
-            <ion-label>{{ getTemplateStepsCount(template) }} steps</ion-label>
-          </ion-chip>
+        <div class="template-icon">
+          <ion-icon [name]="template.icon"></ion-icon>
         </div>
-      </div>
-      
-      <div class="selected-indicator" *ngIf="selectedTemplate?.id === template.id">
-        <ion-icon name="checkmark-circle" color="primary"></ion-icon>
-      </div>
-    </div>
-  </div>
-
-    <div class="blank-template">
-      <div class="blank-card" (click)="dismiss()">
-        <div class="blank-icon">
-          <ion-icon name="add-circle-outline"></ion-icon>
+        
+        <div class="template-content">
+          <h3>{{ template.name }}</h3>
+          <p>{{ template.description }}</p>
+          
+          <div class="template-meta">
+            <span class="meta-item">
+              <ion-icon name="git-branch-outline"></ion-icon>
+              {{ getTemplateTriggerType(template) }}
+            </span>
+            <span class="meta-item">
+              <ion-icon name="layers-outline"></ion-icon>
+              {{ getTemplateStepsCount(template) }} steps
+            </span>
+          </div>
         </div>
-        <h3>Start from Scratch</h3>
-        <p>Create a custom workflow tailored to your needs</p>
+        
+        <ion-icon name="chevron-forward-outline" class="arrow-icon"></ion-icon>
       </div>
-    </div>
-    
-    <div class="modal-actions">
-      <ion-button 
-        expand="block" 
-        [disabled]="!selectedTemplate"
-        (click)="useTemplate()">
-        <ion-icon name="checkmark-circle-outline" slot="start"></ion-icon>
-        Use Selected Template
-      </ion-button>
     </div>
   </div>
 </ion-content>

@@ -1,3 +1,36 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: #2c2c2e;
+}
+
+// Header Styles
+ion-header {
+  ion-toolbar {
+    --background: #1c1c1e;
+    --color: #ffffff;
+    --border-width: 0;
+    
+    ion-title {
+      font-weight: 600;
+      font-size: 18px;
+    }
+    
+    ion-button {
+      --color: #8e8e93;
+      
+      &:hover {
+        --color: #ffffff;
+      }
+    }
+  }
+}
+
+ion-content {
+  --background: #2c2c2e;
+}
+
 .loading-container {
   display: flex;
   flex-direction: column;
@@ -6,13 +39,14 @@
   height: 60vh;
   
   ion-spinner {
+    --color: #007aff;
     width: 48px;
     height: 48px;
     margin-bottom: 16px;
   }
   
   p {
-    color: var(--ion-color-medium);
+    color: #8e8e93;
     font-size: 14px;
   }
 }
@@ -22,12 +56,12 @@
 }
 
 .instance-header {
-  background: white;
+  background: #3a3a3c;
   padding: 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid var(--ion-color-light-shade);
+  border-bottom: 1px solid #48484a;
   
   .member-info {
     display: flex;
@@ -39,7 +73,7 @@
         width: 56px;
         height: 56px;
         border-radius: 50%;
-        background: linear-gradient(135deg, var(--ion-color-primary), var(--ion-color-primary-shade));
+        background: linear-gradient(135deg, #007aff, #0051d5);
         color: white;
         display: flex;
         align-items: center;
@@ -54,12 +88,12 @@
         font-size: 20px;
         font-weight: 600;
         margin: 0 0 4px 0;
-        color: var(--ion-color-dark);
+        color: #ffffff;
       }
       
       p {
         font-size: 14px;
-        color: var(--ion-color-medium);
+        color: #8e8e93;
         margin: 0;
       }
     }
@@ -67,6 +101,28 @@
   
   ion-chip {
     margin: 0;
+    --background: #48484a;
+    --color: #ffffff;
+    
+    &[color="primary"] {
+      --background: #007aff;
+      --color: #ffffff;
+    }
+    
+    &[color="success"] {
+      --background: #34c759;
+      --color: #ffffff;
+    }
+    
+    &[color="warning"] {
+      --background: #ff9500;
+      --color: #ffffff;
+    }
+    
+    &[color="danger"] {
+      --background: #ff3b30;
+      --color: #ffffff;
+    }
     
     ion-icon {
       margin-right: 4px;
@@ -75,9 +131,10 @@
 }
 
 .progress-section {
-  background: white;
+  background: #3a3a3c;
   padding: 20px;
   margin-bottom: 8px;
+  border-bottom: 1px solid #48484a;
   
   .progress-header {
     display: flex;
@@ -87,12 +144,12 @@
     
     .progress-label {
       font-weight: 600;
-      color: var(--ion-color-dark);
+      color: #ffffff;
     }
     
     .progress-text {
       font-size: 14px;
-      color: var(--ion-color-medium);
+      color: #8e8e93;
     }
   }
   
@@ -106,7 +163,7 @@
     display: flex;
     justify-content: space-between;
     font-size: 12px;
-    color: var(--ion-color-medium);
+    color: #8e8e93;
     
     .start-date,
     .completion-date {
@@ -118,45 +175,48 @@
 }
 
 .steps-section {
-  background: white;
+  background: #3a3a3c;
   padding: 20px;
   
   h3 {
     font-size: 18px;
     font-weight: 600;
     margin: 0 0 16px 0;
-    color: var(--ion-color-dark);
+    color: #ffffff;
   }
   
   ion-list {
     background: transparent;
     
     ion-item {
+      --background: #2c2c2e;
+      --color: #ffffff;
       --padding-start: 0;
       --padding-end: 0;
       --inner-padding-end: 0;
       margin-bottom: 16px;
       border-left: 3px solid transparent;
+      border-radius: 8px;
       padding-left: 12px;
       transition: all 0.3s ease;
       
       &.active-step {
-        border-left-color: var(--ion-color-primary);
-        background: var(--ion-color-primary-contrast);
+        border-left-color: #007aff;
+        --background: rgba(0, 122, 255, 0.1);
       }
       
       &.completed-step {
-        border-left-color: var(--ion-color-success);
+        border-left-color: #34c759;
         opacity: 0.8;
       }
       
       &.skipped-step {
-        border-left-color: var(--ion-color-warning);
+        border-left-color: #ff9500;
         opacity: 0.7;
       }
       
       &.failed-step {
-        border-left-color: var(--ion-color-danger);
+        border-left-color: #ff3b30;
         opacity: 0.7;
       }
       
@@ -178,7 +238,7 @@
           font-size: 16px;
           font-weight: 600;
           margin: 0 0 4px 0;
-          color: var(--ion-color-dark);
+          color: #ffffff;
         }
         
         .step-type {
@@ -186,7 +246,7 @@
           align-items: center;
           gap: 4px;
           font-size: 13px;
-          color: var(--ion-color-medium);
+          color: #8e8e93;
           margin: 4px 0;
           
           ion-icon {
@@ -200,7 +260,7 @@
           gap: 12px;
           margin: 8px 0;
           font-size: 12px;
-          color: var(--ion-color-medium);
+          color: #8e8e93;
           
           span {
             display: flex;
@@ -215,7 +275,7 @@
         
         .step-notes {
           font-size: 13px;
-          color: var(--ion-color-medium-shade);
+          color: #636366;
           font-style: italic;
           margin-top: 8px;
           display: flex;
@@ -234,6 +294,33 @@
         font-size: 11px;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        --background: #48484a;
+        --color: #ffffff;
+        
+        &[color="primary"] {
+          --background: #007aff;
+          --color: #ffffff;
+        }
+        
+        &[color="success"] {
+          --background: #34c759;
+          --color: #ffffff;
+        }
+        
+        &[color="warning"] {
+          --background: #ff9500;
+          --color: #ffffff;
+        }
+        
+        &[color="danger"] {
+          --background: #ff3b30;
+          --color: #ffffff;
+        }
+        
+        &[color="medium"] {
+          --background: #636366;
+          --color: #ffffff;
+        }
       }
     }
   }
@@ -243,7 +330,10 @@
   padding: 16px;
   
   ion-card {
+    --background: #3a3a3c;
+    --color: #ffffff;
     margin: 0;
+    border: 1px solid #48484a;
     
     ion-card-header {
       padding-bottom: 8px;
@@ -251,6 +341,7 @@
       ion-card-title {
         font-size: 16px;
         font-weight: 600;
+        color: #ffffff;
       }
     }
     
@@ -258,7 +349,7 @@
       .current-step-actions {
         p {
           font-size: 14px;
-          color: var(--ion-color-medium);
+          color: #8e8e93;
           margin: 0 0 16px 0;
         }
         
@@ -282,6 +373,7 @@
   
   ion-card {
     text-align: center;
+    border: 1px solid #48484a;
     
     ion-card-content {
       padding: 24px;
@@ -295,13 +387,13 @@
         font-size: 20px;
         font-weight: 600;
         margin: 0 0 8px 0;
-        color: white;
+        color: #ffffff;
       }
       
       p {
         font-size: 14px;
         margin: 0 0 8px 0;
-        color: white;
+        color: #ffffff;
         opacity: 0.9;
         
         &.completion-time,
@@ -332,16 +424,4 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  .instance-header,
-  .progress-section,
-  .steps-section {
-    background: var(--ion-color-dark-tint);
-  }
-  
-  .steps-section ion-list ion-item {
-    &.active-step {
-      background: rgba(var(--ion-color-primary-rgb), 0.1);
-    }
-  }
-}
+// Remove media query as we're applying dark theme by default

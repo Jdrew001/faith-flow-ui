@@ -1,19 +1,17 @@
 // Import shared animations
 @import '../../../shared/styles/animations';
 
-// Modal header - Match attendance and followups
+// Modal header
 ion-header ion-toolbar {
   --background: #2c2c2e;
   --color: #ffffff;
   --border-color: #3a3a3c;
   border-bottom: 1px solid #3a3a3c;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   
   ion-title {
     color: #ffffff;
-    font-weight: 700;
-    font-size: 1.2rem;
-    letter-spacing: -0.5px;
+    font-weight: 600;
+    font-size: 1.1rem;
   }
   
   ion-button {
@@ -28,14 +26,15 @@ ion-header ion-toolbar {
 }
 
 .modal-content {
-  --background: #2c2c2e;
-  background: #2c2c2e;
+  --background: #1c1c1e;
+  background: #1c1c1e;
   color: #ffffff;
 }
 
 .templates-container {
-  padding: 24px 16px;
-  padding-bottom: 120px; // More space for fixed action button and scrolling
+  padding: 20px 16px;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .templates-header {
@@ -43,7 +42,7 @@ ion-header ion-toolbar {
   margin-bottom: 24px;
   
   h2 {
-    font-size: 22px;
+    font-size: 24px;
     font-weight: 700;
     margin: 0 0 8px 0;
     color: #ffffff;
@@ -51,245 +50,219 @@ ion-header ion-toolbar {
   }
   
   p {
-    font-size: 14px;
     color: #8e8e93;
+    font-size: 14px;
     margin: 0;
+  }
+}
+
+// Create from scratch section
+.create-options {
+  margin-bottom: 32px;
+}
+
+.create-card {
+  background: linear-gradient(135deg, #007aff, #5856d6);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0);
+    transition: background 0.3s ease;
+  }
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(0, 122, 255, 0.3);
+    
+    &::before {
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.create-icon {
+  width: 48px;
+  height: 48px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  
+  ion-icon {
+    font-size: 24px;
+    color: #ffffff;
+  }
+}
+
+.create-content {
+  flex: 1;
+  
+  h3 {
+    margin: 0 0 4px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #ffffff;
+  }
+  
+  p {
+    margin: 0;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.8);
+  }
+}
+
+.arrow-icon {
+  font-size: 20px;
+  color: rgba(255, 255, 255, 0.6);
+  flex-shrink: 0;
+}
+
+// Divider section
+.divider-section {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 32px 0 24px;
+  
+  .divider-line {
+    flex: 1;
+    height: 1px;
+    background: #3a3a3c;
+  }
+  
+  .divider-text {
+    color: #8e8e93;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 500;
+  }
+}
+
+// Templates grid
+.templates-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.template-card {
+  background: #2c2c2e;
+  border: 1px solid #3a3a3c;
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  
+  &:hover {
+    background: #3a3a3c;
+    border-color: #48484a;
+    transform: translateX(4px);
+  }
+  
+  &:active {
+    transform: translateX(2px);
+  }
+}
+
+.template-icon {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, #48484a, #3a3a3c);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  
+  ion-icon {
+    font-size: 22px;
+    color: #007aff;
+  }
+}
+
+.template-content {
+  flex: 1;
+  
+  h3 {
+    margin: 0 0 4px 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #ffffff;
+  }
+  
+  p {
+    margin: 0 0 8px 0;
+    font-size: 13px;
+    color: #8e8e93;
     line-height: 1.4;
   }
 }
 
-.templates-grid {
+.template-meta {
   display: flex;
-  flex-direction: column;
   gap: 12px;
-  margin-bottom: 24px;
-}
-
-// Template Card - Match attendance session cards
-.template-card {
-  background: #3a3a3c;
-  border-radius: 16px;
-  padding: 16px;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  border: 1px solid #48484a;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-wrap: wrap;
   
-  // Apply consistent card animation
-  @include card-animation();
-  
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    border-color: rgba(0, 122, 255, 0.3);
-  }
-  
-  &.selected {
-    border-color: #007aff;
-    background: rgba(0, 122, 255, 0.05);
-    
-    .selected-indicator {
-      display: flex;
-    }
-  }
-  
-  // Template icon - smaller and cleaner
-  .template-icon {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, rgba(0, 122, 255, 0.15), rgba(0, 122, 255, 0.05));
+  .meta-item {
     display: flex;
     align-items: center;
-    justify-content: center;
-    margin-bottom: 12px;
-    border: 1px solid rgba(0, 122, 255, 0.2);
-    
-    ion-icon {
-      font-size: 24px;
-      color: #007aff;
-    }
-  }
-  
-  .template-content {
-    h3 {
-      font-size: 17px;
-      font-weight: 600;
-      margin: 0 0 6px 0;
-      color: #ffffff;
-    }
-    
-    p {
-      font-size: 13px;
-      color: #8e8e93;
-      line-height: 1.4;
-      margin: 0 0 12px 0;
-    }
-  }
-  
-  .template-meta {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    
-    ion-chip {
-      margin: 0;
-      height: 22px;
-      background: rgba(142, 142, 147, 0.1);
-      color: #8e8e93;
-      padding: 0 8px;
-      border-radius: 11px;
-      font-size: 11px;
-      
-      ion-icon {
-        font-size: 12px;
-        margin-right: 4px;
-      }
-      
-      ion-label {
-        font-size: 11px;
-        font-weight: 500;
-      }
-    }
-  }
-  
-  .selected-indicator {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    background: #34c759;
-    display: none;
-    align-items: center;
-    justify-content: center;
+    gap: 4px;
+    font-size: 12px;
+    color: #8e8e93;
     
     ion-icon {
       font-size: 14px;
-      color: #ffffff;
-    }
-  }
-}
-
-// Start from Scratch Card
-.blank-template {
-  margin-top: 16px;
-  margin-bottom: 24px; // Add bottom margin for better spacing
-  
-  .blank-card {
-    background: #3a3a3c;
-    border-radius: 16px;
-    padding: 24px;
-    border: 2px dashed #48484a;
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    
-    @include card-animation();
-    
-    &:hover {
-      border-color: rgba(0, 122, 255, 0.5);
-      background: rgba(0, 122, 255, 0.05);
-      transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-      
-      .blank-icon {
-        background: linear-gradient(135deg, rgba(0, 122, 255, 0.15), rgba(0, 122, 255, 0.05));
-        border-color: rgba(0, 122, 255, 0.3);
-        
-        ion-icon {
-          color: #007aff;
-        }
-      }
-    }
-    
-    .blank-icon {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: rgba(142, 142, 147, 0.1);
-      border: 2px solid #48484a;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 16px;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      
-      ion-icon {
-        font-size: 28px;
-        color: #8e8e93;
-        transition: all 0.3s ease;
-      }
-    }
-    
-    h3 {
-      font-size: 17px;
-      font-weight: 600;
-      color: #ffffff;
-      margin: 0 0 6px 0;
-    }
-    
-    p {
-      font-size: 13px;
-      color: #8e8e93;
-      margin: 0;
-      line-height: 1.4;
-    }
-  }
-}
-
-// Modal Actions - Match followup modal
-.modal-actions {
-  padding: 20px 16px;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: #2c2c2e;
-  border-top: 1px solid #3a3a3c;
-  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.15);
-  z-index: 100;
-  
-  ion-button {
-    --background: #007aff;
-    --background-activated: #0051d5;
-    --background-hover: #0051d5;
-    --border-radius: 12px;
-    --box-shadow: 0 4px 12px rgba(0, 122, 255, 0.25);
-    font-weight: 600;
-    font-size: 1rem;
-    letter-spacing: -0.3px;
-    height: 48px;
-    
-    &:disabled {
-      --background: #48484a;
-      --color: #8e8e93;
-      opacity: 0.6;
-    }
-    
-    ion-icon {
-      font-size: 1.2rem;
-      margin-right: 8px;
     }
   }
 }
 
 // Responsive adjustments
 @media (min-width: 768px) {
+  .templates-container {
+    padding: 32px 24px;
+  }
+  
   .templates-grid {
-    display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
   }
 }
 
-@media (min-width: 1024px) {
-  .templates-grid {
-    grid-template-columns: repeat(3, 1fr);
-  }
+// Animation classes
+.fade-in {
+  animation: fadeIn 0.3s ease;
 }
 
-// Apply staggered animations for template cards
-@include staggered-animation('.templates-grid', '.template-card', 0.05s, 12);
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -6,11 +6,12 @@ import {
   Workflow, 
   WorkflowTemplate, 
   WorkflowWizardState,
-  WorkflowEvent,
+  WorkflowSession,
   WorkflowStep,
   WorkflowStepType,
   WorkflowTriggerType,
-  AttendanceType
+  WorkflowTemplatePreset,
+  WorkflowTrigger
 } from '../../models';
 
 @Component({
@@ -20,7 +21,7 @@ import {
   standalone: false
 })
 export class WorkflowCreatorComponent implements OnInit {
-  @Input() template?: WorkflowTemplate;
+  @Input() template?: WorkflowTemplatePreset;
   @Input() editingWorkflow?: Workflow;
 
   currentStep = 1;
@@ -31,29 +32,19 @@ export class WorkflowCreatorComponent implements OnInit {
   workflowStepsForm!: FormGroup;
   reviewForm!: FormGroup;
   
-  availableEvents: WorkflowEvent[] = [];
+  availableSessions: WorkflowSession[] = [];
   workflowSteps: WorkflowStep[] = [];
+  currentTrigger?: WorkflowTrigger;
   
   triggerTypes = [
-    { value: 'attendance', label: 'Attendance-based', icon: 'calendar-outline', description: 'Trigger based on attendance patterns' },
+    { value: 'attendance_rule', label: 'Attendance-based', icon: 'calendar-outline', description: 'Trigger based on attendance patterns' },
+    { value: 'first_time_visitor', label: 'First-time Visitor', icon: 'person-add-outline', description: 'Trigger for first-time visitors' },
     { value: 'manual', label: 'Manual', icon: 'hand-left-outline', description: 'Start workflow manually for selected members' },
-    { value: 'schedule', label: 'Schedule-based', icon: 'time-outline', description: 'Trigger on a schedule (Coming soon)', disabled: true }
+    { value: 'scheduled', label: 'Schedule-based', icon: 'time-outline', description: 'Trigger on a schedule (Coming soon)', disabled: true },
+    { value: 'member_created', label: 'New Member', icon: 'person-add-outline', description: 'Trigger when new member is created', disabled: true },
+    { value: 'member_updated', label: 'Member Updated', icon: 'create-outline', description: 'Trigger when member is updated', disabled: true }
   ];
   
-  attendanceTypes = [
-    { value: 'missed', label: 'Missed', icon: 'close-circle-outline' },
-    { value: 'attended', label: 'Attended', icon: 'checkmark-circle-outline' },
-    { value: 'first_time', label: 'First Time', icon: 'person-add-outline' }
-  ];
-  
-  timeWindows = [
-    { value: 7, label: '7 days' },
-    { value: 14, label: '14 days' },
-    { value: 21, label: '21 days' },
-    { value: 30, label: '30 days' },
-    { value: 60, label: '60 days' },
-    { value: 90, label: '90 days' }
-  ];
 
   constructor(
     private fb: FormBuilder,
@@ -65,7 +56,7 @@ export class WorkflowCreatorComponent implements OnInit {
 
   ngOnInit() {
     this.initializeForms();
-    this.loadEvents();
+    this.loadSessions();
     
     if (this.template) {
       this.applyTemplate();
@@ -79,20 +70,13 @@ export class WorkflowCreatorComponent implements OnInit {
     this.nameAndTriggerForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(3)]],
       description: [''],
-      triggerType: ['attendance', Validators.required]
+      triggerType: ['attendance_rule', Validators.required]
     });
 
-    // Step 2: Trigger Rules
+    // Step 2: Trigger Rules - simplified for trigger configuration
     this.triggerRulesForm = this.fb.group({
-      events: [[], Validators.required],
-      allEvents: [false],
-      attendanceType: ['missed'],
-      frequency: [3, [Validators.required, Validators.min(1)]],
-      timeWindowDays: [21, Validators.required],
-      memberStatus: [[]],
-      ageGroups: [[]],
-      ministries: [[]],
-      tags: [[]]
+      // This form is primarily used for validation
+      // Actual trigger configuration is handled by WorkflowTriggerBuilderComponent
     });
 
     // Step 3: Workflow Steps
@@ -107,9 +91,9 @@ export class WorkflowCreatorComponent implements OnInit {
     });
   }
 
-  loadEvents() {
-    this.workflowService.getEvents().subscribe(events => {
-      this.availableEvents = events;
+  loadSessions() {
+    this.workflowService.getSessions().subscribe(sessions => {
+      this.availableSessions = sessions;
     });
   }
 
@@ -122,17 +106,12 @@ export class WorkflowCreatorComponent implements OnInit {
     this.nameAndTriggerForm.patchValue({
       name: preset.name,
       description: preset.description,
-      triggerType: preset.triggerType
+      triggerType: preset.trigger?.type || 'manual'
     });
     
-    // Apply trigger rules if attendance-based
-    if (preset.trigger && preset.triggerType === 'attendance') {
-      this.triggerRulesForm.patchValue({
-        attendanceType: preset.trigger.attendanceType,
-        frequency: preset.trigger.frequency,
-        timeWindowDays: preset.trigger.timeWindowDays,
-        allEvents: preset.trigger.allEvents || false
-      });
+    // Apply trigger rules if needed
+    if (preset.trigger) {
+      this.currentTrigger = preset.trigger;
     }
     
     // Apply workflow steps
@@ -148,17 +127,11 @@ export class WorkflowCreatorComponent implements OnInit {
     this.nameAndTriggerForm.patchValue({
       name: this.editingWorkflow.name,
       description: this.editingWorkflow.description,
-      triggerType: this.editingWorkflow.triggerType
+      triggerType: this.editingWorkflow.trigger?.type || 'manual'
     });
     
     if (this.editingWorkflow.trigger) {
-      this.triggerRulesForm.patchValue({
-        events: this.editingWorkflow.trigger.events || [],
-        allEvents: this.editingWorkflow.trigger.allEvents || false,
-        attendanceType: this.editingWorkflow.trigger.attendanceType,
-        frequency: this.editingWorkflow.trigger.frequency,
-        timeWindowDays: this.editingWorkflow.trigger.timeWindowDays
-      });
+      this.currentTrigger = this.editingWorkflow.trigger;
     }
     
     if (this.editingWorkflow.steps) {
@@ -191,15 +164,11 @@ export class WorkflowCreatorComponent implements OnInit {
       return true; // No additional validation needed for manual triggers
     }
     
-    if (triggerType === 'attendance') {
-      const allEvents = this.triggerRulesForm.get('allEvents')?.value;
-      const events = this.triggerRulesForm.get('events')?.value;
-      
-      if (!allEvents && (!events || events.length === 0)) {
-        return false;
-      }
-      
-      return this.triggerRulesForm.valid;
+    if (triggerType === 'attendance_rule') {
+      // Check if we have a valid trigger configuration
+      return this.currentTrigger !== undefined && 
+             this.currentTrigger.conditions !== undefined &&
+             Object.keys(this.currentTrigger.conditions).length > 0;
     }
     
     return true;
@@ -215,34 +184,26 @@ export class WorkflowCreatorComponent implements OnInit {
     await toast.present();
   }
 
-  onEventSelectionChange(event: any) {
-    const selectedEvents = event.detail.value;
-    this.triggerRulesForm.patchValue({ events: selectedEvents });
-  }
-
-  onAllEventsChange(event: any) {
-    const allEvents = event.detail.checked;
-    this.triggerRulesForm.patchValue({ allEvents });
-    
-    if (allEvents) {
-      this.triggerRulesForm.patchValue({ events: [] });
-    }
+  onTriggerChange(trigger: WorkflowTrigger) {
+    this.currentTrigger = trigger;
   }
 
   onTriggerTypeChange(event: any) {
     const triggerType = event.detail.value;
     console.log('Trigger type changed to:', triggerType);
     
-    // Clear trigger rules when changing type
+    // Reset trigger when changing type
     if (triggerType === 'manual') {
-      // Clear attendance-specific fields
-      this.triggerRulesForm.patchValue({
-        events: [],
-        allEvents: false,
-        attendanceType: 'missed',
-        frequency: 3,
-        timeWindowDays: 21
-      });
+      this.currentTrigger = {
+        type: 'manual',
+        enabled: true
+      };
+    } else if (triggerType === 'attendance_rule') {
+      this.currentTrigger = {
+        type: 'attendance_rule',
+        enabled: true,
+        conditions: {}
+      };
     }
   }
 
@@ -251,9 +212,6 @@ export class WorkflowCreatorComponent implements OnInit {
     this.onTriggerTypeChange({ detail: { value } });
   }
 
-  selectAttendanceType(value: string) {
-    this.triggerRulesForm.patchValue({ attendanceType: value });
-  }
 
   onStepsChange(steps: WorkflowStep[]) {
     this.workflowSteps = steps;
@@ -286,17 +244,6 @@ export class WorkflowCreatorComponent implements OnInit {
     }
   }
 
-  incrementFrequency() {
-    const current = this.triggerRulesForm.get('frequency')?.value || 1;
-    this.triggerRulesForm.patchValue({ frequency: current + 1 });
-  }
-
-  decrementFrequency() {
-    const current = this.triggerRulesForm.get('frequency')?.value || 1;
-    if (current > 1) {
-      this.triggerRulesForm.patchValue({ frequency: current - 1 });
-    }
-  }
 
   addWorkflowStep(step: WorkflowStep) {
     // Set the order for the new step
@@ -328,34 +275,31 @@ export class WorkflowCreatorComponent implements OnInit {
       return 'Workflow will be triggered manually for selected members';
     }
     
-    if (triggerType === 'attendance') {
-      const attendanceType = this.triggerRulesForm.get('attendanceType')?.value;
-      const frequency = this.triggerRulesForm.get('frequency')?.value;
-      const timeWindow = this.triggerRulesForm.get('timeWindowDays')?.value;
-      const allEvents = this.triggerRulesForm.get('allEvents')?.value;
-      const events = this.triggerRulesForm.get('events')?.value || [];
+    if (triggerType === 'attendance_rule' && this.currentTrigger?.conditions) {
+      const conditions = this.currentTrigger.conditions;
       
-      let typeText = '';
-      switch (attendanceType) {
-        case 'missed':
-          typeText = 'has missed';
-          break;
-        case 'attended':
-          typeText = 'has attended';
-          break;
-        case 'first_time':
-          typeText = 'is a first-time visitor at';
-          break;
+      if (conditions.absences_in_period) {
+        const { count, period_days } = conditions.absences_in_period;
+        return `Trigger when someone has ${count} absences in ${period_days} days`;
       }
       
-      const frequencyText = frequency === 1 ? 'once' : `${frequency} times`;
-      const windowText = `in the past ${timeWindow} days`;
-      const eventText = allEvents ? 'any event' : events.length === 1 ? events[0].name : `${events.length} selected events`;
+      if (conditions.consecutive_absences) {
+        const { count } = conditions.consecutive_absences;
+        return `Trigger when someone has ${count} consecutive absences`;
+      }
       
-      return `Trigger when someone ${typeText} ${eventText} ${frequencyText} ${windowText}`;
+      if (conditions.no_attendance_days) {
+        const { days } = conditions.no_attendance_days;
+        return `Trigger when someone has not attended for ${days} days`;
+      }
+      
+      if (conditions.attendance_percentage) {
+        const { percentage, period_days } = conditions.attendance_percentage;
+        return `Trigger when attendance falls below ${percentage}% in ${period_days} days`;
+      }
     }
     
-    return 'Custom trigger configuration';
+    return 'Configure trigger conditions';
   }
 
   getStepsSummary(): string {
@@ -390,30 +334,18 @@ export class WorkflowCreatorComponent implements OnInit {
 
   buildWorkflowObject(status: 'ACTIVE' | 'DRAFT'): Partial<Workflow> {
     const nameAndTrigger = this.nameAndTriggerForm.value;
-    const triggerRules = this.triggerRulesForm.value;
     const review = this.reviewForm.value;
     
     const workflow: Partial<Workflow> = {
       name: nameAndTrigger.name,
       description: nameAndTrigger.description,
       status: status,
-      triggerType: nameAndTrigger.triggerType,
-      trigger: {
-        type: nameAndTrigger.triggerType,
-        attendanceType: triggerRules.attendanceType,
-        frequency: triggerRules.frequency,
-        timeWindowDays: triggerRules.timeWindowDays,
-        events: triggerRules.allEvents ? [] : triggerRules.events,
-        allEvents: triggerRules.allEvents,
-        filters: {
-          memberStatus: triggerRules.memberStatus,
-          ageGroups: triggerRules.ageGroups,
-          ministries: triggerRules.ministries,
-          tags: triggerRules.tags
-        }
+      trigger: this.currentTrigger || {
+        type: nameAndTrigger.triggerType as WorkflowTriggerType,
+        enabled: true
       },
       steps: this.workflowSteps,
-      testMode: review.testMode
+      enabled: status === 'ACTIVE'
     };
     
     if (this.editingWorkflow) {
@@ -508,32 +440,43 @@ export class WorkflowCreatorComponent implements OnInit {
   getStepIcon(type: WorkflowStepType): string {
     const icons: Record<WorkflowStepType, string> = {
       manual_task: 'clipboard-outline',
-      task: 'clipboard-outline',
-      email: 'mail-outline',
-      sms: 'chatbubble-outline',
+      send_email: 'mail-outline',
+      send_sms: 'chatbubble-outline',
       wait: 'time-outline',
-      note: 'document-text-outline'
+      conditional: 'git-branch-outline',
+      update_member: 'person-outline',
+      create_note: 'document-text-outline',
+      webhook: 'link-outline'
     };
     return icons[type] || 'help-outline';
   }
 
   getStepDescription(step: WorkflowStep): string {
+    const metadata = step.metadata || {};
+    
     switch (step.type) {
-      case 'task':
-        const taskConfig = step.config as any;
-        return `${taskConfig.title} - Due in ${taskConfig.dueDateOffset.value} ${taskConfig.dueDateOffset.unit}`;
-      case 'email':
-        const emailConfig = step.config as any;
-        return `Subject: ${emailConfig.subject}`;
-      case 'sms':
-        const smsConfig = step.config as any;
-        return `Message: ${smsConfig.message.substring(0, 50)}...`;
+      case 'manual_task':
+        return `${metadata.title} - Due in ${metadata.due_offset_hours || 24} hours`;
+      case 'send_email':
+        return `Subject: ${metadata.subject || 'No subject'}`;
+      case 'send_sms':
+        return `Message: ${(metadata.message || '').substring(0, 50)}...`;
       case 'wait':
-        const waitConfig = step.config as any;
-        return `Wait ${waitConfig.duration.value} ${waitConfig.duration.unit}`;
-      case 'note':
-        const noteConfig = step.config as any;
-        return `Note: ${noteConfig.content.substring(0, 50)}...`;
+        const days = metadata.duration_days || 0;
+        const hours = metadata.duration_hours || 0;
+        if (days > 0) {
+          return `Wait ${days} day${days !== 1 ? 's' : ''}`;
+        } else {
+          return `Wait ${hours} hour${hours !== 1 ? 's' : ''}`;
+        }
+      case 'create_note':
+        return `Note: ${(metadata.note || '').substring(0, 50)}...`;
+      case 'conditional':
+        return 'Conditional logic';
+      case 'update_member':
+        return 'Update member data';
+      case 'webhook':
+        return `Webhook: ${metadata.url || 'Not configured'}`;
       default:
         return '';
     }

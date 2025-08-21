@@ -44,16 +44,20 @@ export class WorkflowCardComponent {
     
     if (trigger.type === 'manual') {
       return 'Manual trigger';
-    } else if (trigger.type === 'schedule') {
+    } else if (trigger.type === 'scheduled') {
       return 'Scheduled trigger';
-    } else if (trigger.type === 'attendance') {
-      const typeText = trigger.attendanceType === 'missed' ? 'Missed' : 
-                       trigger.attendanceType === 'first_time' ? 'First-time visitor' : 
-                       trigger.attendanceType === 'consistent' ? 'Consistent' : 'Attendance';
-      const frequencyText = trigger.frequency === 1 ? 'once' : `${trigger.frequency}+ times`;
-      const windowText = `in ${trigger.timeWindowDays} days`;
-      
-      return `${typeText} ${frequencyText} ${windowText}`;
+    } else if (trigger.type === 'attendance_rule' && trigger.conditions) {
+      if (trigger.conditions.absences_in_period) {
+        const { count, period_days } = trigger.conditions.absences_in_period;
+        return `Missed ${count}+ times in ${period_days} days`;
+      }
+      return 'Attendance rule';
+    } else if (trigger.type === 'first_time_visitor') {
+      return 'First-time visitor';
+    } else if (trigger.type === 'member_created') {
+      return 'New member';
+    } else if (trigger.type === 'member_updated') {
+      return 'Member updated';
     }
     
     return 'Custom trigger';

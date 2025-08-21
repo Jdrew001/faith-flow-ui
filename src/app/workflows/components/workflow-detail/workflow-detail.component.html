@@ -238,45 +238,37 @@
           
           <div class="trigger-config" *ngIf="workflow.trigger">
             <!-- Attendance Configuration -->
-            <div class="config-section" *ngIf="workflow.trigger.type === 'attendance' || workflow.trigger.type === 'attendance_rule'">
+            <div class="config-section" *ngIf="workflow.trigger.type === 'attendance_rule' && workflow.trigger.conditions">
               <h4>Attendance Rules</h4>
               <div class="config-grid">
-                <div class="config-item">
-                  <ion-icon name="person-outline"></ion-icon>
+                <div class="config-item" *ngIf="workflow.trigger.conditions.absences_in_period">
+                  <ion-icon name="alert-circle-outline"></ion-icon>
                   <div class="config-content">
-                    <span class="config-label">Type</span>
-                    <span class="config-value">{{ workflow.trigger.attendanceType | titlecase }}</span>
+                    <span class="config-label">Absences</span>
+                    <span class="config-value">{{ workflow.trigger.conditions.absences_in_period.count }} in {{ workflow.trigger.conditions.absences_in_period.period_days }} days</span>
                   </div>
                 </div>
-                <div class="config-item">
-                  <ion-icon name="refresh-outline"></ion-icon>
+                <div class="config-item" *ngIf="workflow.trigger.conditions.consecutive_absences">
+                  <ion-icon name="trending-down-outline"></ion-icon>
                   <div class="config-content">
-                    <span class="config-label">Frequency</span>
-                    <span class="config-value">{{ workflow.trigger.frequency }} times</span>
+                    <span class="config-label">Consecutive Absences</span>
+                    <span class="config-value">{{ workflow.trigger.conditions.consecutive_absences.count }} in a row</span>
                   </div>
                 </div>
-                <div class="config-item">
-                  <ion-icon name="calendar-outline"></ion-icon>
+                <div class="config-item" *ngIf="workflow.trigger.conditions.no_attendance_days">
+                  <ion-icon name="calendar-clear-outline"></ion-icon>
                   <div class="config-content">
-                    <span class="config-label">Time Window</span>
-                    <span class="config-value">{{ workflow.trigger.timeWindowDays }} days</span>
+                    <span class="config-label">No Attendance</span>
+                    <span class="config-value">{{ workflow.trigger.conditions.no_attendance_days.days }} days</span>
                   </div>
                 </div>
-              </div>
-            </div>
-            
-            <!-- Events Configuration -->
-            <div class="config-section" *ngIf="(workflow.trigger.events && workflow.trigger.events.length > 0) || workflow.trigger.allEvents">
-              <h4>Events</h4>
-              <div class="events-list" *ngIf="workflow.trigger.events && workflow.trigger.events.length > 0">
-                <div class="event-chip" *ngFor="let event of workflow.trigger.events">
-                  <ion-icon name="calendar"></ion-icon>
-                  {{ event.name }}
+                <div class="config-item" *ngIf="workflow.trigger.conditions.attendance_percentage">
+                  <ion-icon name="stats-chart-outline"></ion-icon>
+                  <div class="config-content">
+                    <span class="config-label">Attendance Rate</span>
+                    <span class="config-value">Below {{ workflow.trigger.conditions.attendance_percentage.percentage }}% in {{ workflow.trigger.conditions.attendance_percentage.period_days }} days</span>
+                  </div>
                 </div>
-              </div>
-              <div class="all-events-badge" *ngIf="workflow.trigger.allEvents">
-                <ion-icon name="globe-outline"></ion-icon>
-                All Events
               </div>
             </div>
             
@@ -325,7 +317,7 @@
               
               <div class="step-details">
                 <!-- Task Details -->
-                <div *ngIf="step.type === 'task' || step.type === 'manual_task'" class="detail-content">
+                <div *ngIf="step.type === 'manual_task'" class="detail-content">
                   <div class="detail-row" *ngIf="hasStepConfigProperty(step, 'title')">
                     <ion-icon name="text-outline"></ion-icon>
                     <span>{{ getStepConfig(step, 'title') }}</span>
@@ -345,7 +337,7 @@
                 </div>
                 
                 <!-- Email Details -->
-                <div *ngIf="step.type === 'email'" class="detail-content">
+                <div *ngIf="step.type === 'send_email'" class="detail-content">
                   <div class="detail-row" *ngIf="hasStepConfigProperty(step, 'subject')">
                     <ion-icon name="mail-outline"></ion-icon>
                     <span>{{ getStepConfig(step, 'subject') }}</span>
@@ -357,7 +349,7 @@
                 </div>
                 
                 <!-- SMS Details -->
-                <div *ngIf="step.type === 'sms'" class="detail-content">
+                <div *ngIf="step.type === 'send_sms'" class="detail-content">
                   <div class="detail-row" *ngIf="hasStepConfigProperty(step, 'message')">
                     <ion-icon name="chatbubble-outline"></ion-icon>
                     <span>{{ getStepConfig(step, 'message') | slice:0:50 }}{{ getStepConfig(step, 'message')?.length > 50 ? '...' : '' }}</span>
@@ -377,7 +369,7 @@
                 </div>
                 
                 <!-- Note Details -->
-                <div *ngIf="step.type === 'note'" class="detail-content">
+                <div *ngIf="step.type === 'create_note'" class="detail-content">
                   <div class="detail-row" *ngIf="hasStepConfigProperty(step, 'content')">
                     <ion-icon name="document-text-outline"></ion-icon>
                     <span>{{ getStepConfig(step, 'content') | slice:0:100 }}{{ getStepConfig(step, 'content')?.length > 100 ? '...' : '' }}</span>
@@ -406,11 +398,11 @@
             <div class="instance-header">
               <div class="instance-member">
                 <div class="member-avatar">
-                  {{ getInitials(instance.memberName) }}
+                  {{ getInitials(instance.member_name) }}
                 </div>
                 <div class="member-info">
-                  <h4>{{ instance.memberName }}</h4>
-                  <span class="instance-date">Started {{ instance.startedAt | date:'short' }}</span>
+                  <h4>{{ instance.member_name }}</h4>
+                  <span class="instance-date">Started {{ instance.started_at | date:'short' }}</span>
                 </div>
               </div>
               <div class="instance-status" [class]="instance.status">
@@ -420,7 +412,7 @@
             
             <div class="instance-progress">
               <div class="progress-info">
-                <span>Step {{ instance.currentStepIndex + 1 }} of {{ instance.steps?.length || 0 }}</span>
+                <span>Step {{ instance.current_step_index + 1 }} of {{ instance.total_steps || 0 }}</span>
                 <span class="progress-percentage">{{ getProgressPercentage(instance) }}%</span>
               </div>
               <div class="progress-bar">

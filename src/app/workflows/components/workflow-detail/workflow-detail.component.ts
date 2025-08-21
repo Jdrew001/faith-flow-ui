@@ -291,10 +291,27 @@ export class WorkflowDetailComponent implements OnInit, OnDestroy {
     this.workflowService.testWorkflow(this.workflow)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: async (result: { affectedMembers: number; previewData: any }) => {
+        next: async (result: any) => {
+          console.log('Test workflow result:', result);
+          
+          // Handle both possible response structures
+          const affectedCount = result?.affectedMembers || result?.affected_members || 0;
+          const membersList = result?.members || result?.previewData?.members || [];
+          
+          let message = `This workflow would affect ${affectedCount} member(s).`;
+          
+          // Add member details if available
+          if (membersList.length > 0) {
+            const memberNames = membersList.slice(0, 5).map((m: any) => m.name || m.display_name).join(', ');
+            message += `\n\nMembers: ${memberNames}`;
+            if (membersList.length > 5) {
+              message += ` and ${membersList.length - 5} more...`;
+            }
+          }
+          
           const alert = await this.alertController.create({
             header: 'Test Results',
-            message: `This workflow would affect ${result.affectedMembers} member(s).`,
+            message: message,
             buttons: ['OK']
           });
           await alert.present();
@@ -367,16 +384,26 @@ export class WorkflowDetailComponent implements OnInit, OnDestroy {
     
     if (trigger.type === 'manual') {
       return 'Manual trigger - Start workflow manually for selected members';
-    } else if (trigger.type === 'schedule') {
+    } else if (trigger.type === 'scheduled') {
       return 'Scheduled trigger - Runs on a schedule';
-    } else if (trigger.type === 'attendance') {
-      const typeText = trigger.attendanceType === 'missed' ? 'has missed' : 
-                       trigger.attendanceType === 'first_time' ? 'is a first-time visitor at' : 
-                       trigger.attendanceType === 'consistent' ? 'has consistently attended' : 'has attended';
-      const frequencyText = trigger.frequency === 1 ? 'once' : `${trigger.frequency} times`;
-      const windowText = `in the past ${trigger.timeWindowDays} days`;
-      
-      return `Trigger when someone ${typeText} ${frequencyText} ${windowText}`;
+    } else if (trigger.type === 'attendance_rule' && trigger.conditions) {
+      if (trigger.conditions.absences_in_period) {
+        const { count, period_days } = trigger.conditions.absences_in_period;
+        return `Trigger when someone has missed ${count} times in ${period_days} days`;
+      } else if (trigger.conditions.consecutive_absences) {
+        return `Trigger after ${trigger.conditions.consecutive_absences.count} consecutive absences`;
+      } else if (trigger.conditions.no_attendance_days) {
+        return `Trigger when no attendance for ${trigger.conditions.no_attendance_days.days} days`;
+      } else if (trigger.conditions.attendance_percentage) {
+        const { percentage, period_days } = trigger.conditions.attendance_percentage;
+        return `Trigger when attendance below ${percentage}% in ${period_days} days`;
+      }
+    } else if (trigger.type === 'first_time_visitor') {
+      return 'Trigger when someone is a first-time visitor';
+    } else if (trigger.type === 'member_created') {
+      return 'Trigger when a new member is created';
+    } else if (trigger.type === 'member_updated') {
+      return 'Trigger when member information is updated';
     }
     
     return 'Custom trigger configuration';
@@ -384,11 +411,14 @@ export class WorkflowDetailComponent implements OnInit, OnDestroy {
 
   getStepIcon(type: string): string {
     const icons: Record<string, string> = {
-      task: 'clipboard-outline',
-      email: 'mail-outline',
-      sms: 'chatbubble-outline',
+      manual_task: 'clipboard-outline',
+      send_email: 'mail-outline',
+      send_sms: 'chatbubble-outline',
       wait: 'time-outline',
-      note: 'document-text-outline'
+      create_note: 'document-text-outline',
+      conditional: 'git-branch-outline',
+      update_member: 'person-outline',
+      webhook: 'globe-outline'
     };
     return icons[type] || 'help-outline';
   }
@@ -405,9 +435,7 @@ export class WorkflowDetailComponent implements OnInit, OnDestroy {
   }
 
   getTriggerFilterValue(filterName: string): string[] | undefined {
-    if (this.workflow?.definition?.trigger?.filters) {
-      return (this.workflow.definition.trigger.filters as any)[filterName];
-    }
+    // Filters not supported in new API contract
     return undefined;
   }
 
@@ -496,15 +524,18 @@ export class WorkflowDetailComponent implements OnInit, OnDestroy {
   }
 
   getTriggerIcon(): string {
-    const type = this.workflow?.trigger?.type || this.workflow?.triggerType;
+    const type = this.workflow?.trigger?.type;
     switch (type) {
-      case 'attendance':
       case 'attendance_rule':
+      case 'first_time_visitor':
         return 'calendar-outline';
       case 'manual':
         return 'hand-left-outline';
-      case 'schedule':
+      case 'scheduled':
         return 'time-outline';
+      case 'member_created':
+      case 'member_updated':
+        return 'person-outline';
       default:
         return 'timer-outline';
     }
@@ -519,12 +550,14 @@ export class WorkflowDetailComponent implements OnInit, OnDestroy {
 
   getStepTypeLabel(type: string): string {
     const labels: Record<string, string> = {
-      task: 'Manual Task',
       manual_task: 'Manual Task',
-      email: 'Email',
-      sms: 'Text Message',
+      send_email: 'Send Email',
+      send_sms: 'Send SMS',
       wait: 'Wait Period',
-      note: 'Add Note'
+      create_note: 'Create Note',
+      conditional: 'Conditional',
+      update_member: 'Update Member',
+      webhook: 'Webhook'
     };
     return labels[type] || type;
   }

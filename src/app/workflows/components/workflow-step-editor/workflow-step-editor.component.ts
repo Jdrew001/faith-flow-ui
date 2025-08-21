@@ -20,19 +20,19 @@ export class WorkflowStepEditorComponent implements OnInit {
   
   stepTypes = [
     { 
-      type: 'task' as WorkflowStepType, 
+      type: 'manual_task' as WorkflowStepType, 
       label: 'Create Task', 
       icon: 'clipboard-outline',
       description: 'Assign a manual follow-up task'
     },
     { 
-      type: 'sms' as WorkflowStepType, 
+      type: 'send_sms' as WorkflowStepType, 
       label: 'Send SMS', 
       icon: 'chatbubble-outline',
       description: 'Send an automated text message'
     },
     { 
-      type: 'email' as WorkflowStepType, 
+      type: 'send_email' as WorkflowStepType, 
       label: 'Send Email', 
       icon: 'mail-outline',
       description: 'Send an automated email'
@@ -44,18 +44,37 @@ export class WorkflowStepEditorComponent implements OnInit {
       description: 'Add a delay before next step'
     },
     { 
-      type: 'note' as WorkflowStepType, 
+      type: 'conditional' as WorkflowStepType, 
+      label: 'Conditional', 
+      icon: 'git-branch-outline',
+      description: 'Branch workflow based on conditions'
+    },
+    { 
+      type: 'update_member' as WorkflowStepType, 
+      label: 'Update Member', 
+      icon: 'person-outline',
+      description: 'Update member fields, tags, or groups'
+    },
+    { 
+      type: 'create_note' as WorkflowStepType, 
       label: 'Add Note', 
       icon: 'document-text-outline',
       description: 'Log a note to member profile'
+    },
+    { 
+      type: 'webhook' as WorkflowStepType, 
+      label: 'Webhook', 
+      icon: 'globe-outline',
+      description: 'Call external API'
     }
   ];
   
   assignmentStrategies = [
-    { value: 'admin', label: 'Admin' },
-    { value: 'role', label: 'Role-based' },
-    { value: 'round-robin', label: 'Round-robin' },
-    { value: 'specific', label: 'Specific person' }
+    { value: 'SPECIFIC_USER', label: 'Specific User' },
+    { value: 'ROLE', label: 'Role-based' },
+    { value: 'ROUND_ROBIN', label: 'Round Robin' },
+    { value: 'LEAST_LOADED', label: 'Least Loaded' },
+    { value: 'SELF', label: 'Self-assign' }
   ];
   
   recipientTypes = [
@@ -81,11 +100,13 @@ export class WorkflowStepEditorComponent implements OnInit {
       // Task fields
       taskTitle: [''],
       taskDescription: [''],
-      assignmentStrategy: ['admin'],
+      assignmentStrategy: ['ROLE'],
       assigneeId: [''],
       roleId: [''],
       dueDateValue: [24],
       dueDateUnit: ['hours'],
+      priority: ['MEDIUM'],
+      category: ['FOLLOW_UP'],
       // SMS fields
       smsMessage: [''],
       smsRecipientType: ['member'],
@@ -97,6 +118,7 @@ export class WorkflowStepEditorComponent implements OnInit {
       emailRecipientType: ['member'],
       emailCustomEmail: [''],
       emailDelayHours: [0],
+      emailTemplateId: [''],
       // Wait fields
       waitValue: [1],
       waitUnit: ['days'],
@@ -111,13 +133,15 @@ export class WorkflowStepEditorComponent implements OnInit {
     this.showEditor = true;
     
     // Set default name based on type
-    const defaultNames: Record<WorkflowStepType, string> = {
+    const defaultNames: Record<string, string> = {
       manual_task: 'Manual Task',
-      task: 'Follow-up Task',
-      sms: 'SMS Message',
-      email: 'Email Message',
+      send_email: 'Email Message',
+      send_sms: 'SMS Message',
       wait: 'Wait Period',
-      note: 'Add Note'
+      create_note: 'Add Note',
+      conditional: 'Conditional Step',
+      update_member: 'Update Member',
+      webhook: 'Webhook'
     };
     
     this.stepForm.patchValue({ name: defaultNames[type] });
@@ -137,21 +161,21 @@ export class WorkflowStepEditorComponent implements OnInit {
     
     // Add type-specific validators
     switch (type) {
-      case 'task':
+      case 'manual_task':
         this.stepForm.get('taskTitle')?.setValidators([Validators.required]);
         this.stepForm.get('taskDescription')?.setValidators([Validators.required]);
         break;
-      case 'sms':
+      case 'send_sms':
         this.stepForm.get('smsMessage')?.setValidators([Validators.required, Validators.maxLength(160)]);
         break;
-      case 'email':
+      case 'send_email':
         this.stepForm.get('emailSubject')?.setValidators([Validators.required]);
         this.stepForm.get('emailBody')?.setValidators([Validators.required]);
         break;
       case 'wait':
         this.stepForm.get('waitValue')?.setValidators([Validators.required, Validators.min(1)]);
         break;
-      case 'note':
+      case 'create_note':
         this.stepForm.get('noteContent')?.setValidators([Validators.required]);
         break;
     }
@@ -174,58 +198,53 @@ export class WorkflowStepEditorComponent implements OnInit {
     let config: any = {};
     
     switch (this.selectedStepType) {
-      case 'task':
+      case 'manual_task':
         config = {
           title: formValue.taskTitle,
           description: formValue.taskDescription,
-          assignmentStrategy: formValue.assignmentStrategy,
-          assigneeId: formValue.assigneeId,
-          roleId: formValue.roleId,
-          dueDateOffset: {
-            value: formValue.dueDateValue,
-            unit: formValue.dueDateUnit
-          }
+          assignment_strategy: formValue.assignmentStrategy,
+          assigned_to: formValue.assigneeId || formValue.roleId,
+          due_offset_hours: formValue.dueDateUnit === 'hours' ? formValue.dueDateValue : formValue.dueDateValue * 24
         };
         break;
-      case 'sms':
+      case 'send_sms':
         config = {
-          message: formValue.smsMessage,
-          recipientType: formValue.smsRecipientType,
-          customNumber: formValue.smsCustomNumber,
-          delayHours: formValue.smsDelayHours
+          to: formValue.smsRecipientType === 'custom' ? formValue.smsCustomNumber : '{{member.phone}}',
+          message: formValue.smsMessage
         };
         break;
-      case 'email':
+      case 'send_email':
         config = {
+          to: formValue.emailRecipientType === 'custom' ? formValue.emailCustomEmail : '{{member.email}}',
           subject: formValue.emailSubject,
-          body: formValue.emailBody,
-          recipientType: formValue.emailRecipientType,
-          customEmail: formValue.emailCustomEmail,
-          delayHours: formValue.emailDelayHours
+          body: formValue.emailBody
         };
         break;
       case 'wait':
-        config = {
-          duration: {
-            value: formValue.waitValue,
-            unit: formValue.waitUnit
-          }
-        };
+        if (formValue.waitUnit === 'days') {
+          config = {
+            duration_days: formValue.waitValue
+          };
+        } else {
+          config = {
+            duration_hours: formValue.waitValue
+          };
+        }
         break;
-      case 'note':
+      case 'create_note':
         config = {
-          content: formValue.noteContent,
-          attachToMember: formValue.noteAttachToMember
+          note: formValue.noteContent,
+          category: 'GENERAL',
+          visibility: 'STAFF_ONLY'
         };
         break;
     }
     
     const step: WorkflowStep = {
-      id: stepId,
-      type: this.selectedStepType,
+      type: this.selectedStepType!,
       name: formValue.name,
       order: this.steps.length + 1,
-      config
+      metadata: config
     };
     
     // Add to local steps array
@@ -279,21 +298,23 @@ export class WorkflowStepEditorComponent implements OnInit {
 
   getStepDescription(step: WorkflowStep): string {
     switch (step.type) {
-      case 'task':
-        const taskConfig = step.config as any;
-        return `${taskConfig.title} - Due in ${taskConfig.dueDateOffset?.value} ${taskConfig.dueDateOffset?.unit}`;
-      case 'email':
-        const emailConfig = step.config as any;
+      case 'manual_task':
+        const taskConfig = step.metadata || {};
+        return `${taskConfig.title} - Due in ${taskConfig.due_offset_hours} hours`;
+      case 'send_email':
+        const emailConfig = step.metadata || {};
         return `Subject: ${emailConfig.subject}`;
-      case 'sms':
-        const smsConfig = step.config as any;
+      case 'send_sms':
+        const smsConfig = step.metadata || {};
         return `Message: ${smsConfig.message?.substring(0, 50)}...`;
       case 'wait':
-        const waitConfig = step.config as any;
-        return `Wait ${waitConfig.duration?.value} ${waitConfig.duration?.unit}`;
-      case 'note':
-        const noteConfig = step.config as any;
-        return `Note: ${noteConfig.content?.substring(0, 50)}...`;
+        const waitConfig = step.metadata || {};
+        const days = waitConfig.duration_days || 0;
+        const hours = waitConfig.duration_hours || 0;
+        return `Wait ${days > 0 ? `${days} days` : `${hours} hours`}`;
+      case 'create_note':
+        const noteConfig = step.metadata || {};
+        return `Note: ${noteConfig.note?.substring(0, 50)}...`;
       default:
         return '';
     }

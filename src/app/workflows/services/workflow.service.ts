@@ -1,28 +1,32 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, of } from 'rxjs';
-import { map, tap, catchError } from 'rxjs/operators';
+import { map, tap, catchError, switchMap } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { 
   Workflow, 
   WorkflowHistory, 
   WorkflowTemplate, 
+  WorkflowSession,
   WorkflowEvent, 
   WorkflowInstance,
   WorkflowStep,
   WorkflowStatistics,
-  WorkflowTrigger
+  WorkflowTrigger,
+  WorkflowTemplatePreset,
+  WorkflowCategory,
+  WorkflowTriggerType
 } from '../models';
 
 @Injectable({
   providedIn: 'root'
 })
 export class WorkflowService {
-  private apiUrl = `${environment.apiUrl}/workflows`;
+  private apiUrl = environment.apiUrl;
   private workflowsSubject = new BehaviorSubject<Workflow[]>([]);
   public workflows$ = this.workflowsSubject.asObservable();
   
-  private templatesSubject = new BehaviorSubject<WorkflowTemplate[]>([]);
+  private templatesSubject = new BehaviorSubject<WorkflowTemplatePreset[]>([]);
   public templates$ = this.templatesSubject.asObservable();
   
   private instancesSubject = new BehaviorSubject<WorkflowInstance[]>([]);
@@ -76,9 +80,19 @@ export class WorkflowService {
   }
 
   // Template Management
-  getWorkflows(): Observable<Workflow[]> {
-    return this.http.get<Workflow[]>(`${this.apiUrl}/templates`).pipe(
-      map(workflows => workflows.map(w => this.mapWorkflowData(w))),
+  getWorkflows(filters?: {
+    category?: WorkflowCategory;
+    enabled?: boolean;
+    trigger_type?: WorkflowTriggerType;
+  }, page: number = 1, limit: number = 20): Observable<Workflow[]> {
+    let url = `${this.apiUrl}/workflow-templates?page=${page}&limit=${limit}`;
+    if (filters) {
+      if (filters.category) url += `&category=${filters.category}`;
+      if (filters.enabled !== undefined) url += `&enabled=${filters.enabled}`;
+      if (filters.trigger_type) url += `&trigger_type=${filters.trigger_type}`;
+    }
+    return this.http.get<{templates: Workflow[], pagination: any}>(url).pipe(
+      map(response => response.templates.map(w => this.mapWorkflowData(w))),
       tap(workflows => this.workflowsSubject.next(workflows)),
       catchError(error => {
         console.error('Error loading workflows:', error);
@@ -88,82 +102,121 @@ export class WorkflowService {
   }
 
   getWorkflow(id: string): Observable<Workflow> {
-    return this.http.get<Workflow>(`${this.apiUrl}/templates/${id}`).pipe(
+    return this.http.get<Workflow>(`${this.apiUrl}/workflow-templates/${id}`).pipe(
       map(workflow => this.mapWorkflowData(workflow))
     );
   }
 
   createWorkflow(workflow: Partial<Workflow>): Observable<Workflow> {
-    const payload = this.prepareWorkflowPayload(workflow);
-    return this.http.post<Workflow>(`${this.apiUrl}/templates`, payload).pipe(
+    const payload = {
+      name: workflow.name,
+      description: workflow.description,
+      definition: {
+        name: workflow.name,
+        trigger: workflow.trigger,
+        steps: workflow.steps || []
+      },
+      status: 'ACTIVE',
+      enabled: workflow.enabled !== false
+    };
+    return this.http.post<Workflow>(`${this.apiUrl}/workflow-templates`, payload).pipe(
       map(response => this.mapWorkflowData(response)),
       tap(() => this.getWorkflows().subscribe())
     );
   }
 
   updateWorkflow(id: string, workflow: Partial<Workflow>): Observable<Workflow> {
-    const payload = this.prepareWorkflowPayload(workflow);
-    return this.http.put<Workflow>(`${this.apiUrl}/templates/${id}`, payload).pipe(
+    const payload: any = {
+      name: workflow.name,
+      description: workflow.description
+    };
+    
+    // Only include definition if steps or trigger are being updated
+    if (workflow.steps || workflow.trigger) {
+      payload.definition = {
+        name: workflow.name,
+        trigger: workflow.trigger,
+        steps: workflow.steps || []
+      };
+    }
+    
+    if (workflow.enabled !== undefined) {
+      payload.status = workflow.enabled ? 'ACTIVE' : 'DRAFT';
+    }
+    
+    return this.http.put<Workflow>(`${this.apiUrl}/workflow-templates/${id}`, payload).pipe(
       map(response => this.mapWorkflowData(response)),
       tap(() => this.getWorkflows().subscribe())
     );
   }
 
   deleteWorkflow(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/templates/${id}`).pipe(
+    return this.http.delete<void>(`${this.apiUrl}/workflow-templates/${id}`).pipe(
       tap(() => this.getWorkflows().subscribe())
     );
   }
 
   toggleWorkflowStatus(id: string, status: 'ACTIVE' | 'PAUSED'): Observable<{ success: boolean }> {
-    const endpoint = status === 'ACTIVE' ? 'activate' : 'archive';
-    return this.http.post<{ success: boolean }>(`${this.apiUrl}/templates/${id}/${endpoint}`, {}).pipe(
-      tap(() => this.getWorkflows().subscribe())
+    return this.updateWorkflow(id, { enabled: status === 'ACTIVE' }).pipe(
+      map(() => ({ success: true }))
     );
   }
 
   duplicateWorkflow(id: string, name?: string): Observable<Workflow> {
-    return this.http.post<Workflow>(`${this.apiUrl}/templates/${id}/duplicate`, { name: name || 'Copy' }).pipe(
-      map(response => this.mapWorkflowData(response)),
-      tap(() => this.getWorkflows().subscribe())
+    // Get the original workflow and create a copy
+    return this.getWorkflow(id).pipe(
+      switchMap(original => {
+        const copy: Partial<Workflow> = {
+          name: name || `${original.name} (Copy)`,
+          description: original.description,
+          category: original.category,
+          trigger: original.trigger,
+          steps: original.steps,
+          enabled: original.enabled
+        };
+        return this.createWorkflow(copy);
+      })
     );
   }
 
   getTemplateProgress(id: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/templates/${id}/progress`);
+    return this.http.get(`${this.apiUrl}/workflow-templates/${id}/progress`);
   }
 
   getTemplateOverview(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/templates/overview`);
+    return this.http.get(`${this.apiUrl}/workflow-templates/overview`);
   }
 
   // Workflow History & Statistics
   getWorkflowHistory(id: string): Observable<WorkflowHistory[]> {
-    return this.http.get<WorkflowHistory[]>(`${this.apiUrl}/${id}/history`);
+    return this.http.get<WorkflowHistory[]>(`${this.apiUrl}/workflows/${id}/history`);
   }
 
   getWorkflowStatistics(workflowId: string, period: 'day' | 'week' | 'month' | 'all' = 'week'): Observable<WorkflowStatistics> {
-    return this.http.get<WorkflowStatistics>(`${this.apiUrl}/${workflowId}/statistics?period=${period}`);
+    return this.http.get<WorkflowStatistics>(`${this.apiUrl}/workflows/${workflowId}/statistics?period=${period}`);
   }
 
   // Workflow Instances
-  startWorkflow(templateId: string, memberId: string): Observable<WorkflowInstance> {
-    return this.http.post<WorkflowInstance>(`${this.apiUrl}/start`, {
-      templateId,
-      memberId
+  startWorkflow(templateId: string, memberId: string, context?: any): Observable<WorkflowInstance> {
+    return this.http.post<WorkflowInstance>(`${this.apiUrl}/workflows/start`, {
+      template_id: templateId,
+      member_id: memberId,
+      trigger_source: 'MANUAL',
+      context: context
     }).pipe(
       tap(() => this.getWorkflowInstances().subscribe())
     );
   }
   
   getWorkflowInstances(status?: string, limit: number = 20): Observable<WorkflowInstance[]> {
-    let url = `${this.apiUrl}/instances`;
+    let url = `${this.apiUrl}/workflows`;
     const params: string[] = [];
     if (status) params.push(`status=${status}`);
     params.push(`limit=${limit}`);
     if (params.length > 0) url += '?' + params.join('&');
     
-    return this.http.get<WorkflowInstance[]>(url).pipe(
+    return this.http.get<{workflows: WorkflowInstance[], total: number}>(url).pipe(
+      map(response => response.workflows),
       tap(instances => this.instancesSubject.next(instances)),
       catchError(error => {
         console.error('Error loading workflow instances:', error);
@@ -173,35 +226,41 @@ export class WorkflowService {
   }
   
   getWorkflowInstance(instanceId: string): Observable<WorkflowInstance> {
-    return this.http.get<WorkflowInstance>(`${this.apiUrl}/${instanceId}`);
+    return this.http.get<WorkflowInstance>(`${this.apiUrl}/workflows/${instanceId}`);
   }
 
   pauseWorkflow(id: string): Observable<{ success: boolean }> {
-    return this.http.post<{ success: boolean }>(`${this.apiUrl}/${id}/pause`, {}).pipe(
+    return this.http.post<{ success: boolean }>(`${this.apiUrl}/workflows/${id}/pause`, {}).pipe(
       tap(() => this.getWorkflowInstances().subscribe())
     );
   }
 
   resumeWorkflow(id: string): Observable<{ success: boolean }> {
-    return this.http.post<{ success: boolean }>(`${this.apiUrl}/${id}/resume`, {}).pipe(
+    return this.http.post<{ success: boolean }>(`${this.apiUrl}/workflows/${id}/resume`, {}).pipe(
       tap(() => this.getWorkflowInstances().subscribe())
     );
   }
 
   cancelWorkflowInstance(instanceId: string, reason?: string): Observable<{ success: boolean }> {
     return this.http.post<{ success: boolean }>(
-      `${this.apiUrl}/${instanceId}/cancel`,
-      { reason }
+      `${this.apiUrl}/workflows/${instanceId}/cancel`,
+      { reason: reason || 'Cancelled by user' }
     ).pipe(
       tap(() => this.getWorkflowInstances().subscribe())
     );
   }
   
   // Workflow Steps
-  completeWorkflowStep(stepId: string, notes?: string): Observable<{ success: boolean; nextStep?: any }> {
+  completeWorkflowStep(workflowId: string, stepId: string, data?: any): Observable<{ success: boolean; nextStep?: any }> {
     return this.http.post<{ success: boolean; nextStep?: any }>(
-      `${this.apiUrl}/steps/${stepId}/complete`,
-      { notes }
+      `${this.apiUrl}/workflows/complete-step`,
+      { 
+        workflow_id: workflowId,
+        step_id: stepId,
+        completion_notes: data?.notes,
+        data_collected: data?.dataCollected,
+        completed_by: data?.completedBy
+      }
     ).pipe(
       tap(() => this.getWorkflowInstances().subscribe())
     );
@@ -209,19 +268,20 @@ export class WorkflowService {
   
   skipWorkflowStep(stepId: string, reason: string): Observable<{ success: boolean }> {
     return this.http.post<{ success: boolean }>(
-      `${this.apiUrl}/steps/${stepId}/skip`,
+      `${this.apiUrl}/workflows/steps/${stepId}/skip`,
       { reason }
     ).pipe(
       tap(() => this.getWorkflowInstances().subscribe())
     );
   }
 
-  // Assignment completion (for manual tasks)
-  completeAssignment(assignmentId: string, notes?: string): Observable<{ success: boolean; message: string }> {
-    return this.http.post<{ success: boolean; message: string }>(
-      `${environment.apiUrl}/followups/assignments/${assignmentId}/complete`,
-      { notes }
-    );
+  // Bulk workflow operations
+  startBulkWorkflows(templateId: string, memberIds: string[]): Observable<any> {
+    return this.http.post(`${this.apiUrl}/workflows/bulk-start`, {
+      template_id: templateId,
+      member_ids: memberIds,
+      trigger_source: 'MANUAL'
+    });
   }
   
   // Triggers & Automation
@@ -248,24 +308,36 @@ export class WorkflowService {
     return this.http.get<any[]>(url);
   }
 
-  getEvents(): Observable<WorkflowEvent[]> {
-    return this.http.get<WorkflowEvent[]>(`${environment.apiUrl}/events`).pipe(
+  getSessions(): Observable<WorkflowSession[]> {
+    return this.http.get<WorkflowSession[]>(`${environment.apiUrl}/sessions`).pipe(
       catchError(error => {
-        console.error('Error loading events:', error);
-        return of(this.getMockEvents());
+        console.error('Error loading sessions:', error);
+        return of([]); // Return empty array on error, no mocks
       })
     );
   }
 
+  // Deprecated - use getSessions instead
+  getEvents(): Observable<WorkflowEvent[]> {
+    return this.getSessions();
+  }
+
+  validateWorkflow(workflow: Partial<Workflow>): Observable<{ valid: boolean; errors?: string[] }> {
+    return this.http.post<{ valid: boolean; errors?: string[] }>(
+      `${this.apiUrl}/workflow-templates/validate`,
+      workflow
+    );
+  }
+  
   testWorkflow(workflow: Workflow): Observable<{ affectedMembers: number; previewData: any }> {
     return this.http.post<{ affectedMembers: number; previewData: any }>(
-      `${this.apiUrl}/templates/${workflow.id}/test`,
-      workflow
+      `${this.apiUrl}/workflow-templates/${workflow.id}/test`,
+      { memberId: null } // Will need to be provided by user
     );
   }
 
   private loadTemplates(): void {
-    const templates: WorkflowTemplate[] = [
+    const templates: WorkflowTemplatePreset[] = [
       {
         id: '1',
         name: 'First-time Visitor Follow-up',
@@ -273,46 +345,45 @@ export class WorkflowService {
         icon: 'person-add-outline',
         preset: {
           name: 'First-time Visitor Follow-up',
-          triggerType: 'attendance',
+          description: 'Welcome and connect with new visitors within 24 hours',
+          category: 'ENGAGEMENT',
+          enabled: true,
           trigger: {
-            type: 'attendance',
-            attendanceType: 'first_time',
-            frequency: 1,
-            timeWindowDays: 7
+            type: 'first_time_visitor',
+            enabled: true
           },
           steps: [
             {
-              id: '1',
-              type: 'task',
-              name: 'Send Welcome Message',
               order: 1,
-              config: {
+              type: 'manual_task',
+              name: 'Send Welcome Message',
+              metadata: {
                 title: 'Welcome new visitor',
                 description: 'Send a personalized welcome message and invite to next steps class',
-                assignmentStrategy: 'role',
-                roleId: 'guest-team',
-                dueDateOffset: { value: 24, unit: 'hours' }
-              } as any
+                assignment_strategy: 'ROLE',
+                assigned_to: 'guest-team',
+                due_offset_hours: 24,
+                category: 'FOLLOW_UP',
+                priority: 'HIGH'
+              }
             },
             {
-              id: '2',
+              order: 2,
               type: 'wait',
               name: 'Wait 3 days',
-              order: 2,
-              config: {
-                duration: { value: 3, unit: 'days' }
-              } as any
+              metadata: {
+                duration_days: 3
+              }
             },
             {
-              id: '3',
-              type: 'email',
-              name: 'Follow-up Email',
               order: 3,
-              config: {
+              type: 'send_email',
+              name: 'Follow-up Email',
+              metadata: {
+                to: '{{member.email}}',
                 subject: 'Great to meet you!',
-                body: 'We loved having you visit us last Sunday...',
-                recipientType: 'member'
-              } as any
+                body: 'We loved having you visit us last Sunday...'
+              }
             }
           ]
         }
@@ -324,36 +395,43 @@ export class WorkflowService {
         icon: 'calendar-outline',
         preset: {
           name: 'Absence Check-in',
-          triggerType: 'attendance',
+          description: 'Reach out when someone misses 3 weeks',
+          category: 'PASTORAL_CARE',
+          enabled: true,
           trigger: {
-            type: 'attendance',
-            attendanceType: 'missed',
-            frequency: 3,
-            timeWindowDays: 21
+            type: 'attendance_rule',
+            enabled: true,
+            conditions: {
+              absences_in_period: {
+                count: 3,
+                period_days: 21
+              }
+            }
           },
           steps: [
             {
-              id: '1',
-              type: 'task',
-              name: 'Pastoral Check-in',
               order: 1,
-              config: {
+              type: 'manual_task',
+              name: 'Pastoral Check-in',
+              metadata: {
                 title: 'Check in with member',
                 description: 'Reach out to see if everything is okay and if they need support',
-                assignmentStrategy: 'role',
-                roleId: 'pastoral-care',
-                dueDateOffset: { value: 48, unit: 'hours' }
-              } as any
+                assignment_strategy: 'ROLE',
+                assigned_to: 'pastoral-care',
+                due_offset_hours: 48,
+                category: 'PASTORAL_CARE',
+                priority: 'HIGH'
+              }
             },
             {
-              id: '2',
-              type: 'note',
-              name: 'Log Contact',
               order: 2,
-              config: {
-                content: 'Member has been absent for 3+ weeks. Follow-up initiated.',
-                attachToMember: true
-              } as any
+              type: 'create_note',
+              name: 'Log Contact',
+              metadata: {
+                note: 'Member has been absent for 3+ weeks. Follow-up initiated.',
+                category: 'PASTORAL_CARE',
+                visibility: 'STAFF_ONLY'
+              }
             }
           ]
         }
@@ -365,56 +443,59 @@ export class WorkflowService {
         icon: 'rocket-outline',
         preset: {
           name: 'New Member Onboarding',
-          triggerType: 'manual',
+          description: 'Guide new members through their first 30 days',
+          category: 'ONBOARDING',
+          enabled: true,
           trigger: {
-            type: 'manual'
+            type: 'manual',
+            enabled: true
           },
           steps: [
             {
-              id: '1',
-              type: 'email',
-              name: 'Welcome Email',
               order: 1,
-              config: {
+              type: 'send_email',
+              name: 'Welcome Email',
+              metadata: {
+                to: '{{member.email}}',
                 subject: 'Welcome to our church family!',
-                body: 'We are so excited you have decided to make our church your home...',
-                recipientType: 'member'
-              } as any
+                body: 'We are so excited you have decided to make our church your home...'
+              }
             },
             {
-              id: '2',
-              type: 'task',
-              name: 'Schedule Next Steps Class',
               order: 2,
-              config: {
+              type: 'manual_task',
+              name: 'Schedule Next Steps Class',
+              metadata: {
                 title: 'Enroll in Next Steps',
                 description: 'Contact member to schedule them for the next Next Steps class',
-                assignmentStrategy: 'specific',
-                assigneeId: 'admin',
-                dueDateOffset: { value: 3, unit: 'days' }
-              } as any
+                assignment_strategy: 'SPECIFIC_USER',
+                assigned_to: 'admin',
+                due_offset_hours: 72,
+                category: 'FOLLOW_UP',
+                priority: 'MEDIUM'
+              }
             },
             {
-              id: '3',
+              order: 3,
               type: 'wait',
               name: 'Wait 1 week',
-              order: 3,
-              config: {
-                duration: { value: 7, unit: 'days' }
-              } as any
+              metadata: {
+                duration_days: 7
+              }
             },
             {
-              id: '4',
-              type: 'task',
-              name: 'Connect with Small Group',
               order: 4,
-              config: {
+              type: 'manual_task',
+              name: 'Connect with Small Group',
+              metadata: {
                 title: 'Small group connection',
                 description: 'Help member find and connect with an appropriate small group',
-                assignmentStrategy: 'role',
-                roleId: 'groups-team',
-                dueDateOffset: { value: 48, unit: 'hours' }
-              } as any
+                assignment_strategy: 'ROLE',
+                assigned_to: 'groups-team',
+                due_offset_hours: 48,
+                category: 'ENGAGEMENT',
+                priority: 'MEDIUM'
+              }
             }
           ]
         }
@@ -426,20 +507,23 @@ export class WorkflowService {
         icon: 'gift-outline',
         preset: {
           name: 'Birthday Greetings',
-          triggerType: 'schedule',
+          description: 'Send birthday wishes to members',
+          category: 'ENGAGEMENT',
+          enabled: true,
           trigger: {
-            type: 'schedule'
+            type: 'scheduled',
+            enabled: true,
+            schedule: '0 9 * * *' // Daily at 9 AM
           },
           steps: [
             {
-              id: '1',
-              type: 'sms',
-              name: 'Birthday Text',
               order: 1,
-              config: {
-                message: 'Happy Birthday! We are praying for a blessed year ahead!',
-                recipientType: 'member'
-              } as any
+              type: 'send_sms',
+              name: 'Birthday Text',
+              metadata: {
+                to: '{{member.phone}}',
+                message: 'Happy Birthday {{member.first_name}}! We are praying for a blessed year ahead!'
+              }
             }
           ]
         }
@@ -448,15 +532,6 @@ export class WorkflowService {
     this.templatesSubject.next(templates);
   }
 
-  private getMockEvents(): WorkflowEvent[] {
-    return [
-      { id: '1', name: 'Sunday Service', type: 'service' },
-      { id: '2', name: 'Wednesday Bible Study', type: 'study' },
-      { id: '3', name: 'Youth Group', type: 'youth' },
-      { id: '4', name: 'Small Groups', type: 'groups' },
-      { id: '5', name: 'Prayer Meeting', type: 'prayer' }
-    ];
-  }
 
   generateTriggerDescription(trigger: any): string {
     const typeText = trigger.attendanceType === 'missed' ? 'has missed' : 

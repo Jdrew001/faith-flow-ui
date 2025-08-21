@@ -1035,6 +1035,17 @@
   }
 }
 
+// Workflow trigger builder embedded styles
+app-workflow-trigger-builder {
+  display: block;
+  margin-top: 20px;
+  
+  ::ng-deep .trigger-builder {
+    background: transparent;
+    padding: 0;
+  }
+}
+
 // Animations
 @keyframes fadeInUp {
   from {

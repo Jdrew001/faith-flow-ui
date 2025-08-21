@@ -36,7 +36,7 @@
 
 <!-- Add Step Button -->
 <div class="add-step-buttons" *ngIf="!showEditor">
-  <ion-button expand="block" fill="outline" (click)="openStepEditor('task')">
+  <ion-button expand="block" fill="outline" (click)="openStepEditor('manual_task')">
     <ion-icon slot="start" name="add-circle-outline"></ion-icon>
     Add Step
   </ion-button>
@@ -74,7 +74,7 @@
     </div>
     
     <!-- Task Configuration -->
-    <div *ngIf="selectedStepType === 'task'" class="step-config">
+    <div *ngIf="selectedStepType === 'manual_task'" class="step-config">
       <div class="form-field" [class.has-value]="stepForm.get('taskTitle')?.value">
         <div class="input-wrapper">
           <ion-icon name="clipboard-outline" class="field-icon"></ion-icon>
@@ -149,7 +149,7 @@
     </div>
     
     <!-- SMS Configuration -->
-    <div *ngIf="selectedStepType === 'sms'" class="step-config">
+    <div *ngIf="selectedStepType === 'send_sms'" class="step-config">
       <div class="form-field" [class.has-value]="stepForm.get('smsMessage')?.value">
         <div class="input-wrapper">
           <ion-icon name="chatbubble-outline" class="field-icon"></ion-icon>
@@ -208,7 +208,7 @@
     </div>
     
     <!-- Email Configuration -->
-    <div *ngIf="selectedStepType === 'email'" class="step-config">
+    <div *ngIf="selectedStepType === 'send_email'" class="step-config">
       <div class="form-field" [class.has-value]="stepForm.get('emailSubject')?.value">
         <div class="input-wrapper">
           <ion-icon name="mail-outline" class="field-icon"></ion-icon>
@@ -312,7 +312,7 @@
     </div>
     
     <!-- Note Configuration -->
-    <div *ngIf="selectedStepType === 'note'" class="step-config">
+    <div *ngIf="selectedStepType === 'create_note'" class="step-config">
       <div class="form-field" [class.has-value]="stepForm.get('noteContent')?.value">
         <div class="input-wrapper">
           <ion-icon name="document-text-outline" class="field-icon"></ion-icon>

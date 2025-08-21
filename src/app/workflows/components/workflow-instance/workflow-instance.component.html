@@ -32,20 +32,20 @@
     <div class="instance-header">
       <div class="member-info">
         <div class="avatar">
-          <div class="avatar-placeholder">{{ instance.memberName.charAt(0) }}</div>
+          <div class="avatar-placeholder">{{ instance.member_name?.charAt(0) || '?' }}</div>
         </div>
         <div class="member-details">
-          <h2>{{ instance.memberName }}</h2>
-          <p>{{ instance.workflowName }}</p>
+          <h2>{{ instance.member_name }}</h2>
+          <p>{{ instance.template_name }}</p>
         </div>
       </div>
       
-      <ion-chip [color]="instance.status === 'active' ? 'primary' : 
-                        instance.status === 'completed' ? 'success' : 
-                        instance.status === 'cancelled' ? 'warning' : 'danger'">
-        <ion-icon [name]="instance.status === 'active' ? 'play-circle' : 
-                         instance.status === 'completed' ? 'checkmark-circle' : 
-                         instance.status === 'cancelled' ? 'close-circle' : 'alert-circle'">
+      <ion-chip [color]="instance.status === 'ACTIVE' ? 'primary' : 
+                        instance.status === 'COMPLETED' ? 'success' : 
+                        instance.status === 'CANCELLED' ? 'warning' : 'danger'">
+        <ion-icon [name]="instance.status === 'ACTIVE' ? 'play-circle' : 
+                         instance.status === 'COMPLETED' ? 'checkmark-circle' : 
+                         instance.status === 'CANCELLED' ? 'close-circle' : 'alert-circle'">
         </ion-icon>
         <ion-label>{{ instance.status | uppercase }}</ion-label>
       </ion-chip>
@@ -56,20 +56,20 @@
       <div class="progress-header">
         <span class="progress-label">Progress</span>
         <span class="progress-text">
-          Step {{ instance.currentStepIndex + 1 }} of {{ instance.steps.length }}
+          Step {{ instance.current_step_index + 1 }} of {{ instance.total_steps }}
         </span>
       </div>
       <ion-progress-bar 
         [value]="getProgressPercentage() / 100"
-        [color]="instance.status === 'active' ? 'primary' : 
-                instance.status === 'completed' ? 'success' : 'medium'">
+        [color]="instance.status === 'ACTIVE' ? 'primary' : 
+                instance.status === 'COMPLETED' ? 'success' : 'medium'">
       </ion-progress-bar>
       <div class="progress-footer">
         <span class="start-date">
-          Started: {{ instance.startedAt | date:'short' }}
+          Started: {{ instance.started_at | date:'short' }}
         </span>
-        <span class="completion-date" *ngIf="instance.completedAt">
-          Completed: {{ instance.completedAt | date:'short' }}
+        <span class="completion-date" *ngIf="instance.completed_at">
+          Completed: {{ instance.completed_at | date:'short' }}
         </span>
       </div>
     </div>
@@ -78,7 +78,7 @@
     <div class="steps-section">
       <h3>Workflow Steps</h3>
       
-      <ion-list>
+      <ion-list *ngIf="instance.steps">
         <ion-item 
           *ngFor="let step of instance.steps; let i = index"
           [button]="step.status === 'active'"
@@ -96,24 +96,24 @@
           </div>
           
           <ion-label>
-            <h2>{{ step.stepName }}</h2>
+            <h2>{{ step.step_name }}</h2>
             <p class="step-type">
-              <ion-icon [name]="getStepIcon(step.stepType)"></ion-icon>
-              {{ step.stepType | titlecase }}
+              <ion-icon [name]="getStepIcon(step.step_type)"></ion-icon>
+              {{ getStepTypeLabel(step.step_type) }}
             </p>
             
             <div class="step-meta" *ngIf="step.status !== 'pending'">
-              <span *ngIf="step.assigneeName" class="assignee">
+              <span *ngIf="step.assignee_name" class="assignee">
                 <ion-icon name="person-outline"></ion-icon>
-                {{ step.assigneeName }}
+                {{ step.assignee_name }}
               </span>
-              <span *ngIf="step.startedAt" class="date">
+              <span *ngIf="step.started_at" class="date">
                 <ion-icon name="time-outline"></ion-icon>
-                {{ step.startedAt | date:'short' }}
+                {{ step.started_at | date:'short' }}
               </span>
-              <span *ngIf="step.completedAt" class="completed-date">
+              <span *ngIf="step.completed_at" class="completed-date">
                 <ion-icon name="checkmark-circle-outline"></ion-icon>
-                {{ step.completedAt | date:'short' }}
+                {{ step.completed_at | date:'short' }}
               </span>
             </div>
             
@@ -131,15 +131,16 @@
     </div>
 
     <!-- Current Step Actions (if active) -->
-    <div class="action-section" *ngIf="instance.status === 'active'">
+    <div class="action-section" *ngIf="instance.status === 'ACTIVE'">
       <ion-card>
         <ion-card-header>
           <ion-card-title>Current Step Actions</ion-card-title>
         </ion-card-header>
         <ion-card-content>
+          <ng-container *ngIf="instance.steps">
           <ng-container *ngFor="let step of instance.steps">
             <div *ngIf="step.status === 'active'" class="current-step-actions">
-              <p>{{ step.stepName }} is currently active.</p>
+              <p>{{ step.step_name }} is currently active.</p>
               
               <div class="action-buttons">
                 <ion-button 
@@ -162,33 +163,34 @@
               </div>
             </div>
           </ng-container>
+        </ng-container>
         </ion-card-content>
       </ion-card>
     </div>
 
     <!-- Completion Summary (if completed) -->
-    <div class="completion-summary" *ngIf="instance.status === 'completed'">
+    <div class="completion-summary" *ngIf="instance.status === 'COMPLETED'">
       <ion-card color="success">
         <ion-card-content>
           <ion-icon name="checkmark-circle" size="large"></ion-icon>
           <h3>Workflow Completed</h3>
           <p>All steps have been successfully completed.</p>
           <p class="completion-time">
-            Completed on {{ instance.completedAt | date:'full' }}
+            Completed on {{ instance.completed_at | date:'full' }}
           </p>
         </ion-card-content>
       </ion-card>
     </div>
 
     <!-- Cancellation Summary (if cancelled) -->
-    <div class="cancellation-summary" *ngIf="instance.status === 'cancelled'">
+    <div class="cancellation-summary" *ngIf="instance.status === 'CANCELLED'">
       <ion-card color="warning">
         <ion-card-content>
           <ion-icon name="close-circle" size="large"></ion-icon>
           <h3>Workflow Cancelled</h3>
           <p>This workflow was cancelled before completion.</p>
-          <p class="cancellation-time" *ngIf="instance.completedAt">
-            Cancelled on {{ instance.completedAt | date:'full' }}
+          <p class="cancellation-time" *ngIf="instance.completed_at">
+            Cancelled on {{ instance.completed_at | date:'full' }}
           </p>
         </ion-card-content>
       </ion-card>

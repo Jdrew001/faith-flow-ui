@@ -1,9 +1,9 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ModalController, AlertController, ToastController, ActionSheetController } from '@ionic/angular';
+import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { ModalController, AlertController, ToastController, ActionSheetController, IonInfiniteScroll } from '@ionic/angular';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { WorkflowService } from './services/workflow.service';
-import { Workflow, WorkflowTemplate, WorkflowInstance } from './models';
+import { Workflow, WorkflowTemplate, WorkflowInstance, WorkflowCategory, WorkflowTriggerType } from './models';
 import { WorkflowCreatorComponent } from './components/workflow-creator/workflow-creator.component';
 import { WorkflowTemplatesComponent } from './components/workflow-templates/workflow-templates.component';
 import { Router } from '@angular/router';
@@ -15,16 +15,27 @@ import { Router } from '@angular/router';
   standalone: false
 })
 export class WorkflowsPage implements OnInit, OnDestroy {
+  @ViewChild(IonInfiniteScroll) infiniteScroll!: IonInfiniteScroll;
+  
   workflows: Workflow[] = [];
   activeInstances: WorkflowInstance[] = [];
   filteredWorkflows: Workflow[] = [];
   searchQuery = '';
-  filterStatus: 'all' | 'ACTIVE' | 'PAUSED' | 'DRAFT' = 'all';
+  filterStatus: 'all' | 'enabled' | 'disabled' = 'all';
+  filterCategory: WorkflowCategory | 'all' = 'all';
+  filterTriggerType: WorkflowTriggerType | 'all' = 'all';
   isLoading = true;
   showInstances = false;
   showSortMenu = false;
   showFilterMenu = false;
   sortField: 'name' | 'created' | 'lastRun' | 'status' = 'name';
+  
+  // Pagination
+  currentPage = 1;
+  pageSize = 20;
+  hasMoreData = true;
+  totalWorkflows = 0;
+  
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -46,30 +57,61 @@ export class WorkflowsPage implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  loadWorkflows() {
-    this.isLoading = true;
-    this.workflowService.getWorkflows()
+  loadWorkflows(append: boolean = false) {
+    if (!append) {
+      this.isLoading = true;
+      this.currentPage = 1;
+      this.workflows = [];
+    }
+    
+    const filters: any = {};
+    if (this.filterStatus !== 'all') {
+      filters.enabled = this.filterStatus === 'enabled';
+    }
+    if (this.filterCategory !== 'all') {
+      filters.category = this.filterCategory;
+    }
+    if (this.filterTriggerType !== 'all') {
+      filters.trigger_type = this.filterTriggerType;
+    }
+    
+    this.workflowService.getWorkflows(filters, this.currentPage, this.pageSize)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (workflows) => {
-          this.workflows = workflows;
+          if (append) {
+            this.workflows = [...this.workflows, ...workflows];
+          } else {
+            this.workflows = workflows;
+          }
+          
+          this.hasMoreData = workflows.length === this.pageSize;
           this.applyFilters();
           this.isLoading = false;
+          
+          if (this.infiniteScroll) {
+            this.infiniteScroll.complete();
+            this.infiniteScroll.disabled = !this.hasMoreData;
+          }
         },
         error: (error) => {
           console.error('Error loading workflows:', error);
           this.isLoading = false;
           this.showToast('Failed to load workflows', 'danger');
+          
+          if (this.infiniteScroll) {
+            this.infiniteScroll.complete();
+          }
         }
       });
   }
 
   loadActiveInstances() {
-    this.workflowService.getWorkflowInstances()
+    this.workflowService.getWorkflowInstances('ACTIVE')
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (instances) => {
-          this.activeInstances = instances.filter(i => i.status === 'active');
+          this.activeInstances = instances;
         },
         error: (error) => {
           console.error('Error loading instances:', error);
@@ -77,10 +119,11 @@ export class WorkflowsPage implements OnInit, OnDestroy {
       });
   }
 
-  async openWorkflowCreator(template?: WorkflowTemplate) {
+  async openWorkflowCreator(template?: any) {
     const modal = await this.modalController.create({
       component: WorkflowCreatorComponent,
-      componentProps: { template }
+      componentProps: { template },
+      cssClass: 'workflow-creator-modal'
     });
 
     await modal.present();
@@ -105,13 +148,34 @@ export class WorkflowsPage implements OnInit, OnDestroy {
     }
   }
 
+  async openTemplateSelector() {
+    // Open template selector directly when FAB is clicked
+    const modal = await this.modalController.create({
+      component: WorkflowTemplatesComponent,
+      cssClass: 'template-selector-modal',
+      breakpoints: [0, 0.5, 0.75, 1],
+      initialBreakpoint: 0.75
+    });
+
+    await modal.present();
+    const { data } = await modal.onDidDismiss();
+    
+    if (data?.template) {
+      // User selected a template, open creator with it
+      this.openWorkflowCreator(data.template);
+    } else if (data?.action === 'blank') {
+      // User wants to create from scratch
+      this.openWorkflowCreator();
+    }
+  }
+
   async showWorkflowActions(workflow: Workflow) {
     const actionSheet = await this.actionSheetController.create({
       header: workflow.name,
       buttons: [
         {
-          text: workflow.status === 'ACTIVE' ? 'Pause' : 'Activate',
-          icon: workflow.status === 'ACTIVE' ? 'pause-outline' : 'play-outline',
+          text: workflow.enabled ? 'Disable' : 'Enable',
+          icon: workflow.enabled ? 'pause-outline' : 'play-outline',
           handler: () => {
             this.toggleWorkflowStatus(workflow);
           }
@@ -164,14 +228,13 @@ export class WorkflowsPage implements OnInit, OnDestroy {
   }
 
   toggleWorkflowStatus(workflow: Workflow) {
-    const newStatus = workflow.status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE';
-    this.workflowService.toggleWorkflowStatus(workflow.id!, newStatus)
+    const newEnabled = !workflow.enabled;
+    this.workflowService.updateWorkflow(workflow.id!, { enabled: newEnabled })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          workflow.status = newStatus;
-          this.loadWorkflows();
-          this.showToast(`Workflow ${newStatus === 'ACTIVE' ? 'activated' : 'paused'}`, 'success');
+          workflow.enabled = newEnabled;
+          this.showToast(`Workflow ${newEnabled ? 'enabled' : 'disabled'}`, 'success');
         },
         error: (error: any) => {
           console.error('Error toggling workflow status:', error);
@@ -219,7 +282,8 @@ export class WorkflowsPage implements OnInit, OnDestroy {
     this.workflowService.testWorkflow(workflow)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (result: { affectedMembers: number; previewData: any }) => {
+        next: (result: any) => {
+          console.log('Test workflow result:', result);
           this.showTestResults(result);
         },
         error: (error: any) => {
@@ -229,10 +293,25 @@ export class WorkflowsPage implements OnInit, OnDestroy {
       });
   }
 
-  async showTestResults(result: { affectedMembers: number; previewData: any }) {
+  async showTestResults(result: any) {
+    // Handle both possible response structures
+    const affectedCount = result?.affectedMembers || result?.affected_members || 0;
+    const membersList = result?.members || result?.previewData?.members || [];
+    
+    let message = `This workflow would affect ${affectedCount} member(s).`;
+    
+    // Add member details if available
+    if (membersList.length > 0) {
+      const memberNames = membersList.slice(0, 5).map((m: any) => m.name || m.display_name).join(', ');
+      message += `\n\nMembers: ${memberNames}`;
+      if (membersList.length > 5) {
+        message += ` and ${membersList.length - 5} more...`;
+      }
+    }
+    
     const alert = await this.alertController.create({
       header: 'Test Results',
-      message: `This workflow would affect ${result.affectedMembers} member(s).`,
+      message: message,
       buttons: ['OK']
     });
     await alert.present();
@@ -261,14 +340,11 @@ export class WorkflowsPage implements OnInit, OnDestroy {
 
 
   getCurrentStepName(instance: any): string {
-    if (!instance.steps || instance.steps.length === 0) return 'No steps';
-    const currentStep = instance.steps[instance.currentStepIndex];
-    return currentStep ? currentStep.name : 'Unknown step';
+    return instance.current_step_name || 'Unknown step';
   }
 
   getProgressPercentage(instance: any): number {
-    if (!instance.steps || instance.steps.length === 0) return 0;
-    return ((instance.currentStepIndex + 1) / instance.steps.length) * 100;
+    return instance.progress_percentage || 0;
   }
 
   deleteWorkflow(workflow: Workflow) {
@@ -292,9 +368,7 @@ export class WorkflowsPage implements OnInit, OnDestroy {
         workflow.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
         workflow.description?.toLowerCase().includes(this.searchQuery.toLowerCase());
       
-      const matchesStatus = this.filterStatus === 'all' || workflow.status === this.filterStatus;
-      
-      return matchesSearch && matchesStatus;
+      return matchesSearch;
     });
   }
 
@@ -303,7 +377,7 @@ export class WorkflowsPage implements OnInit, OnDestroy {
   }
 
   onFilterChange() {
-    this.applyFilters();
+    this.loadWorkflows();
   }
 
   toggleView() {
@@ -331,8 +405,13 @@ export class WorkflowsPage implements OnInit, OnDestroy {
     }, 1000);
   }
 
-  getStatusCount(status: 'ACTIVE' | 'PAUSED' | 'DRAFT'): number {
-    return this.workflows.filter(w => w.status === status).length;
+  getStatusCount(enabled: boolean): number {
+    return this.workflows.filter(w => w.enabled === enabled).length;
+  }
+  
+  loadMore(event: any) {
+    this.currentPage++;
+    this.loadWorkflows(true);
   }
 
   getTriggerText(trigger: any): string {
@@ -414,11 +493,12 @@ export class WorkflowsPage implements OnInit, OnDestroy {
   }
 
   getStatusIcon(status: string): string {
-    switch (status) {
-      case 'active': return 'play-circle';
-      case 'completed': return 'checkmark-circle';
-      case 'failed': return 'close-circle';
-      case 'cancelled': return 'stop-circle';
+    switch (status.toUpperCase()) {
+      case 'ACTIVE': return 'play-circle';
+      case 'COMPLETED': return 'checkmark-circle';
+      case 'FAILED': return 'close-circle';
+      case 'CANCELLED': return 'stop-circle';
+      case 'PAUSED': return 'pause-circle';
       default: return 'time';
     }
   }
@@ -461,29 +541,14 @@ export class WorkflowsPage implements OnInit, OnDestroy {
     this.router.navigate(['/workflows', workflow.id, 'edit']);
   }
 
+  // Legacy methods kept for backward compatibility
   createFromTemplate() {
-    this.openTemplates();
+    this.openTemplateSelector();
   }
 
   async importWorkflow() {
-    const alert = await this.alertController.create({
-      header: 'Import Workflow',
-      message: 'Import a workflow from a JSON file or template library',
-      buttons: [
-        {
-          text: 'Cancel',
-          role: 'cancel'
-        },
-        {
-          text: 'Choose File',
-          handler: () => {
-            // TODO: Implement file import
-            this.showToast('Import feature coming soon', 'warning');
-          }
-        }
-      ]
-    });
-    await alert.present();
+    // This feature can be added later if needed
+    this.showToast('Import feature coming soon', 'warning');
   }
 
 }

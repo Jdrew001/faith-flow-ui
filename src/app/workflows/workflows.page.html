@@ -4,14 +4,6 @@
       <ion-menu-button></ion-menu-button>
     </ion-buttons>
     <ion-title>Workflows</ion-title>
-    <ion-buttons slot="end">
-      <ion-button (click)="openTemplates()">
-        <ion-icon slot="icon-only" name="sparkles-outline"></ion-icon>
-      </ion-button>
-      <ion-button (click)="openWorkflowCreator()" class="primary-action">
-        <ion-icon slot="icon-only" name="add"></ion-icon>
-      </ion-button>
-    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
@@ -22,21 +14,21 @@
 
   <!-- Minimal Stats Bar -->
   <div class="mini-stats">
-    <div class="stat active" (click)="filterStatus = 'ACTIVE'; onFilterChange()">
-      <span class="value">{{ getStatusCount('ACTIVE') }}</span>
-      <span class="label">Active</span>
+    <div class="stat active" (click)="filterStatus = 'enabled'; onFilterChange()">
+      <span class="value">{{ getStatusCount(true) }}</span>
+      <span class="label">Enabled</span>
     </div>
     <div class="stat running" (click)="showInstances = true">
       <span class="value">{{ activeInstances.length }}</span>
       <span class="label">Running</span>
     </div>
-    <div class="stat paused" (click)="filterStatus = 'PAUSED'; onFilterChange()">
-      <span class="value">{{ getStatusCount('PAUSED') }}</span>
-      <span class="label">Paused</span>
+    <div class="stat paused" (click)="filterStatus = 'disabled'; onFilterChange()">
+      <span class="value">{{ getStatusCount(false) }}</span>
+      <span class="label">Disabled</span>
     </div>
-    <div class="stat draft" (click)="filterStatus = 'DRAFT'; onFilterChange()">
-      <span class="value">{{ getStatusCount('DRAFT') }}</span>
-      <span class="label">Draft</span>
+    <div class="stat total" (click)="filterStatus = 'all'; onFilterChange()">
+      <span class="value">{{ workflows.length }}</span>
+      <span class="label">Total</span>
     </div>
   </div>
 
@@ -60,9 +52,9 @@
         </button>
       </div>
       
-      <button class="filter-btn" [class.active]="filterStatus !== 'all'" (click)="showFilterMenu = !showFilterMenu">
+      <button class="filter-btn" [class.active]="filterStatus !== 'all' || filterCategory !== 'all' || filterTriggerType !== 'all'" (click)="showFilterMenu = !showFilterMenu">
         <ion-icon name="filter"></ion-icon>
-        <span class="badge" *ngIf="filterStatus !== 'all'">1</span>
+        <span class="badge" *ngIf="filterStatus !== 'all' || filterCategory !== 'all' || filterTriggerType !== 'all'">{{ (filterStatus !== 'all' ? 1 : 0) + (filterCategory !== 'all' ? 1 : 0) + (filterTriggerType !== 'all' ? 1 : 0) }}</span>
       </button>
       
       <button class="sort-btn" (click)="showSortMenu = !showSortMenu">
@@ -72,10 +64,32 @@
     
     <!-- Dropdown Menus -->
     <div class="dropdown-menu filter-menu" *ngIf="showFilterMenu">
-      <button [class.selected]="filterStatus === 'all'" (click)="filterStatus = 'all'; onFilterChange(); showFilterMenu = false">All Workflows</button>
-      <button [class.selected]="filterStatus === 'ACTIVE'" (click)="filterStatus = 'ACTIVE'; onFilterChange(); showFilterMenu = false">Active Only</button>
-      <button [class.selected]="filterStatus === 'PAUSED'" (click)="filterStatus = 'PAUSED'; onFilterChange(); showFilterMenu = false">Paused Only</button>
-      <button [class.selected]="filterStatus === 'DRAFT'" (click)="filterStatus = 'DRAFT'; onFilterChange(); showFilterMenu = false">Drafts Only</button>
+      <div class="filter-section">
+        <h4>Status</h4>
+        <button [class.selected]="filterStatus === 'all'" (click)="filterStatus = 'all'; onFilterChange()">All</button>
+        <button [class.selected]="filterStatus === 'enabled'" (click)="filterStatus = 'enabled'; onFilterChange()">Enabled</button>
+        <button [class.selected]="filterStatus === 'disabled'" (click)="filterStatus = 'disabled'; onFilterChange()">Disabled</button>
+      </div>
+      <div class="filter-section">
+        <h4>Category</h4>
+        <button [class.selected]="filterCategory === 'all'" (click)="filterCategory = 'all'; onFilterChange()">All</button>
+        <button [class.selected]="filterCategory === 'ENGAGEMENT'" (click)="filterCategory = 'ENGAGEMENT'; onFilterChange()">Engagement</button>
+        <button [class.selected]="filterCategory === 'PASTORAL_CARE'" (click)="filterCategory = 'PASTORAL_CARE'; onFilterChange()">Pastoral Care</button>
+        <button [class.selected]="filterCategory === 'ONBOARDING'" (click)="filterCategory = 'ONBOARDING'; onFilterChange()">Onboarding</button>
+        <button [class.selected]="filterCategory === 'FOLLOW_UP'" (click)="filterCategory = 'FOLLOW_UP'; onFilterChange()">Follow Up</button>
+      </div>
+      <div class="filter-section">
+        <h4>Trigger Type</h4>
+        <button [class.selected]="filterTriggerType === 'all'" (click)="filterTriggerType = 'all'; onFilterChange()">All</button>
+        <button [class.selected]="filterTriggerType === 'manual'" (click)="filterTriggerType = 'manual'; onFilterChange()">Manual</button>
+        <button [class.selected]="filterTriggerType === 'attendance_rule'" (click)="filterTriggerType = 'attendance_rule'; onFilterChange()">Attendance</button>
+        <button [class.selected]="filterTriggerType === 'scheduled'" (click)="filterTriggerType = 'scheduled'; onFilterChange()">Scheduled</button>
+        <button [class.selected]="filterTriggerType === 'first_time_visitor'" (click)="filterTriggerType = 'first_time_visitor'; onFilterChange()">First Visitor</button>
+      </div>
+      <div class="filter-actions">
+        <button class="clear-btn" (click)="clearFilters(); showFilterMenu = false">Clear All</button>
+        <button class="apply-btn" (click)="showFilterMenu = false">Apply</button>
+      </div>
     </div>
     
     <div class="dropdown-menu sort-menu" *ngIf="showSortMenu">
@@ -241,12 +255,12 @@
         <!-- Instance Info -->
         <div class="instance-info">
           <div class="member">
-            <div class="avatar" [style.background]="getAvatarGradient(instance.memberName)">
-              {{ instance.memberName?.charAt(0)?.toUpperCase() || '?' }}
+            <div class="avatar" [style.background]="getAvatarGradient(instance.member_name)">
+              {{ instance.member_name?.charAt(0)?.toUpperCase() || '?' }}
             </div>
             <div>
-              <h4>{{ instance.memberName }}</h4>
-              <p>{{ instance.workflowName }}</p>
+              <h4>{{ instance.member_name }}</h4>
+              <p>{{ instance.template_name }}</p>
             </div>
           </div>
           
@@ -256,14 +270,14 @@
               {{ getCurrentStepName(instance) }}
             </div>
             <div class="step-progress">
-              Step {{ instance.currentStepIndex + 1 }} of {{ instance.steps?.length || 0 }}
+              Step {{ instance.current_step_index + 1 }} of {{ instance.total_steps || 0 }}
             </div>
           </div>
           
           <div class="instance-meta">
             <span class="started">
               <ion-icon name="play-circle"></ion-icon>
-              {{ getRelativeTime(instance.startedAt) }}
+              {{ getRelativeTime(instance.started_at) }}
             </span>
             <span class="status" [class]="instance.status">
               {{ instance.status }}
@@ -274,21 +288,18 @@
     </div>
   </div>
 
+  <!-- Infinite Scroll -->
+  <ion-infinite-scroll threshold="100px" (ionInfinite)="loadMore($event)" *ngIf="!showInstances">
+    <ion-infinite-scroll-content
+      loadingSpinner="bubbles"
+      loadingText="Loading more workflows...">
+    </ion-infinite-scroll-content>
+  </ion-infinite-scroll>
+
   <!-- Quick Create FAB -->
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-    <ion-fab-button size="small">
+    <ion-fab-button (click)="openTemplateSelector()">
       <ion-icon name="add"></ion-icon>
     </ion-fab-button>
-    <ion-fab-list side="top">
-      <ion-fab-button size="small" color="secondary" (click)="createFromTemplate()">
-        <ion-icon name="document-text"></ion-icon>
-      </ion-fab-button>
-      <ion-fab-button size="small" color="tertiary" (click)="importWorkflow()">
-        <ion-icon name="cloud-download"></ion-icon>
-      </ion-fab-button>
-      <ion-fab-button size="small" color="primary" (click)="openWorkflowCreator()">
-        <ion-icon name="create"></ion-icon>
-      </ion-fab-button>
-    </ion-fab-list>
   </ion-fab>
 </ion-content>

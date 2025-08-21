@@ -1,28 +1,35 @@
 .trigger-builder {
   padding: 16px;
+  background: #1c1c1e;
   
   h4 {
-    font-size: 16px;
+    font-size: 14px;
     font-weight: 600;
-    color: var(--ion-color-dark);
+    color: #8e8e93;
     margin: 0 0 12px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
 }
 
-.attendance-selector {
+// Condition Type Selector
+.condition-selector {
   margin-bottom: 24px;
   
   ion-segment {
-    background: var(--ion-color-light);
+    background: #2c2c2e;
+    border: 1px solid #3a3a3c;
     border-radius: 12px;
     padding: 4px;
     
     ion-segment-button {
       --indicator-height: 0;
-      --background-checked: white;
-      --color-checked: var(--ion-color-primary);
+      --background: transparent;
+      --background-checked: #3a3a3c;
+      --color: #8e8e93;
+      --color-checked: #ffffff;
       border-radius: 8px;
-      min-height: 56px;
+      min-height: 48px;
       transition: all 0.3s ease;
       
       .segment-content {
@@ -30,156 +37,168 @@
         flex-direction: column;
         align-items: center;
         gap: 4px;
-        
-        ion-icon {
-          font-size: 24px;
-        }
-        
-        ion-label {
-          font-size: 12px;
-          font-weight: 500;
-        }
-      }
-      
-      &.segment-button-checked {
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      }
-    }
-  }
-}
-
-.frequency-selector {
-  margin-bottom: 24px;
-  
-  .frequency-control {
-    background: white;
-    border: 1px solid var(--ion-color-light-shade);
-    border-radius: 12px;
-    padding: 16px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    
-    ion-label {
-      font-weight: 500;
-      color: var(--ion-color-dark);
-    }
-    
-    .stepper {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      
-      ion-button {
-        --padding-start: 8px;
-        --padding-end: 8px;
-        --border-radius: 8px;
-        width: 40px;
-        height: 40px;
+        padding: 8px;
         
         ion-icon {
           font-size: 20px;
         }
         
-        &:disabled {
-          opacity: 0.5;
+        ion-label {
+          font-size: 11px;
+          font-weight: 500;
+          text-align: center;
+          line-height: 1.2;
         }
       }
       
-      .frequency-value {
-        font-size: 28px;
-        font-weight: 600;
-        color: var(--ion-color-primary);
-        min-width: 50px;
-        text-align: center;
+      &.segment-button-checked {
+        background: #3a3a3c;
+        
+        .segment-content ion-icon {
+          color: #007aff;
+        }
       }
     }
   }
 }
 
-.time-window-selector {
-  margin-bottom: 24px;
+// Configuration Section
+.config-section {
+  background: #2c2c2e;
+  border: 1px solid #3a3a3c;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+.config-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
   
-  ion-item {
-    --background: white;
-    --padding-start: 16px;
-    --inner-padding-end: 16px;
-    border: 1px solid var(--ion-color-light-shade);
-    border-radius: 12px;
+  &:last-child {
+    margin-bottom: 0;
+  }
+  
+  ion-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #ffffff;
+    flex-shrink: 0;
+  }
+  
+  ion-select {
+    --background: #3a3a3c;
+    --padding-start: 12px;
+    --padding-end: 8px;
+    border: 1px solid #48484a;
+    border-radius: 8px;
+    min-width: 120px;
+    font-size: 14px;
+    color: #ffffff;
     
-    ion-label {
-      font-weight: 500;
-      color: var(--ion-color-dark);
+    &::part(text) {
+      color: #ffffff;
     }
     
-    ion-select {
-      font-weight: 500;
-      color: var(--ion-color-primary);
+    &::part(icon) {
+      color: #8e8e93;
     }
   }
 }
 
-.trigger-preview {
-  margin-top: 32px;
+// Stepper controls
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   
-  ion-card {
-    background: var(--ion-color-primary-contrast);
-    border-left: 4px solid var(--ion-color-primary);
+  ion-button {
+    --padding-start: 0;
+    --padding-end: 0;
+    --background: #3a3a3c;
+    --background-hover: #48484a;
+    --color: #ffffff;
+    --border-radius: 8px;
+    width: 36px;
+    height: 36px;
     margin: 0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     
-    ion-card-content {
-      padding: 16px;
-      
-      .preview-content {
-        display: flex;
-        gap: 12px;
-        
-        ion-icon {
-          font-size: 28px;
-          flex-shrink: 0;
-          margin-top: 4px;
-        }
-        
-        .preview-text {
-          flex: 1;
-          
-          strong {
-            display: block;
-            font-size: 14px;
-            color: var(--ion-color-dark);
-            margin-bottom: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-          }
-          
-          p {
-            margin: 0;
-            font-size: 15px;
-            line-height: 1.5;
-            color: var(--ion-color-dark-shade);
-          }
-        }
-      }
+    ion-icon {
+      font-size: 18px;
     }
+    
+    &:disabled {
+      opacity: 0.3;
+    }
+  }
+  
+  .value {
+    font-size: 20px;
+    font-weight: 600;
+    color: #007aff;
+    min-width: 40px;
+    text-align: center;
   }
 }
 
+// Percentage input
+.percentage-input {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  .percentage-field {
+    background: #3a3a3c;
+    border: 1px solid #48484a;
+    border-radius: 8px;
+    padding: 8px 12px;
+    width: 80px;
+    font-size: 14px;
+    color: #ffffff;
+    text-align: center;
+    
+    &:focus {
+      outline: none;
+      border-color: #007aff;
+      background: #48484a;
+    }
+  }
+  
+  span {
+    color: #8e8e93;
+    font-size: 14px;
+    font-weight: 500;
+  }
+}
+
+// Time Windows
+.timeWindows {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+// Responsive
 @media (min-width: 768px) {
   .trigger-builder {
     max-width: 600px;
     margin: 0 auto;
   }
-}
-
-@media (prefers-color-scheme: dark) {
-  .frequency-selector .frequency-control,
-  .time-window-selector ion-item {
-    background: var(--ion-color-dark-tint);
-    border-color: var(--ion-color-medium-shade);
-  }
   
-  .trigger-preview ion-card {
-    background: rgba(var(--ion-color-primary-rgb), 0.1);
+  .condition-selector ion-segment {
+    ion-segment-button {
+      min-height: 56px;
+      
+      .segment-content {
+        flex-direction: row;
+        gap: 8px;
+        
+        ion-label {
+          font-size: 13px;
+        }
+      }
+    }
   }
 }

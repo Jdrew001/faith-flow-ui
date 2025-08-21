@@ -69,13 +69,30 @@ export class WorkflowInstanceComponent implements OnInit, OnDestroy {
 
   getStepIcon(type: string): string {
     const icons: Record<string, string> = {
-      task: 'clipboard-outline',
-      email: 'mail-outline',
-      sms: 'chatbubble-outline',
+      manual_task: 'clipboard-outline',
+      send_email: 'mail-outline',
+      send_sms: 'chatbubble-outline',
       wait: 'time-outline',
-      note: 'document-text-outline'
+      create_note: 'document-text-outline',
+      conditional: 'git-branch-outline',
+      update_member: 'person-outline',
+      webhook: 'globe-outline'
     };
     return icons[type] || 'help-outline';
+  }
+
+  getStepTypeLabel(type: string): string {
+    const labels: Record<string, string> = {
+      manual_task: 'Manual Task',
+      send_email: 'Send Email',
+      send_sms: 'Send SMS',
+      wait: 'Wait',
+      create_note: 'Create Note',
+      conditional: 'Conditional',
+      update_member: 'Update Member',
+      webhook: 'Webhook'
+    };
+    return labels[type] || type;
   }
 
   getStepStatusIcon(status: string): string {
@@ -110,10 +127,18 @@ export class WorkflowInstanceComponent implements OnInit, OnDestroy {
 
   getProgressPercentage(): number {
     if (!this.instance) return 0;
-    const completedSteps = this.instance.steps.filter(
-      s => s.status === 'completed' || s.status === 'skipped'
-    ).length;
-    return (completedSteps / this.instance.steps.length) * 100;
+    // Use the progress_percentage from the API if available
+    if (this.instance.progress_percentage !== undefined) {
+      return this.instance.progress_percentage;
+    }
+    // Fallback calculation if steps are available
+    if (this.instance.steps && this.instance.steps.length > 0) {
+      const completedSteps = this.instance.steps.filter(
+        s => s.status === 'completed' || s.status === 'skipped'
+      ).length;
+      return (completedSteps / this.instance.steps.length) * 100;
+    }
+    return 0;
   }
 
   async showStepActions(step: WorkflowInstanceStep) {
@@ -155,7 +180,7 @@ export class WorkflowInstanceComponent implements OnInit, OnDestroy {
     });
 
     const actionSheet = await this.actionSheetController.create({
-      header: step.stepName,
+      header: step.step_name,
       buttons
     });
 
@@ -165,7 +190,7 @@ export class WorkflowInstanceComponent implements OnInit, OnDestroy {
   async completeStep(step: WorkflowInstanceStep) {
     const alert = await this.alertController.create({
       header: 'Complete Step',
-      message: `Mark "${step.stepName}" as completed?`,
+      message: `Mark "${step.step_name}" as completed?`,
       inputs: [
         {
           name: 'notes',
@@ -181,7 +206,7 @@ export class WorkflowInstanceComponent implements OnInit, OnDestroy {
         {
           text: 'Complete',
           handler: (data) => {
-            this.doCompleteStep(step.id, data.notes);
+            this.doCompleteStep(step, data.notes);
           }
         }
       ]
@@ -190,10 +215,10 @@ export class WorkflowInstanceComponent implements OnInit, OnDestroy {
     await alert.present();
   }
 
-  doCompleteStep(stepId: string, notes?: string) {
+  doCompleteStep(step: WorkflowInstanceStep, notes?: string) {
     if (!this.instance) return;
 
-    this.workflowService.completeWorkflowStep(stepId, notes)
+    this.workflowService.completeWorkflowStep(this.instance.id, step.id, notes)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
@@ -210,7 +235,7 @@ export class WorkflowInstanceComponent implements OnInit, OnDestroy {
   async confirmSkipStep(step: WorkflowInstanceStep) {
     const alert = await this.alertController.create({
       header: 'Skip Step',
-      message: `Are you sure you want to skip "${step.stepName}"? This action cannot be undone.`,
+      message: `Are you sure you want to skip "${step.step_name}"? This action cannot be undone.`,
       inputs: [
         {
           name: 'reason',
@@ -231,7 +256,7 @@ export class WorkflowInstanceComponent implements OnInit, OnDestroy {
           role: 'warning',
           handler: (data) => {
             if (data.reason && data.reason.trim()) {
-              this.doSkipStep(step.id, data.reason);
+              this.doSkipStep(step, data.reason);
               return true;
             } else {
               this.showToast('Please provide a reason for skipping', 'warning');
@@ -245,10 +270,15 @@ export class WorkflowInstanceComponent implements OnInit, OnDestroy {
     await alert.present();
   }
 
-  doSkipStep(stepId: string, reason: string) {
+  doSkipStep(step: WorkflowInstanceStep, reason: string) {
     if (!this.instance) return;
-
-    this.workflowService.skipWorkflowStep(stepId, reason)
+    
+    // Skip step functionality - for now just show message
+    this.showToast('Skip functionality not yet implemented', 'warning');
+    return;
+    
+    /* TODO: Implement when skip endpoint is available
+    this.workflowService.skipWorkflowStep(this.instance.id, step.id, reason)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
@@ -260,6 +290,7 @@ export class WorkflowInstanceComponent implements OnInit, OnDestroy {
           this.showToast('Failed to skip step', 'danger');
         }
       });
+    */
   }
 
   async viewStepDetails(step: WorkflowInstanceStep) {
@@ -317,7 +348,7 @@ export class WorkflowInstanceComponent implements OnInit, OnDestroy {
   async showInstanceActions() {
     const buttons = [];
 
-    if (this.instance?.status === 'active') {
+    if (this.instance?.status === 'ACTIVE') {
       buttons.push({
         text: 'Cancel Workflow',
         icon: 'close-circle-outline',
@@ -333,7 +364,7 @@ export class WorkflowInstanceComponent implements OnInit, OnDestroy {
       icon: 'git-branch-outline',
       handler: () => {
         if (this.instance) {
-          this.router.navigate(['/workflows', this.instance.workflowId]);
+          this.router.navigate(['/workflows', this.instance.template_id]);
         }
       }
     });
@@ -343,7 +374,7 @@ export class WorkflowInstanceComponent implements OnInit, OnDestroy {
       icon: 'person-outline',
       handler: () => {
         // TODO: Navigate to member profile
-        console.log('View member:', this.instance?.memberId);
+        console.log('View member:', this.instance?.member_id);
       }
     });
 

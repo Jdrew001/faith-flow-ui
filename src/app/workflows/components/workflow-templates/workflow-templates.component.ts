@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ModalController } from '@ionic/angular';
 import { WorkflowService } from '../../services/workflow.service';
-import { WorkflowTemplate } from '../../models';
+import { WorkflowTemplatePreset } from '../../models';
 
 @Component({
   selector: 'app-workflow-templates',
@@ -10,8 +10,8 @@ import { WorkflowTemplate } from '../../models';
   standalone: false
 })
 export class WorkflowTemplatesComponent implements OnInit {
-  templates: WorkflowTemplate[] = [];
-  selectedTemplate: WorkflowTemplate | null = null;
+  templates: WorkflowTemplatePreset[] = [];
+  selectedTemplate: WorkflowTemplatePreset | null = null;
 
   constructor(
     private modalController: ModalController,
@@ -24,11 +24,11 @@ export class WorkflowTemplatesComponent implements OnInit {
 
   loadTemplates() {
     this.workflowService.templates$.subscribe(templates => {
-      this.templates = templates;
+      this.templates = templates as WorkflowTemplatePreset[];
     });
   }
 
-  selectTemplate(template: WorkflowTemplate) {
+  selectTemplate(template: WorkflowTemplatePreset) {
     this.selectedTemplate = template;
   }
 
@@ -40,19 +40,36 @@ export class WorkflowTemplatesComponent implements OnInit {
     }
   }
 
+  useTemplateDirectly(template: WorkflowTemplatePreset) {
+    // Directly use the template without requiring selection first
+    this.modalController.dismiss({
+      template: template
+    });
+  }
+
+  createFromScratch() {
+    // Dismiss with blank action to create from scratch
+    this.modalController.dismiss({
+      action: 'blank'
+    });
+  }
+
   dismiss() {
     this.modalController.dismiss();
   }
 
-  getTemplateStepsCount(template: WorkflowTemplate): number {
+  getTemplateStepsCount(template: WorkflowTemplatePreset): number {
     return template.preset.steps?.length || 0;
   }
 
-  getTemplateTriggerType(template: WorkflowTemplate): string {
-    const triggerType = template.preset.triggerType;
-    if (triggerType === 'attendance') return 'Attendance-based';
+  getTemplateTriggerType(template: WorkflowTemplatePreset): string {
+    const triggerType = template.preset.trigger?.type;
+    if (triggerType === 'attendance_rule') return 'Attendance-based';
+    if (triggerType === 'first_time_visitor') return 'First-time visitor';
     if (triggerType === 'manual') return 'Manual';
-    if (triggerType === 'schedule') return 'Scheduled';
+    if (triggerType === 'scheduled') return 'Scheduled';
+    if (triggerType === 'member_created') return 'New member';
+    if (triggerType === 'member_updated') return 'Member updated';
     return 'Custom';
   }
 }

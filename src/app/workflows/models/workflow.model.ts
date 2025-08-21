@@ -1,112 +1,191 @@
-export type WorkflowTriggerType = 'attendance' | 'attendance_rule' | 'manual' | 'schedule';
-export type AttendanceCondition = 'missed_3_in_21_days' | 'first_time_visitor' | 'consistent_attendance';
-export type AttendanceType = 'missed' | 'first_time' | 'consistent';
+// Workflow Types
+export type WorkflowTriggerType = 'manual' | 'attendance_rule' | 'member_created' | 'member_updated' | 'scheduled' | 'first_time_visitor' | 'api' | 'workflow_completion';
 export type WorkflowStatus = 'ACTIVE' | 'PAUSED' | 'DRAFT';
-export type WorkflowStepType = 'manual_task' | 'task' | 'sms' | 'email' | 'wait' | 'note';
-export type AssignmentStrategy = 'admin' | 'role' | 'round-robin' | 'specific';
+export type WorkflowStepType = 'manual_task' | 'send_email' | 'send_sms' | 'wait' | 'conditional' | 'update_member' | 'create_note' | 'webhook';
+export type AssignmentStrategy = 'SPECIFIC_USER' | 'ROLE' | 'ROUND_ROBIN' | 'LEAST_LOADED' | 'SELF';
+export type WorkflowCategory = 'FOLLOW_UP' | 'ONBOARDING' | 'ENGAGEMENT' | 'PASTORAL_CARE' | 'ADMINISTRATION' | 'CUSTOM';
+export type Priority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+export type TaskCategory = 'FOLLOW_UP' | 'PHONE_CALL' | 'EMAIL' | 'VISIT' | 'MEETING' | 'PRAYER' | 'OTHER';
+export type InstanceStatus = 'ACTIVE' | 'PAUSED' | 'COMPLETED' | 'CANCELLED' | 'FAILED';
+export type StepStatus = 'pending' | 'active' | 'completed' | 'skipped' | 'failed';
 
 export interface WorkflowTrigger {
   type: WorkflowTriggerType;
-  condition?: AttendanceCondition;
-  events?: WorkflowEvent[];
-  allEvents?: boolean;
-  attendanceType?: AttendanceType;
-  frequency?: number;
-  timeWindowDays?: number;
-  filters?: {
-    memberStatus?: ('active' | 'inactive' | 'visitor')[];
-    ageGroups?: string[];
-    ministries?: string[];
-    tags?: string[];
+  enabled?: boolean;
+  conditions?: {
+    // Simple format for attendance conditions
+    absences_in_period?: { 
+      count: number;
+      period_days: number;
+    };
+    consecutive_absences?: { 
+      count: number;
+    };
+    no_attendance_days?: { 
+      days: number;
+    };
+    attendance_percentage?: { 
+      percentage: number;
+      period_days: number;
+    };
+    // For member update triggers
+    field_changed?: string;
+    new_value?: any;
+    old_value?: any;
   };
+  filters?: {
+    age_groups?: string[];
+    services?: string[];
+    member_status?: string[];
+    exclude_members?: boolean;
+    exclude_tags?: string[];
+  };
+  schedule?: string; // Cron expression for scheduled type
+  evaluation_schedule?: string; // When to evaluate the trigger
 }
 
-export interface WorkflowEvent {
+export interface WorkflowSession {
   id: string;
   name: string;
   type: string;
 }
 
+// Deprecated - use WorkflowSession instead
+export type WorkflowEvent = WorkflowSession;
+
 export interface WorkflowStep {
-  id?: string;
-  name: string;
-  type: WorkflowStepType;
   order: number;
+  type: WorkflowStepType;
+  name: string;
   description?: string;
-  due_offset_hours?: number;
-  assignment_strategy?: AssignmentStrategy;
-  wait_hours?: number;
-  message?: string;
-  subject?: string;
-  body?: string;
-  content?: string;
-  config?: TaskStepConfig | SmsStepConfig | EmailStepConfig | WaitStepConfig | NoteStepConfig;
+  metadata: any; // Step-specific metadata
 }
 
-export interface TaskStepConfig {
+// Step Metadata Interfaces
+export interface ManualTaskMetadata {
   title: string;
   description: string;
-  assignmentStrategy: AssignmentStrategy;
-  assigneeId?: string;
-  roleId?: string;
-  dueDateOffset: {
-    value: number;
-    unit: 'hours' | 'days';
+  priority: Priority;
+  assignment_strategy: AssignmentStrategy;
+  assigned_to?: string;
+  due_offset_hours: number;
+  category: TaskCategory;
+  required_fields?: string[];
+  completion_requires_note?: boolean;
+  escalation?: {
+    after_hours: number;
+    escalate_to: string;
   };
+  task_template_id?: string;
 }
 
-export interface SmsStepConfig {
-  message: string;
-  recipientType: 'member' | 'assignee' | 'custom';
-  customNumber?: string;
-  delayHours?: number;
-}
-
-export interface EmailStepConfig {
+export interface SendEmailMetadata {
+  to: string;
+  cc?: string[];
+  bcc?: string[];
+  from?: string;
   subject: string;
-  body: string;
-  recipientType: 'member' | 'assignee' | 'custom';
-  customEmail?: string;
-  delayHours?: number;
+  body?: string;
+  template_id?: string;
+  track_opens?: boolean;
+  track_clicks?: boolean;
+  attachments?: string[];
+  include_attachments?: string[];
 }
 
-export interface WaitStepConfig {
-  duration: {
-    value: number;
-    unit: 'hours' | 'days';
+export interface SendSmsMetadata {
+  to: string;
+  message: string;
+  provider?: 'TWILIO' | 'AWS_SNS' | 'MESSAGEBIRD' | 'NEXMO';
+  sender_id?: string;
+  delivery_time?: string;
+  timezone?: string;
+}
+
+export interface WaitMetadata {
+  duration_hours?: number;
+  duration_days?: number;
+  skip_weekends?: boolean;
+  skip_holidays?: boolean;
+  business_hours_only?: boolean;
+  wait_until?: string;
+}
+
+export interface ConditionalMetadata {
+  condition: {
+    type: 'member_field' | 'email_opened' | 'sms_clicked' | 'step_completed' | 'custom';
+    field?: string;
+    operator?: 'equals' | 'not_equals' | 'contains' | 'is_null' | 'is_not_null' | 'greater_than' | 'less_than';
+    value?: any;
+    within_hours?: number;
   };
+  true_path?: number[];
+  false_path?: number[];
 }
 
-export interface NoteStepConfig {
-  content: string;
-  attachToMember: boolean;
+export interface UpdateMemberMetadata {
+  fields?: {
+    [key: string]: any;
+  };
+  add_tags?: string[];
+  remove_tags?: string[];
+  add_to_groups?: string[];
+  remove_from_groups?: string[];
+}
+
+export interface CreateNoteMetadata {
+  note: string;
+  category: 'GENERAL' | 'PASTORAL_CARE' | 'ATTENDANCE' | 'PRAYER_REQUEST' | 'FOLLOW_UP' | 'ADMINISTRATIVE' | 'ENGAGEMENT';
+  visibility: 'PUBLIC' | 'PRIVATE' | 'STAFF_ONLY';
+  pin_to_profile?: boolean;
+}
+
+export interface WebhookMetadata {
+  url: string;
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+  headers?: {
+    [key: string]: string;
+  };
+  body?: any;
+  auth?: {
+    type: 'basic' | 'bearer' | 'api_key';
+    credentials: {
+      [key: string]: string;
+    };
+  };
+  retry_count?: number;
+  timeout_seconds?: number;
 }
 
 export interface WorkflowInstance {
   id: string;
-  workflowId: string;
-  workflowName: string;
-  memberId: string;
-  memberName: string;
-  status: 'active' | 'completed' | 'cancelled' | 'failed';
-  currentStepId: string;
-  currentStepIndex: number;
-  startedAt: Date;
-  completedAt?: Date;
-  steps: WorkflowInstanceStep[];
+  template_id: string;
+  template_name: string;
+  member_id: string;
+  member_name: string;
+  status: InstanceStatus;
+  current_step_index: number;
+  current_step_name?: string;
+  started_at: string;
+  completed_at?: string;
+  progress_percentage: number;
+  pending_tasks: number;
+  completed_steps: number;
+  total_steps: number;
+  steps?: WorkflowInstanceStep[];
 }
 
 export interface WorkflowInstanceStep {
   id: string;
-  stepId: string;
-  stepName: string;
-  stepType: WorkflowStepType;
-  status: 'pending' | 'active' | 'completed' | 'skipped' | 'failed';
-  assigneeId?: string;
-  assigneeName?: string;
-  startedAt?: Date;
-  completedAt?: Date;
-  completedBy?: string;
+  step_id: string;
+  step_name: string;
+  step_type: WorkflowStepType;
+  status: StepStatus;
+  assignee_id?: string;
+  assignee_name?: string;
+  started_at?: string;
+  completed_at?: string;
+  completed_by?: string;
   notes?: string;
 }
 
@@ -122,22 +201,45 @@ export interface WorkflowHistory {
   outcome?: string;
 }
 
-export interface WorkflowDefinition {
-  name: string;
-  steps: WorkflowStep[];
-  trigger: WorkflowTrigger;
-}
-
-export interface Workflow {
+export interface WorkflowTemplate {
   id: string;
   name: string;
   description?: string;
-  definition: WorkflowDefinition;
-  status: WorkflowStatus;
-  version: number;
-  created_by: string | null;
+  category: WorkflowCategory;
+  enabled: boolean;
+  trigger: WorkflowTrigger;
+  steps: WorkflowStep[];
+  settings?: {
+    max_concurrent_instances?: number;
+    allow_multiple_per_member?: boolean;
+    auto_cancel_after_days?: number;
+    timezone?: string;
+    business_hours?: {
+      start: string;
+      end: string;
+      days: string[];
+    };
+  };
   created_at: string;
   updated_at: string;
+  created_by?: string;
+  version?: number;
+  statistics?: {
+    total_runs: number;
+    active_instances: number;
+    success_rate: number;
+    average_completion_time_hours: number;
+  };
+}
+
+// Workflow (for backward compatibility - maps to WorkflowTemplate)
+export interface Workflow extends WorkflowTemplate {
+  definition?: {
+    name: string;
+    steps: WorkflowStep[];
+    trigger: WorkflowTrigger;
+  };
+  status?: WorkflowStatus;
   lastTriggeredAt?: Date;
   stats?: {
     totalTriggers: number;
@@ -146,9 +248,7 @@ export interface Workflow {
     successRate: number;
   };
   // Convenience properties for easier access
-  trigger?: WorkflowTrigger;
   triggerType?: WorkflowTriggerType;
-  steps?: WorkflowStep[];
   testMode?: boolean;
   createdAt?: string;
   updatedAt?: string;
@@ -164,7 +264,7 @@ export interface WorkflowWizardState {
       triggerType: WorkflowTriggerType;
     };
     triggerRules: {
-      events: WorkflowEvent[];
+      events: WorkflowSession[];
       allEvents: boolean;
       trigger: WorkflowTrigger;
     };
@@ -178,12 +278,13 @@ export interface WorkflowWizardState {
   };
 }
 
-export interface WorkflowTemplate {
+// Template preset for UI (used for template selection)
+export interface WorkflowTemplatePreset {
   id: string;
   name: string;
   description: string;
   icon: string;
-  preset: Partial<Workflow>;
+  preset: Partial<WorkflowTemplate>;
 }
 
 export interface WorkflowStatistics {

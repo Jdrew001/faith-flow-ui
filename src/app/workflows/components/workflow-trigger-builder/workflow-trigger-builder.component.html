@@ -1,12 +1,12 @@
 <div class="trigger-builder">
   <form [formGroup]="triggerForm">
     
-    <!-- Attendance Type Selector -->
-    <div class="attendance-selector">
-      <h4>Attendance Type</h4>
-      <ion-segment formControlName="attendanceType">
+    <!-- Condition Type Selector -->
+    <div class="condition-selector">
+      <h4>Trigger Condition</h4>
+      <ion-segment formControlName="conditionType">
         <ion-segment-button 
-          *ngFor="let type of attendanceTypes" 
+          *ngFor="let type of conditionTypes" 
           [value]="type.value">
           <div class="segment-content">
             <ion-icon [name]="type.icon" [color]="type.color"></ion-icon>
@@ -16,64 +16,116 @@
       </ion-segment>
     </div>
     
-    <!-- Frequency Selector -->
-    <div class="frequency-selector">
-      <h4>Frequency</h4>
-      <div class="frequency-control">
-        <ion-label>Number of times</ion-label>
+    <!-- Configuration for Absences in Period -->
+    <div class="config-section" *ngIf="triggerForm.get('conditionType')?.value === 'absences_in_period'">
+      <div class="config-row">
+        <ion-label>Number of absences</ion-label>
         <div class="stepper">
           <ion-button 
             fill="outline" 
             size="small" 
-            (click)="decrementFrequency()"
-            [disabled]="triggerForm.get('frequency')?.value <= 1">
+            (click)="decrementCount()"
+            [disabled]="triggerForm.get('count')?.value <= 1">
             <ion-icon name="remove"></ion-icon>
           </ion-button>
           
-          <span class="frequency-value">
-            {{ triggerForm.get('frequency')?.value }}
+          <span class="value">
+            {{ triggerForm.get('count')?.value }}
           </span>
           
           <ion-button 
             fill="outline" 
             size="small" 
-            (click)="incrementFrequency()">
+            (click)="incrementCount()">
+            <ion-icon name="add"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+      
+      <div class="config-row">
+        <ion-label>Time period</ion-label>
+        <ion-select 
+          formControlName="periodDays" 
+          interface="popover">
+          <ion-select-option 
+            *ngFor="let window of timeWindows" 
+            [value]="window.value">
+            {{ window.label }}
+          </ion-select-option>
+        </ion-select>
+      </div>
+    </div>
+    
+    <!-- Configuration for Consecutive Absences -->
+    <div class="config-section" *ngIf="triggerForm.get('conditionType')?.value === 'consecutive_absences'">
+      <div class="config-row">
+        <ion-label>Consecutive absences</ion-label>
+        <div class="stepper">
+          <ion-button 
+            fill="outline" 
+            size="small" 
+            (click)="decrementCount()"
+            [disabled]="triggerForm.get('count')?.value <= 1">
+            <ion-icon name="remove"></ion-icon>
+          </ion-button>
+          
+          <span class="value">
+            {{ triggerForm.get('count')?.value }}
+          </span>
+          
+          <ion-button 
+            fill="outline" 
+            size="small" 
+            (click)="incrementCount()">
             <ion-icon name="add"></ion-icon>
           </ion-button>
         </div>
       </div>
     </div>
     
-    <!-- Time Window Selector -->
-    <div class="time-window-selector">
-      <h4>Time Window</h4>
-      <ion-item>
-        <ion-label>Look back period</ion-label>
+    <!-- Configuration for No Attendance Days -->
+    <div class="config-section" *ngIf="triggerForm.get('conditionType')?.value === 'no_attendance_days'">
+      <div class="config-row">
+        <ion-label>Days without attendance</ion-label>
         <ion-select 
-          formControlName="timeWindowDays" 
+          formControlName="periodDays" 
           interface="popover">
           <ion-select-option 
             *ngFor="let window of timeWindows" 
             [value]="window.value">
-            Past {{ window.label }}
+            {{ window.label }}
           </ion-select-option>
         </ion-select>
-      </ion-item>
+      </div>
     </div>
     
-    <!-- Trigger Preview -->
-    <div class="trigger-preview">
-      <ion-card>
-        <ion-card-content>
-          <div class="preview-content">
-            <ion-icon name="information-circle-outline" color="primary"></ion-icon>
-            <div class="preview-text">
-              <strong>Trigger Preview</strong>
-              <p>{{ getTriggerDescription() }}</p>
-            </div>
-          </div>
-        </ion-card-content>
-      </ion-card>
+    <!-- Configuration for Attendance Percentage -->
+    <div class="config-section" *ngIf="triggerForm.get('conditionType')?.value === 'attendance_percentage'">
+      <div class="config-row">
+        <ion-label>Attendance below</ion-label>
+        <div class="percentage-input">
+          <input 
+            type="number" 
+            formControlName="percentage" 
+            min="1" 
+            max="100"
+            class="percentage-field">
+          <span>%</span>
+        </div>
+      </div>
+      
+      <div class="config-row">
+        <ion-label>Time period</ion-label>
+        <ion-select 
+          formControlName="periodDays" 
+          interface="popover">
+          <ion-select-option 
+            *ngFor="let window of timeWindows" 
+            [value]="window.value">
+            {{ window.label }}
+          </ion-select-option>
+        </ion-select>
+      </div>
     </div>
     
   </form>

@@ -103,117 +103,47 @@
 
   <!-- Step 2: Trigger Rules -->
   <div class="wizard-step fade-in" *ngIf="currentStep === 2">
-    <form [formGroup]="triggerRulesForm">
-      <!-- For Attendance-based triggers -->
-      <div *ngIf="nameAndTriggerForm.get('triggerType')?.value === 'attendance'">
+    <!-- For Attendance-based triggers -->
+    <div *ngIf="nameAndTriggerForm.get('triggerType')?.value === 'attendance_rule'">
+      <div class="form-section">
+        <h4 class="section-title">
+          <ion-icon name="analytics-outline" class="section-icon"></ion-icon>
+          Define Trigger Conditions
+        </h4>
+        <p class="section-description">Configure when this workflow should trigger based on attendance patterns</p>
         
-        <!-- Event Selection -->
-        <div class="form-section">
-          <h4 class="section-title">
-            <ion-icon name="calendar-outline" class="section-icon"></ion-icon>
-            Select Events
-          </h4>
-          <p class="section-description">Which events should this workflow monitor?</p>
-          
-          <div class="checkbox-field">
-            <label class="custom-checkbox">
-              <input type="checkbox" 
-                     [checked]="triggerRulesForm.get('allEvents')?.value"
-                     (change)="onAllEventsChange($event)">
-              <span class="checkbox-mark"></span>
-              <span class="checkbox-label">Monitor All Events</span>
-            </label>
-          </div>
-          
-          <div class="select-field" *ngIf="!triggerRulesForm.get('allEvents')?.value">
-            <div class="input-wrapper">
-              <ion-icon name="calendar-outline" class="field-icon"></ion-icon>
-              <ion-select 
-                multiple="true" 
-                placeholder="Choose specific events"
-                (ionChange)="onEventSelectionChange($event)"
-                [value]="triggerRulesForm.get('events')?.value"
-                class="custom-select">
-                <ion-select-option *ngFor="let event of availableEvents" [value]="event">
-                  {{ event.name }}
-                </ion-select-option>
-              </ion-select>
-              <label class="floating-label">Select Events</label>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Pattern Builder -->
-        <div class="form-section">
-          <h4 class="section-title">
-            <ion-icon name="analytics-outline" class="section-icon"></ion-icon>
-            Define Trigger Pattern
-          </h4>
-          <p class="section-description">When should this workflow trigger?</p>
-          
-          <!-- Attendance Type -->
-          <div class="attendance-type-selector">
-            <label class="selector-label">Attendance Type</label>
-            <div class="type-cards">
-              <div class="type-card" 
-                   *ngFor="let type of attendanceTypes"
-                   [class.selected]="triggerRulesForm.get('attendanceType')?.value === type.value"
-                   (click)="selectAttendanceType(type.value)">
-                <ion-icon [name]="type.icon"></ion-icon>
-                <span>{{ type.label }}</span>
-              </div>
-            </div>
-          </div>
-          
-          <!-- Frequency -->
-          <div class="frequency-selector">
-            <label class="selector-label">Number of times</label>
-            <div class="number-stepper">
-              <button type="button" class="stepper-btn" (click)="decrementFrequency()">
-                <ion-icon name="remove"></ion-icon>
-              </button>
-              <span class="frequency-value">{{ triggerRulesForm.get('frequency')?.value }}</span>
-              <button type="button" class="stepper-btn" (click)="incrementFrequency()">
-                <ion-icon name="add"></ion-icon>
-              </button>
-            </div>
-          </div>
-          
-          <!-- Time Window -->
-          <div class="select-field">
-            <div class="input-wrapper">
-              <ion-icon name="time-outline" class="field-icon"></ion-icon>
-              <ion-select 
-                formControlName="timeWindowDays"
-                placeholder="Select time window"
-                class="custom-select">
-                <ion-select-option *ngFor="let window of timeWindows" [value]="window.value">
-                  {{ window.label }}
-                </ion-select-option>
-              </ion-select>
-              <label class="floating-label">Time Window</label>
-            </div>
-          </div>
-        </div>
-        
-        <!-- Trigger Preview -->
-        <div class="trigger-preview" *ngIf="getTriggerDescription()">
-          <div class="preview-card">
-            <ion-icon name="information-circle" color="primary"></ion-icon>
-            <p>{{ getTriggerDescription() }}</p>
-          </div>
-        </div>
+        <app-workflow-trigger-builder
+          [trigger]="currentTrigger"
+          (triggerChange)="onTriggerChange($event)">
+        </app-workflow-trigger-builder>
       </div>
       
-      <!-- For Manual triggers -->
-      <div *ngIf="nameAndTriggerForm.get('triggerType')?.value === 'manual'" class="manual-trigger-info">
-        <div class="info-card">
-          <ion-icon name="hand-left-outline" color="primary"></ion-icon>
-          <h3>Manual Trigger</h3>
-          <p>This workflow will be triggered manually. You'll be able to select specific members and start the workflow from the member list or workflow details page.</p>
+      <!-- Trigger Preview -->
+      <div class="trigger-preview" *ngIf="getTriggerDescription()">
+        <div class="preview-card">
+          <ion-icon name="information-circle" color="primary"></ion-icon>
+          <p>{{ getTriggerDescription() }}</p>
         </div>
       </div>
-    </form>
+    </div>
+    
+    <!-- For First-time Visitor triggers -->
+    <div *ngIf="nameAndTriggerForm.get('triggerType')?.value === 'first_time_visitor'" class="manual-trigger-info">
+      <div class="info-card">
+        <ion-icon name="person-add-outline" color="primary"></ion-icon>
+        <h3>First-time Visitor Trigger</h3>
+        <p>This workflow will automatically trigger when a first-time visitor is recorded in the system.</p>
+      </div>
+    </div>
+    
+    <!-- For Manual triggers -->
+    <div *ngIf="nameAndTriggerForm.get('triggerType')?.value === 'manual'" class="manual-trigger-info">
+      <div class="info-card">
+        <ion-icon name="hand-left-outline" color="primary"></ion-icon>
+        <h3>Manual Trigger</h3>
+        <p>This workflow will be triggered manually. You'll be able to select specific members and start the workflow from the member list or workflow details page.</p>
+      </div>
+    </div>
   </div>
 
   <!-- Step 3: Workflow Steps -->
