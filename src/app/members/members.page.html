@@ -1,0 +1,222 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-menu-button></ion-menu-button>
+    </ion-buttons>
+    <ion-title>Members</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [scrollEvents]="true" [forceOverscroll]="true">
+  <ion-refresher slot="fixed" (ionRefresh)="doRefresh($event)">
+    <ion-refresher-content></ion-refresher-content>
+  </ion-refresher>
+
+  <!-- Minimal Stats Bar -->
+  <div class="mini-stats">
+    <div class="stat total" (click)="selectedStatus = 'all'; onStatusChange()">
+      <span class="value">{{ stats.total }}</span>
+      <span class="label">Total</span>
+    </div>
+    <div class="stat active" (click)="selectedStatus = MemberStatus.ACTIVE; onStatusChange()">
+      <span class="value">{{ stats.active }}</span>
+      <span class="label">Active</span>
+    </div>
+    <div class="stat inactive" (click)="selectedStatus = MemberStatus.INACTIVE; onStatusChange()">
+      <span class="value">{{ stats.inactive }}</span>
+      <span class="label">Inactive</span>
+    </div>
+    <div class="stat visitors" (click)="selectedStatus = MemberStatus.VISITOR; onStatusChange()">
+      <span class="value">{{ stats.visitors }}</span>
+      <span class="label">Visitors</span>
+    </div>
+  </div>
+
+  <!-- Ultra Compact Control Bar -->
+  <div class="control-bar">
+    <ion-searchbar 
+      [formControl]="searchControl"
+      placeholder="Search members..."
+      animated="true">
+    </ion-searchbar>
+    
+    <div class="control-buttons">
+      <div class="view-toggle">
+        <button [class.active]="viewMode === 'list'" (click)="viewMode = 'list'">
+          <ion-icon name="list"></ion-icon>
+        </button>
+        <button [class.active]="viewMode === 'grid'" (click)="viewMode = 'grid'">
+          <ion-icon name="grid"></ion-icon>
+        </button>
+      </div>
+      
+      <button class="filter-btn" [class.active]="selectedTags.length > 0" (click)="showFilterMenu = !showFilterMenu">
+        <ion-icon name="filter"></ion-icon>
+        <span class="badge" *ngIf="selectedTags.length > 0">{{ selectedTags.length }}</span>
+      </button>
+      
+      <button class="sort-btn" (click)="showSortMenu = !showSortMenu">
+        <ion-icon name="swap-vertical"></ion-icon>
+      </button>
+    </div>
+    
+    <!-- Dropdown Menus -->
+    <div class="dropdown-menu filter-menu" *ngIf="showFilterMenu">
+      <div class="filter-section">
+        <h4>Status</h4>
+        <button [class.selected]="selectedStatus === 'all'" (click)="selectedStatus = 'all'; onStatusChange()">All</button>
+        <button [class.selected]="selectedStatus === MemberStatus.ACTIVE" (click)="selectedStatus = MemberStatus.ACTIVE; onStatusChange()">Active</button>
+        <button [class.selected]="selectedStatus === MemberStatus.INACTIVE" (click)="selectedStatus = MemberStatus.INACTIVE; onStatusChange()">Inactive</button>
+        <button [class.selected]="selectedStatus === MemberStatus.VISITOR" (click)="selectedStatus = MemberStatus.VISITOR; onStatusChange()">Visitors</button>
+      </div>
+      <div class="filter-section" *ngIf="availableTags.length > 0">
+        <h4>Tags</h4>
+        <div class="tag-list">
+          <button 
+            *ngFor="let tag of availableTags" 
+            [class.selected]="selectedTags.includes(tag)"
+            (click)="toggleTag(tag)">
+            {{ tag }}
+          </button>
+        </div>
+      </div>
+      <div class="filter-actions">
+        <button class="clear-btn" (click)="clearFilters(); showFilterMenu = false">Clear All</button>
+        <button class="apply-btn" (click)="showFilterMenu = false">Apply</button>
+      </div>
+    </div>
+    
+    <div class="dropdown-menu sort-menu" *ngIf="showSortMenu">
+      <button (click)="sortBy('name'); showSortMenu = false">
+        <ion-icon name="text"></ion-icon>
+        Name
+      </button>
+      <button (click)="sortBy('created'); showSortMenu = false">
+        <ion-icon name="calendar"></ion-icon>
+        Date Added
+      </button>
+      <button (click)="sortBy('lastActive'); showSortMenu = false">
+        <ion-icon name="time"></ion-icon>
+        Last Active
+      </button>
+      <button (click)="sortBy('status'); showSortMenu = false">
+        <ion-icon name="pulse"></ion-icon>
+        Status
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="loading-state">
+    <div class="loading-animation">
+      <div class="pulse-ring"></div>
+      <ion-icon name="people"></ion-icon>
+    </div>
+    <p>Loading members...</p>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && filteredMembers.length === 0" class="empty-state">
+    <div class="empty-icon">
+      <ion-icon name="people-outline"></ion-icon>
+    </div>
+    <h3>No members found</h3>
+    <p *ngIf="searchControl.value || selectedStatus !== 'all' || selectedTags.length > 0">
+      Try adjusting your filters
+    </p>
+    <p *ngIf="!searchControl.value && selectedStatus === 'all' && selectedTags.length === 0">
+      Add your first member to get started
+    </p>
+  </div>
+
+  <!-- Members List View -->
+  <div class="members-container" *ngIf="!isLoading && filteredMembers.length > 0">
+    <div class="members-list" *ngIf="viewMode === 'list'">
+      <div 
+        *ngFor="let member of filteredMembers" 
+        class="member-card"
+        (click)="openMember(member)">
+        
+        <div class="member-avatar" [style.background]="getAvatarGradient(member.name)">
+          <span>{{ getInitials(member.name) }}</span>
+        </div>
+        
+        <div class="member-info">
+          <div class="member-header">
+            <h3>{{ member.name }}</h3>
+            <ion-badge [color]="getStatusColor(member.status)" class="status-badge">
+              {{ member.status }}
+            </ion-badge>
+          </div>
+          
+          <div class="member-details">
+            <span *ngIf="member.email" class="detail-item">
+              <ion-icon name="mail-outline"></ion-icon>
+              {{ member.email }}
+            </span>
+            <span *ngIf="member.phone" class="detail-item">
+              <ion-icon name="call-outline"></ion-icon>
+              {{ member.phone }}
+            </span>
+            <span *ngIf="member.membership_date" class="detail-item">
+              <ion-icon name="calendar-outline"></ion-icon>
+              Member since {{ member.membership_date | date:'MMM yyyy' }}
+            </span>
+          </div>
+          
+          <div class="member-tags" *ngIf="member.tags && member.tags.length > 0">
+            <ion-chip *ngFor="let tag of member.tags.slice(0, 3)" class="tag-chip">
+              {{ tag }}
+            </ion-chip>
+            <span *ngIf="member.tags.length > 3" class="more-tags">
+              +{{ member.tags.length - 3 }}
+            </span>
+          </div>
+        </div>
+        
+        <div class="member-actions">
+          <button class="action-btn" (click)="showMemberActions(member, $event)">
+            <ion-icon name="ellipsis-vertical"></ion-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Grid View -->
+    <div class="members-grid" *ngIf="viewMode === 'grid'">
+      <div 
+        *ngFor="let member of filteredMembers"
+        class="member-grid-card"
+        (click)="openMember(member)">
+        
+        <div class="grid-avatar" [style.background]="getAvatarGradient(member.name)">
+          <span>{{ getInitials(member.name) }}</span>
+        </div>
+        
+        <h4>{{ member.name }}</h4>
+        
+        <ion-badge [color]="getStatusColor(member.status)" class="grid-status">
+          {{ member.status }}
+        </ion-badge>
+        
+        <div class="grid-details">
+          <p *ngIf="member.email">{{ member.email }}</p>
+          <p *ngIf="member.phone">{{ member.phone }}</p>
+        </div>
+        
+        <div class="grid-tags" *ngIf="member.tags && member.tags.length > 0">
+          <ion-chip *ngFor="let tag of member.tags.slice(0, 2)" class="mini-tag">
+            {{ tag }}
+          </ion-chip>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Create FAB -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="openCreateModal()">
+      <ion-icon name="person-add"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

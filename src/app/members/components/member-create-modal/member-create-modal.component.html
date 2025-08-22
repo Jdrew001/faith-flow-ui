@@ -1,0 +1,382 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Add New Member</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="close()">
+        <ion-icon slot="icon-only" name="close"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+  
+  <!-- Progress Bar -->
+  <div class="progress-container">
+    <div class="progress-bar">
+      <div class="progress-fill" [style.width.%]="(currentStep / totalSteps) * 100"></div>
+    </div>
+    <div class="step-indicators">
+      <div class="step-indicator" 
+           *ngFor="let step of [1,2,3,4]; let i = index"
+           [class.active]="currentStep > i"
+           [class.current]="currentStep === i + 1">
+        <span class="step-number">{{ i + 1 }}</span>
+        <span class="step-label">{{ getStepLabel(i + 1) }}</span>
+      </div>
+    </div>
+  </div>
+</ion-header>
+
+<ion-content class="form-content" scrollY="true">
+  <form [formGroup]="memberForm" class="modern-form">
+    <div class="form-container">
+      
+      <!-- Step 1: Personal Information -->
+      <div class="step-content" *ngIf="currentStep === 1">
+        <div class="step-header">
+          <ion-icon name="person-outline"></ion-icon>
+          <h2>Personal Information</h2>
+          <p>Let's start with the basic details</p>
+        </div>
+      
+      <div class="form-section">
+        <div class="form-grid">
+          <div class="form-field full-width">
+            <label class="field-label required">Full Name</label>
+            <ion-input 
+              formControlName="name" 
+              type="text"
+              placeholder="Enter full name"
+              class="modern-input">
+            </ion-input>
+            <span class="field-error" *ngIf="memberForm.get('name')?.invalid && memberForm.get('name')?.touched">
+              Name is required
+            </span>
+          </div>
+          
+          <div class="form-field">
+            <label class="field-label">Email Address</label>
+            <ion-input 
+              formControlName="email" 
+              type="email"
+              placeholder="email@example.com"
+              class="modern-input">
+            </ion-input>
+            <span class="field-error" *ngIf="memberForm.get('email')?.invalid && memberForm.get('email')?.touched">
+              Please enter a valid email
+            </span>
+          </div>
+          
+          <div class="form-field">
+            <label class="field-label">Phone Number</label>
+            <ion-input 
+              formControlName="phone" 
+              type="tel"
+              placeholder="(555) 123-4567"
+              class="modern-input">
+            </ion-input>
+          </div>
+          
+          <div class="form-field">
+            <label class="field-label">Birthdate</label>
+            <app-enhanced-date-picker
+              formControlName="birthdate"
+              placeholder="Select birthdate"
+              mode="date"
+              [returnFullObject]="false">
+            </app-enhanced-date-picker>
+          </div>
+          
+          <div class="form-field">
+            <label class="field-label">Anniversary</label>
+            <app-enhanced-date-picker
+              formControlName="anniversary"
+              placeholder="Select anniversary"
+              mode="date"
+              [returnFullObject]="false">
+            </app-enhanced-date-picker>
+          </div>
+        </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Address Information -->
+    <div class="step-content" *ngIf="currentStep === 2">
+      <div class="step-header">
+        <ion-icon name="location-outline"></ion-icon>
+        <h2>Address Information</h2>
+        <p>Where can we reach them?</p>
+      </div>
+      
+      <div class="form-section">
+        <div class="form-grid">
+          <div class="form-field full-width">
+            <label class="field-label">Street Address</label>
+            <ion-input 
+              formControlName="address" 
+              type="text"
+              placeholder="123 Main Street"
+              class="modern-input">
+            </ion-input>
+          </div>
+          
+          <div class="form-field">
+            <label class="field-label">City</label>
+            <ion-input 
+              formControlName="city" 
+              type="text"
+              placeholder="City"
+              class="modern-input">
+            </ion-input>
+          </div>
+          
+          <div class="form-field small">
+            <label class="field-label">State</label>
+            <ion-input 
+              formControlName="state" 
+              type="text"
+              placeholder="ST"
+              maxlength="2"
+              class="modern-input">
+            </ion-input>
+          </div>
+          
+          <div class="form-field small">
+            <label class="field-label">ZIP Code</label>
+            <ion-input 
+              formControlName="zip" 
+              type="text"
+              placeholder="12345"
+              class="modern-input">
+            </ion-input>
+          </div>
+        </div>
+        
+        <!-- Optional: Map Preview -->
+        <div class="address-preview" *ngIf="hasValidAddress()">
+          <div class="preview-card">
+            <ion-icon name="map-outline"></ion-icon>
+            <div class="preview-text">
+              <p>{{ getFullAddress() }}</p>
+            </div>
+          </div>
+        </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Membership Details -->
+    <div class="step-content" *ngIf="currentStep === 3">
+      <div class="step-header">
+        <ion-icon name="people-outline"></ion-icon>
+        <h2>Membership Details</h2>
+        <p>Member status and information</p>
+      </div>
+      
+      <div class="form-section">
+        <div class="form-grid">
+          <div class="form-field">
+            <label class="field-label required">Status</label>
+            <ion-select formControlName="status" class="modern-select" interface="popover">
+              <ion-select-option *ngFor="let status of statusOptions" [value]="status">
+                {{ status }}
+              </ion-select-option>
+            </ion-select>
+          </div>
+          
+          <div class="form-field">
+            <label class="field-label">Membership Date</label>
+            <app-enhanced-date-picker
+              formControlName="membership_date"
+              placeholder="Select membership date"
+              mode="date"
+              [returnFullObject]="false">
+            </app-enhanced-date-picker>
+          </div>
+          
+          <div class="form-field full-width">
+            <label class="field-label">Notes</label>
+            <ion-textarea 
+              formControlName="notes" 
+              rows="4"
+              placeholder="Add any additional notes about this member..."
+              class="modern-textarea">
+            </ion-textarea>
+          </div>
+        </div>
+        
+        <!-- Tags Section -->
+        <div class="tags-section">
+          <h3 class="section-subtitle">
+            <ion-icon name="pricetags-outline"></ion-icon>
+            Member Tags
+          </h3>
+          
+          <div class="tag-input-wrapper">
+            <ion-input 
+              #tagInput
+              type="text"
+              placeholder="Type a tag and press Enter"
+              (keyup.enter)="addTag($event)"
+              class="modern-input tag-input">
+            </ion-input>
+            <button class="add-tag-btn" (click)="addTag(tagInput)">
+              <ion-icon name="add-circle"></ion-icon>
+            </button>
+          </div>
+          
+          <div class="tags-display" *ngIf="tags.length > 0">
+            <div class="tag-chip" *ngFor="let tag of tags">
+              <span>{{ tag }}</span>
+              <button (click)="removeTag(tag)" class="remove-tag">
+                <ion-icon name="close"></ion-icon>
+              </button>
+            </div>
+          </div>
+          
+          <div class="suggested-tags">
+            <span class="suggestion-label">Quick Add:</span>
+            <button class="suggestion-chip" (click)="addSuggestedTag('New Member')">New Member</button>
+            <button class="suggestion-chip" (click)="addSuggestedTag('Youth')">Youth</button>
+            <button class="suggestion-chip" (click)="addSuggestedTag('Small Group')">Small Group</button>
+            <button class="suggestion-chip" (click)="addSuggestedTag('Volunteer')">Volunteer</button>
+            <button class="suggestion-chip" (click)="addSuggestedTag('Leader')">Leader</button>
+          </div>
+        </div>
+        </div>
+      </div>
+
+      <!-- Step 4: Review & Confirm -->
+    <div class="step-content" *ngIf="currentStep === 4">
+      <div class="step-header">
+        <ion-icon name="checkmark-circle-outline"></ion-icon>
+        <h2>Review & Confirm</h2>
+        <p>Please review the member information</p>
+      </div>
+      
+      <div class="review-section">
+        <!-- Personal Info Review -->
+        <div class="review-card">
+          <div class="review-card-header">
+            <ion-icon name="person-outline"></ion-icon>
+            <span>Personal Information</span>
+            <button class="edit-btn" (click)="goToStep(1)">
+              <ion-icon name="create-outline"></ion-icon>
+            </button>
+          </div>
+          <div class="review-card-content">
+            <div class="review-item">
+              <span class="review-label">Name</span>
+              <span class="review-value">{{ memberForm.get('name')?.value || 'Not provided' }}</span>
+            </div>
+            <div class="review-item" *ngIf="memberForm.get('email')?.value">
+              <span class="review-label">Email</span>
+              <span class="review-value">{{ memberForm.get('email')?.value }}</span>
+            </div>
+            <div class="review-item" *ngIf="memberForm.get('phone')?.value">
+              <span class="review-label">Phone</span>
+              <span class="review-value">{{ memberForm.get('phone')?.value }}</span>
+            </div>
+            <div class="review-item" *ngIf="memberForm.get('birthdate')?.value">
+              <span class="review-label">Birthdate</span>
+              <span class="review-value">{{ memberForm.get('birthdate')?.value | date:'mediumDate' }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Address Review -->
+        <div class="review-card" *ngIf="hasValidAddress()">
+          <div class="review-card-header">
+            <ion-icon name="location-outline"></ion-icon>
+            <span>Address</span>
+            <button class="edit-btn" (click)="goToStep(2)">
+              <ion-icon name="create-outline"></ion-icon>
+            </button>
+          </div>
+          <div class="review-card-content">
+            <div class="review-item">
+              <span class="review-value">{{ getFullAddress() }}</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Membership Review -->
+        <div class="review-card">
+          <div class="review-card-header">
+            <ion-icon name="people-outline"></ion-icon>
+            <span>Membership</span>
+            <button class="edit-btn" (click)="goToStep(3)">
+              <ion-icon name="create-outline"></ion-icon>
+            </button>
+          </div>
+          <div class="review-card-content">
+            <div class="review-item">
+              <span class="review-label">Status</span>
+              <span class="review-value">
+                <ion-badge [color]="getStatusColor(memberForm.get('status')?.value)">
+                  {{ memberForm.get('status')?.value }}
+                </ion-badge>
+              </span>
+            </div>
+            <div class="review-item" *ngIf="memberForm.get('membership_date')?.value">
+              <span class="review-label">Member Since</span>
+              <span class="review-value">{{ memberForm.get('membership_date')?.value | date:'mediumDate' }}</span>
+            </div>
+            <div class="review-item" *ngIf="tags.length > 0">
+              <span class="review-label">Tags</span>
+              <div class="review-tags">
+                <span class="review-tag" *ngFor="let tag of tags">{{ tag }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </form>
+</ion-content>
+
+<!-- Navigation Footer - Outside ion-content -->
+<ion-footer class="form-footer">
+  <div class="form-navigation">
+    <button 
+      type="button"
+      class="nav-btn back-btn"
+      *ngIf="currentStep > 1"
+      (click)="previousStep()">
+      <ion-icon name="arrow-back"></ion-icon>
+      <span>Back</span>
+    </button>
+    
+    <button 
+      type="button"
+      class="nav-btn skip-btn"
+      *ngIf="currentStep === 2"
+      (click)="skipStep()">
+      <span>Skip Address</span>
+    </button>
+    
+    <div class="nav-spacer"></div>
+    
+    <button 
+      type="button"
+      class="nav-btn next-btn"
+      *ngIf="currentStep < totalSteps"
+      [disabled]="!isStepValid()"
+      (click)="nextStep()">
+      <span>Continue</span>
+      <ion-icon name="arrow-forward"></ion-icon>
+    </button>
+    
+    <button 
+      type="button"
+      class="nav-btn create-btn"
+      *ngIf="currentStep === totalSteps"
+      [disabled]="memberForm.invalid || isLoading"
+      [class.loading]="isLoading"
+      (click)="save()">
+      <div class="btn-content">
+        <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+        <ion-icon name="person-add" *ngIf="!isLoading"></ion-icon>
+        <span>{{ isLoading ? 'Creating...' : 'Create Member' }}</span>
+      </div>
+    </button>
+  </div>
+</ion-footer>

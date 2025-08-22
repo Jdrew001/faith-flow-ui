@@ -9,8 +9,16 @@
     <label class="floating-label" *ngIf="label">{{ label }}<span *ngIf="required"> *</span></label>
   </div>
 
-  <!-- Dropdown Panel -->
-  <div class="date-picker-panel" [class.open]="isOpen" [class.datetime-mode]="mode === 'datetime'" *ngIf="isOpen">
+  <!-- Backdrop for modal mode -->
+  <div class="date-picker-backdrop" [class.open]="isOpen && openAsModal" (click)="closePicker()" *ngIf="isOpen && openAsModal"></div>
+  
+  <!-- Dropdown/Modal Panel -->
+  <div class="date-picker-panel" 
+       [class.open]="isOpen" 
+       [class.modal-mode]="openAsModal"
+       [class.dropdown-mode]="!openAsModal"
+       [class.datetime-mode]="mode === 'datetime'" 
+       *ngIf="isOpen">
     <!-- Tab Navigation for DateTime Mode -->
     <div class="tab-navigation" *ngIf="mode === 'datetime'">
       <button 

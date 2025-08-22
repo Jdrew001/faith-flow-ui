@@ -1,0 +1,408 @@
+<ion-header>
+  <ion-toolbar class="modal-header">
+    <ion-buttons slot="start">
+      <ion-button (click)="close()" class="close-button">
+        <ion-icon name="close" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Member Profile</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="toggleEdit()" class="edit-button" *ngIf="!isEditing">
+        <ion-icon name="create-outline" slot="icon-only"></ion-icon>
+      </ion-button>
+      <ion-button (click)="openActions()" class="more-button" *ngIf="!isEditing">
+        <ion-icon name="ellipsis-vertical" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="member-detail-content">
+  <!-- Profile Header -->
+  <div class="profile-header">
+    <div class="profile-info">
+      <div class="profile-avatar" [style.background]="getAvatarGradient(member.name)">
+        <span>{{ getInitials(member.name) }}</span>
+      </div>
+      <h1 class="profile-name">{{ member.name }}</h1>
+      <ion-badge [color]="getStatusColor(member.status)" class="status-badge">
+        <ion-icon name="ellipse" class="status-indicator"></ion-icon>
+        {{ member.status }}
+      </ion-badge>
+      <p class="member-since" *ngIf="member.membership_date">
+        Member since {{ member.membership_date | date:'MMM yyyy' }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="tab-navigation">
+    <button 
+      class="tab-button" 
+      [class.active]="activeTab === 'overview'"
+      (click)="activeTab = 'overview'">
+      <ion-icon name="person-outline"></ion-icon>
+      <span>Overview</span>
+    </button>
+    <button 
+      class="tab-button" 
+      [class.active]="activeTab === 'activity'"
+      (click)="activeTab = 'activity'">
+      <ion-icon name="pulse-outline"></ion-icon>
+      <span>Activity</span>
+    </button>
+    <button 
+      class="tab-button" 
+      [class.active]="activeTab === 'attendance'"
+      (click)="activeTab = 'attendance'">
+      <ion-icon name="calendar-outline"></ion-icon>
+      <span>Attendance</span>
+    </button>
+    <button 
+      class="tab-button" 
+      [class.active]="activeTab === 'notes'"
+      (click)="activeTab = 'notes'">
+      <ion-icon name="document-text-outline"></ion-icon>
+      <span>Notes</span>
+    </button>
+  </div>
+
+  <!-- Overview Tab -->
+  <div class="tab-content" *ngIf="activeTab === 'overview'">
+    <form [formGroup]="memberForm">
+      <!-- Quick Actions -->
+      <div class="quick-actions" *ngIf="!isEditing">
+        <button class="action-card" (click)="callMember()" [disabled]="!member.phone">
+          <ion-icon name="call-outline"></ion-icon>
+          <span>Call</span>
+        </button>
+        <button class="action-card" (click)="emailMember()" [disabled]="!member.email">
+          <ion-icon name="mail-outline"></ion-icon>
+          <span>Email</span>
+        </button>
+        <button class="action-card" (click)="sendMessage()">
+          <ion-icon name="chatbubble-outline"></ion-icon>
+          <span>Message</span>
+        </button>
+        <button class="action-card" (click)="addFollowUp()">
+          <ion-icon name="flag-outline"></ion-icon>
+          <span>Follow-up</span>
+        </button>
+      </div>
+
+      <!-- Contact Information -->
+      <div class="info-section">
+        <h3 class="section-title">
+          <ion-icon name="call-outline"></ion-icon>
+          Contact Information
+        </h3>
+        <div class="info-card">
+          <div class="info-item" *ngIf="member.email">
+            <ion-icon name="mail-outline" class="info-icon"></ion-icon>
+            <div class="info-content">
+              <label>Email</label>
+              <span *ngIf="!isEditing">{{ member.email }}</span>
+              <ion-input *ngIf="isEditing" formControlName="email" type="email"></ion-input>
+            </div>
+          </div>
+          <div class="info-item" *ngIf="member.phone">
+            <ion-icon name="call-outline" class="info-icon"></ion-icon>
+            <div class="info-content">
+              <label>Phone</label>
+              <span *ngIf="!isEditing">{{ formatPhone(member.phone) }}</span>
+              <ion-input *ngIf="isEditing" formControlName="phone" type="tel"></ion-input>
+            </div>
+          </div>
+          <div class="info-item" *ngIf="member.address || isEditing">
+            <ion-icon name="location-outline" class="info-icon"></ion-icon>
+            <div class="info-content">
+              <label>Address</label>
+              <span *ngIf="!isEditing && member.address">{{ getFullAddress() }}</span>
+              <div *ngIf="isEditing" class="address-fields">
+                <ion-input formControlName="address" placeholder="Street Address"></ion-input>
+                <div class="address-row">
+                  <ion-input formControlName="city" placeholder="City"></ion-input>
+                  <ion-input formControlName="state" placeholder="State" maxlength="2"></ion-input>
+                  <ion-input formControlName="zip" placeholder="ZIP"></ion-input>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Personal Information -->
+      <div class="info-section">
+        <h3 class="section-title">
+          <ion-icon name="information-circle-outline"></ion-icon>
+          Personal Information
+        </h3>
+        <div class="info-card">
+          <div class="info-item">
+            <ion-icon name="gift-outline" class="info-icon"></ion-icon>
+            <div class="info-content">
+              <label>Birthday</label>
+              <span *ngIf="!isEditing && member.birthdate">
+                {{ member.birthdate | date:'MMM d' }}
+                <span class="age-badge" *ngIf="getAge()">{{ getAge() }} years old</span>
+              </span>
+              <span *ngIf="!isEditing && !member.birthdate" class="no-data">Not set</span>
+              <app-enhanced-date-picker 
+                *ngIf="isEditing"
+                formControlName="birthdate"
+                placeholder="Select birthdate"
+                mode="date"
+                [returnFullObject]="false">
+              </app-enhanced-date-picker>
+            </div>
+          </div>
+          <div class="info-item">
+            <ion-icon name="heart-outline" class="info-icon"></ion-icon>
+            <div class="info-content">
+              <label>Anniversary</label>
+              <span *ngIf="!isEditing && member.anniversary">{{ member.anniversary | date:'MMM d, yyyy' }}</span>
+              <span *ngIf="!isEditing && !member.anniversary" class="no-data">Not set</span>
+              <app-enhanced-date-picker 
+                *ngIf="isEditing"
+                formControlName="anniversary"
+                placeholder="Select anniversary"
+                mode="date"
+                [returnFullObject]="false">
+              </app-enhanced-date-picker>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tags -->
+      <div class="info-section">
+        <h3 class="section-title">
+          <ion-icon name="pricetags-outline"></ion-icon>
+          Tags
+        </h3>
+        <div class="tags-card">
+          <div class="tags-display">
+            <span class="tag-chip" *ngFor="let tag of member.tags">
+              {{ tag }}
+              <button *ngIf="isEditing" (click)="removeTag(tag)" class="remove-tag">
+                <ion-icon name="close"></ion-icon>
+              </button>
+            </span>
+            <button *ngIf="isEditing" class="add-tag-chip" (click)="addTag()">
+              <ion-icon name="add"></ion-icon>
+              Add Tag
+            </button>
+            <p *ngIf="(!member.tags || member.tags.length === 0) && !isEditing" class="no-data">
+              No tags assigned
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div class="info-section">
+        <h3 class="section-title">
+          <ion-icon name="document-text-outline"></ion-icon>
+          Notes
+        </h3>
+        <div class="info-card">
+          <div class="notes-content">
+            <p *ngIf="!isEditing && member.notes">{{ member.notes }}</p>
+            <p *ngIf="!isEditing && !member.notes" class="no-data">No notes added</p>
+            <ion-textarea 
+              *ngIf="isEditing"
+              formControlName="notes"
+              rows="4"
+              placeholder="Add notes about this member...">
+            </ion-textarea>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <!-- Edit Actions -->
+    <div class="edit-actions" *ngIf="isEditing">
+      <button class="action-btn save-btn" (click)="save()" [disabled]="memberForm.invalid">
+        <ion-icon name="checkmark"></ion-icon>
+        Save Changes
+      </button>
+      <button class="action-btn cancel-btn" (click)="toggleEdit()">
+        <ion-icon name="close"></ion-icon>
+        Cancel
+      </button>
+    </div>
+  </div>
+
+  <!-- Activity Tab -->
+  <div class="tab-content" *ngIf="activeTab === 'activity'">
+    <div class="activity-section">
+      <!-- Follow-ups -->
+      <h3 class="section-title">
+        <ion-icon name="flag-outline"></ion-icon>
+        Follow-ups
+      </h3>
+      <div class="activity-list">
+        <div class="activity-card" *ngFor="let followUp of followUps">
+          <div class="activity-icon" [class.completed]="followUp.status === 'COMPLETED'">
+            <ion-icon name="flag"></ion-icon>
+          </div>
+          <div class="activity-content">
+            <h4>{{ followUp.type }}</h4>
+            <p>{{ followUp.description }}</p>
+            <span class="activity-date">{{ followUp.dueDate | date:'MMM d, yyyy' }}</span>
+          </div>
+          <ion-badge [color]="followUp.status === 'COMPLETED' ? 'success' : 'warning'">
+            {{ followUp.status }}
+          </ion-badge>
+        </div>
+        <div class="empty-state" *ngIf="followUps.length === 0">
+          <ion-icon name="flag-outline"></ion-icon>
+          <p>No follow-ups scheduled</p>
+        </div>
+      </div>
+
+      <!-- Workflows -->
+      <h3 class="section-title">
+        <ion-icon name="git-branch-outline"></ion-icon>
+        Workflows
+      </h3>
+      <div class="activity-list">
+        <div class="activity-card" *ngFor="let workflow of workflows">
+          <div class="activity-icon" [class.completed]="workflow.status === 'COMPLETED'">
+            <ion-icon name="git-branch"></ion-icon>
+          </div>
+          <div class="activity-content">
+            <h4>{{ workflow.name }}</h4>
+            <span class="activity-date">Started {{ workflow.created_at | date:'MMM d, yyyy' }}</span>
+          </div>
+          <ion-badge [color]="workflow.status === 'COMPLETED' ? 'success' : 'primary'">
+            {{ workflow.status }}
+          </ion-badge>
+        </div>
+        <div class="empty-state" *ngIf="workflows.length === 0">
+          <ion-icon name="git-branch-outline"></ion-icon>
+          <p>No active workflows</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Attendance Tab -->
+  <div class="tab-content" *ngIf="activeTab === 'attendance'">
+    <div class="attendance-stats">
+      <div class="stat-card">
+        <ion-icon name="checkmark-circle" class="stat-icon success"></ion-icon>
+        <div class="stat-value">{{ getAttendanceCount('Present') }}</div>
+        <div class="stat-label">Present</div>
+      </div>
+      <div class="stat-card">
+        <ion-icon name="close-circle" class="stat-icon danger"></ion-icon>
+        <div class="stat-value">{{ getAttendanceCount('Absent') }}</div>
+        <div class="stat-label">Absent</div>
+      </div>
+      <div class="stat-card">
+        <ion-icon name="trending-up" class="stat-icon primary"></ion-icon>
+        <div class="stat-value">{{ getAttendanceRate() }}%</div>
+        <div class="stat-label">Rate</div>
+      </div>
+    </div>
+
+    <h3 class="section-title">
+      <ion-icon name="calendar-outline"></ion-icon>
+      Attendance History
+    </h3>
+    <div class="attendance-list">
+      <div class="attendance-card" *ngFor="let attendance of attendanceHistory">
+        <div class="attendance-date">
+          <span class="day">{{ attendance.date | date:'d' }}</span>
+          <span class="month">{{ attendance.date | date:'MMM' }}</span>
+        </div>
+        <div class="attendance-content">
+          <h4>{{ attendance.sessionName }}</h4>
+          <p>{{ attendance.date | date:'EEEE, h:mm a' }}</p>
+        </div>
+        <ion-icon 
+          [name]="attendance.status === 'Present' ? 'checkmark-circle' : 'close-circle'"
+          [class.present]="attendance.status === 'Present'"
+          [class.absent]="attendance.status === 'Absent'"
+          class="attendance-status">
+        </ion-icon>
+      </div>
+      <div class="empty-state" *ngIf="attendanceHistory.length === 0">
+        <ion-icon name="calendar-outline"></ion-icon>
+        <p>No attendance records</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notes Tab -->
+  <div class="tab-content" *ngIf="activeTab === 'notes'">
+    <div class="notes-section">
+      <!-- Simple Search -->
+      <div class="notes-search" *ngIf="memberNotes.length > 0">
+        <ion-icon name="search-outline"></ion-icon>
+        <input 
+          type="text" 
+          placeholder="Search notes..." 
+          [(ngModel)]="noteSearchTerm"
+          (ngModelChange)="filterNotes()">
+      </div>
+      
+      <!-- Clean Notes List -->
+      <div class="notes-list-clean" *ngIf="filteredNotes.length > 0">
+        <div class="note-item-clean" 
+             *ngFor="let note of filteredNotes; let i = index"
+             [class.last]="i === filteredNotes.length - 1">
+          
+          <div class="note-main">
+            <div class="note-header-clean">
+              <div class="note-date-clean">
+                <span class="date-primary">{{ note.created_at | date:'MMM d, yyyy' }}</span>
+                <span class="date-secondary">{{ note.created_at | date:'h:mm a' }}</span>
+                <span class="date-updated" *ngIf="wasUpdated(note)">
+                  Edited {{ note.updated_at | date:'MMM d' }}
+                </span>
+              </div>
+              <button class="note-action-button" (click)="showNoteOptions(note, $event)">
+                <ion-icon name="ellipsis-horizontal"></ion-icon>
+              </button>
+            </div>
+            
+            <div class="note-body-clean">
+              <p class="note-text">{{ note.content }}</p>
+            </div>
+            
+            <div class="note-footer-clean" *ngIf="note.author || note.tags">
+              <div class="note-metadata">
+                <span class="metadata-item" *ngIf="note.author">
+                  <ion-icon name="person-outline"></ion-icon>
+                  {{ note.author }}
+                </span>
+                <span class="metadata-item" *ngIf="isRecentNote(note.created_at)">
+                  <ion-icon name="sparkles-outline"></ion-icon>
+                  Recent
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Clean Empty State -->
+      <div class="empty-state-clean" *ngIf="filteredNotes.length === 0">
+        <ion-icon name="document-text-outline"></ion-icon>
+        <h4>{{ noteSearchTerm ? 'No results found' : 'No notes yet' }}</h4>
+        <p>{{ noteSearchTerm ? 'Try a different search term' : 'Add notes to keep track of important information' }}</p>
+        <button class="start-button" (click)="addNote()" *ngIf="!noteSearchTerm">
+          <ion-icon name="add-circle-outline"></ion-icon>
+          Add Your First Note
+        </button>
+      </div>
+      
+      <!-- Floating Action Button for Notes -->
+      <button class="notes-fab" (click)="addNote()" *ngIf="activeTab === 'notes'">
+        <ion-icon name="add"></ion-icon>
+      </button>
+    </div>
+  </div>
+</ion-content>

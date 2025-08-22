@@ -85,28 +85,85 @@
   }
 }
 
-.date-picker-panel {
-  position: absolute;
-  top: 100%;
+// Backdrop for modal
+.date-picker-backdrop {
+  position: fixed;
+  top: 0;
   left: 0;
   right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 9998;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  
+  &.open {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+.date-picker-panel {
   background: #2c2c2e;
   border: 2px solid #48484a;
-  border-radius: 12px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
   z-index: 9999;
-  margin-top: 8px;
   overflow: hidden;
-  animation: slideDown 0.2s ease-out;
+  display: flex;
+  flex-direction: column;
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   
-  @keyframes slideDown {
-    from {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    to {
+  // Modal mode styles
+  &.modal-mode {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    width: 90%;
+    max-width: 400px;
+    max-height: 85vh;
+    border-radius: 20px;
+    
+    &.open {
       opacity: 1;
-      transform: translateY(0);
+      pointer-events: auto;
+      transform: translate(-50%, -50%) scale(1);
+    }
+    
+    // iOS safe area
+    @supports (padding: max(0px)) {
+      padding-bottom: max(0px, env(safe-area-inset-bottom));
+    }
+  }
+  
+  // Dropdown mode styles
+  &.dropdown-mode {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    max-height: 480px;
+    border-radius: 12px;
+    
+    &.open {
+      opacity: 1;
+      pointer-events: auto;
+      animation: slideDown 0.2s ease-out;
+    }
+    
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
   }
   
@@ -288,6 +345,10 @@
   gap: 12px;
   padding: 16px;
   border-top: 1px solid #3a3a3c;
+  background: #2c2c2e;
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
   
   .action-btn {
     flex: 1;
@@ -392,6 +453,10 @@
 }
 
 .tab-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  
   &.hidden {
     display: none;
   }

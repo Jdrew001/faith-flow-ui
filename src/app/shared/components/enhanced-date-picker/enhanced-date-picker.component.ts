@@ -44,6 +44,7 @@ export class EnhancedDatePickerComponent implements ControlValueAccessor, OnInit
   @Input() mode: 'date' | 'datetime' = 'date';
   @Input() minuteStep: number = 15;
   @Input() returnFullObject: boolean = true; // Return full object with timezone info
+  @Input() openAsModal: boolean = true; // Open as modal instead of dropdown
   
   @Output() dateChange = new EventEmitter<string>();
 

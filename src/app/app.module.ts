@@ -25,7 +25,10 @@ import { customNavAnimation } from './animations/nav-animation';
       animated: true,
       navAnimation: customNavAnimation,
       mode: 'ios',
-      swipeBackEnabled: false
+      swipeBackEnabled: false,
+      scrollAssist: true, // Ensure input fields are scrolled into view
+      scrollPadding: true, // Add padding when scrolling to inputs
+      experimentalCloseWatcher: true // Better modal handling
     }), 
     AppRoutingModule, 
     SharedModule,

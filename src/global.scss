@@ -28,9 +28,46 @@
 /* Disable swipe gestures globally */
 @import 'app/styles/disable-swipe.scss';
 
+/* iOS-style momentum scrolling and rubber band effect */
+* {
+  -webkit-overflow-scrolling: touch; // Enable momentum scrolling everywhere
+}
+
+// Enable bounce scrolling for all ion-content elements
+ion-content {
+  --overflow: scroll;
+  -webkit-overflow-scrolling: touch;
+  
+  // iOS specific - enable rubber band effect
+  @supports (-webkit-touch-callout: none) {
+    &::part(scroll) {
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: auto;
+    }
+  }
+}
+
+// Ensure modals have proper scrolling
+ion-modal {
+  ion-content {
+    --overflow: scroll;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+// Fix for iOS scrolling in custom scrollable containers
+.scrollable-container,
+.form-content,
+.tab-content,
+.date-picker-panel {
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
 // Dark theme for workflow modals and alerts
 ion-modal {
-  &.workflow-modal {
+  &.workflow-modal,
+  &.member-modal {
     --background: #2c2c2e;
     
     ion-header {
@@ -120,8 +157,9 @@ ion-modal {
   }
 }
 
-// Dark theme for alerts in workflow context
-ion-alert.workflow-alert {
+// Dark theme for alerts in workflow and member context
+ion-alert.workflow-alert,
+ion-alert.member-actions-alert {
   --background: #3a3a3c;
   --backdrop-opacity: 0.7;
   

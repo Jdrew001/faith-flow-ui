@@ -1,0 +1,760 @@
+// Header Styling
+ion-header {
+  ion-toolbar {
+    --background: #2c2c2e;
+    --color: #ffffff;
+    --border-color: #48484a;
+    
+    ion-title {
+      color: #ffffff;
+      font-weight: 600;
+    }
+    
+    ion-button {
+      --color: #8e8e93;
+      
+      &:hover {
+        --color: #007aff;
+      }
+    }
+  }
+}
+
+// Progress Container
+.progress-container {
+  background: #2c2c2e;
+  padding: 16px 16px 20px;
+  border-bottom: 1px solid #48484a;
+  
+  .progress-bar {
+    height: 4px;
+    background: #3a3a3c;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #007aff, #5856d6);
+      transition: width 0.3s ease;
+      border-radius: 2px;
+    }
+  }
+  
+  .step-indicators {
+    display: flex;
+    justify-content: space-between;
+    
+    .step-indicator {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      opacity: 0.5;
+      transition: all 0.3s;
+      
+      .step-number {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: #3a3a3c;
+        color: #8e8e93;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 600;
+        border: 2px solid #3a3a3c;
+        transition: all 0.3s;
+      }
+      
+      .step-label {
+        font-size: 10px;
+        color: #8e8e93;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+      }
+      
+      &.current {
+        opacity: 1;
+        
+        .step-number {
+          background: #007aff;
+          border-color: #007aff;
+          color: white;
+          transform: scale(1.1);
+        }
+        
+        .step-label {
+          color: #007aff;
+          font-weight: 600;
+        }
+      }
+      
+      &.active {
+        opacity: 1;
+        
+        .step-number {
+          background: #34c759;
+          border-color: #34c759;
+          color: white;
+        }
+        
+        .step-label {
+          color: #ffffff;
+        }
+      }
+    }
+  }
+}
+
+// Form Content Styling
+.form-content {
+  --background: #2c2c2e;
+  -webkit-overflow-scrolling: touch; // Enable momentum scrolling on iOS
+  overflow-y: scroll; // Always show scrollbar track for consistent behavior
+}
+
+.modern-form {
+  padding: 0;
+  min-height: 100%;
+}
+
+.form-container {
+  padding-bottom: 80px; // Space for fixed footer
+}
+
+// Step Content
+.step-content {
+  animation: slideIn 0.3s ease;
+  
+  .step-header {
+    text-align: center;
+    padding: 24px 24px 20px;
+    
+    ion-icon {
+      font-size: 48px;
+      color: #007aff;
+      margin-bottom: 16px;
+    }
+    
+    h2 {
+      margin: 0 0 8px;
+      font-size: 24px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+    
+    p {
+      margin: 0;
+      color: #8e8e93;
+      font-size: 14px;
+    }
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+// Form Sections
+.form-section {
+  background: #3a3a3c;
+  margin: 0 16px 16px;
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid #48484a;
+}
+
+// Form Grid Layout
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  
+  @media (max-width: 576px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// Form Fields
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  
+  &.full-width {
+    grid-column: 1 / -1;
+  }
+  
+  &.small {
+    max-width: 150px;
+  }
+}
+
+.field-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #8e8e93;
+  letter-spacing: 0.3px;
+  
+  &.required::after {
+    content: ' *';
+    color: #ff3b30;
+  }
+}
+
+.field-error {
+  font-size: 11px;
+  color: #ff3b30;
+  margin-top: 2px;
+}
+
+// Modern Input Styles
+.modern-input {
+  --background: #48484a;
+  --color: #ffffff;
+  --placeholder-color: #8e8e93;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --padding-top: 10px;
+  --padding-bottom: 10px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  
+  &:hover {
+    background: #5a5a5c;
+  }
+  
+  &.ion-focused {
+    border-color: #007aff;
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+  }
+}
+
+.modern-textarea {
+  --background: #48484a;
+  --color: #ffffff;
+  --placeholder-color: #8e8e93;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --padding-top: 10px;
+  --padding-bottom: 10px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+  min-height: 100px;
+  
+  &:hover {
+    background: #5a5a5c;
+  }
+  
+  &.ion-focused {
+    border-color: #007aff;
+    box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+  }
+}
+
+.modern-select {
+  --background: #48484a;
+  --placeholder-color: #8e8e93;
+  --padding-start: 12px;
+  --padding-end: 12px;
+  --padding-top: 10px;
+  --padding-bottom: 10px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  color: #ffffff;
+  
+  &::part(text) {
+    color: #ffffff;
+  }
+  
+  &::part(icon) {
+    color: #8e8e93;
+  }
+}
+
+// Address Preview
+.address-preview {
+  margin-top: 16px;
+  
+  .preview-card {
+    background: #48484a;
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    
+    ion-icon {
+      font-size: 24px;
+      color: #007aff;
+    }
+    
+    .preview-text {
+      flex: 1;
+      
+      p {
+        margin: 0;
+        color: #ffffff;
+        font-size: 14px;
+      }
+    }
+  }
+}
+
+// Tags Section
+.tags-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #48484a;
+  
+  .section-subtitle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 16px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffffff;
+    
+    ion-icon {
+      font-size: 18px;
+      color: #007aff;
+    }
+  }
+}
+
+.tag-input-wrapper {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 16px;
+  
+  .tag-input {
+    flex: 1;
+  }
+  
+  .add-tag-btn {
+    background: #007aff;
+    border: none;
+    border-radius: 10px;
+    padding: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    ion-icon {
+      font-size: 24px;
+      color: white;
+    }
+    
+    &:hover {
+      background: #0051d5;
+      transform: scale(1.05);
+    }
+    
+    &:active {
+      transform: scale(0.95);
+    }
+  }
+}
+
+.tags-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.tag-chip {
+  background: #48484a;
+  border: 1px solid #007aff;
+  border-radius: 20px;
+  padding: 6px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #ffffff;
+  font-size: 13px;
+  
+  .remove-tag {
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    transition: all 0.2s;
+    
+    ion-icon {
+      font-size: 16px;
+      color: #8e8e93;
+    }
+    
+    &:hover ion-icon {
+      color: #ff3b30;
+    }
+  }
+}
+
+.suggested-tags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  
+  .suggestion-label {
+    font-size: 12px;
+    color: #8e8e93;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .suggestion-chip {
+    background: transparent;
+    border: 1px solid #48484a;
+    border-radius: 16px;
+    padding: 4px 12px;
+    font-size: 12px;
+    color: #8e8e93;
+    cursor: pointer;
+    transition: all 0.2s;
+    
+    &:hover {
+      background: #48484a;
+      border-color: #007aff;
+      color: #007aff;
+    }
+  }
+}
+
+// Review Section
+.review-section {
+  padding: 0 16px;
+  padding-bottom: 20px;
+}
+
+.review-card {
+  background: #3a3a3c;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  overflow: hidden;
+  border: 1px solid #48484a;
+  
+  .review-card-header {
+    background: #48484a;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    
+    ion-icon {
+      font-size: 20px;
+      color: #007aff;
+    }
+    
+    span {
+      flex: 1;
+      font-weight: 600;
+      color: #ffffff;
+      font-size: 14px;
+    }
+    
+    .edit-btn {
+      background: transparent;
+      border: none;
+      color: #8e8e93;
+      padding: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      
+      &:hover {
+        color: #007aff;
+      }
+      
+      ion-icon {
+        font-size: 18px;
+      }
+    }
+  }
+  
+  .review-card-content {
+    padding: 16px;
+    
+    .review-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      
+      &:last-child {
+        margin-bottom: 0;
+      }
+      
+      .review-label {
+        font-size: 13px;
+        color: #8e8e93;
+        min-width: 100px;
+      }
+      
+      .review-value {
+        flex: 1;
+        font-size: 14px;
+        color: #ffffff;
+        
+        ion-badge {
+          font-size: 11px;
+          padding: 4px 8px;
+        }
+      }
+      
+      .review-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        
+        .review-tag {
+          background: #48484a;
+          color: #ffffff;
+          padding: 4px 8px;
+          border-radius: 12px;
+          font-size: 12px;
+        }
+      }
+    }
+  }
+}
+
+// Footer
+ion-footer.form-footer {
+  background: #2c2c2e;
+  border-top: 1px solid #48484a;
+}
+
+// Navigation Buttons
+.form-navigation {
+  background: #2c2c2e;
+  padding: 16px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+  display: flex;
+  gap: 12px;
+  
+  .nav-spacer {
+    flex: 1;
+  }
+  
+  .nav-btn {
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+    cursor: pointer;
+    border: none;
+    
+    &.back-btn {
+      background: transparent;
+      color: #8e8e93;
+      border: 1px solid #48484a;
+      
+      &:hover {
+        background: #3a3a3c;
+        color: #ffffff;
+      }
+    }
+    
+    &.skip-btn {
+      background: transparent;
+      color: #8e8e93;
+      border: 1px solid transparent;
+      
+      &:hover {
+        color: #007aff;
+      }
+    }
+    
+    &.next-btn {
+      background: #007aff;
+      color: white;
+      
+      &:hover:not(:disabled) {
+        background: #0051d5;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+      }
+      
+      &:disabled {
+        background: #48484a;
+        color: #8e8e93;
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+    }
+    
+    &.create-btn {
+      background: linear-gradient(135deg, #007aff, #5856d6);
+      color: white;
+      box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3);
+      
+      .btn-content {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      
+      &:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 24px rgba(0, 122, 255, 0.4);
+      }
+      
+      &:disabled {
+        background: #48484a;
+        color: #8e8e93;
+        box-shadow: none;
+        cursor: not-allowed;
+      }
+      
+      &.loading {
+        pointer-events: none;
+        
+        ion-spinner {
+          --color: white;
+        }
+      }
+    }
+    
+    ion-icon {
+      font-size: 18px;
+    }
+  }
+}
+
+// Enhanced Date Picker Integration
+app-enhanced-date-picker {
+  display: block;
+  width: 100%;
+  
+  ::ng-deep {
+    .date-picker-trigger {
+      background: #48484a;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      padding: 10px 12px;
+      color: #ffffff;
+      transition: all 0.2s;
+      
+      &:hover {
+        background: #5a5a5c;
+      }
+      
+      &.has-value {
+        color: #ffffff;
+      }
+      
+      .placeholder {
+        color: #8e8e93;
+      }
+      
+      ion-icon {
+        color: #8e8e93;
+      }
+    }
+    
+    .date-picker-modal {
+      --background: #3a3a3c;
+      
+      ion-datetime {
+        --background: #3a3a3c;
+        --background-rgb: 58, 58, 60;
+        --color: #ffffff;
+        --color-rgb: 255, 255, 255;
+      }
+    }
+  }
+}
+
+// Dark theme adjustments for Ionic components
+ion-item {
+  --background: transparent;
+  --border-color: transparent;
+  --padding-start: 0;
+  --inner-padding-end: 0;
+}
+
+ion-list {
+  background: transparent;
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .form-section {
+    margin: 12px;
+    padding: 16px;
+  }
+  
+  .form-grid {
+    gap: 12px;
+  }
+  
+  .review-item {
+    flex-direction: column;
+    align-items: flex-start;
+    
+    .review-label {
+      min-width: auto;
+      margin-bottom: 4px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .step-header {
+    padding: 24px 16px 20px !important;
+    
+    h2 {
+      font-size: 20px;
+    }
+  }
+  
+  .form-navigation {
+    flex-wrap: wrap;
+    
+    .nav-btn {
+      flex: 1;
+      min-width: calc(50% - 6px);
+      
+      &.skip-btn {
+        order: 1;
+      }
+      
+      &.back-btn {
+        order: 2;
+      }
+      
+      &.next-btn,
+      &.create-btn {
+        order: 3;
+        min-width: 100%;
+      }
+    }
+    
+    .nav-spacer {
+      display: none;
+    }
+  }
+}

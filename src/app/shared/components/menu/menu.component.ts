@@ -20,6 +20,7 @@ export class MenuComponent implements OnInit, OnDestroy {
     { title: 'Attendance', url: '/attendance', icon: 'people' },
     { title: 'Follow-ups', url: '/followups', icon: 'heart' },
     { title: 'Workflows', url: '/workflows', icon: 'git-branch' },
+    { title: 'Members', url: '/members', icon: 'people-circle' },
     { title: 'Reports', url: '/reports', icon: 'analytics' },
     { title: 'Settings', url: '/settings', icon: 'settings' }
   ];

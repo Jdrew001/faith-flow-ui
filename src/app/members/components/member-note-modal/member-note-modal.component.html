@@ -1,0 +1,80 @@
+<ion-header class="modal-header">
+  <ion-toolbar>
+    <ion-buttons slot="start">
+      <ion-button (click)="close()" class="close-button">
+        <ion-icon name="close" slot="icon-only"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Add Note</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="modal-content">
+  <form [formGroup]="noteForm" (ngSubmit)="save()">
+    <div class="form-container">
+      <!-- Member Info -->
+      <div class="member-info-card">
+        <ion-icon name="person-circle-outline" class="member-icon"></ion-icon>
+        <div class="member-details">
+          <span class="member-label">Adding note for</span>
+          <span class="member-name">{{ memberName }}</span>
+        </div>
+      </div>
+
+      <!-- Note Content -->
+      <div class="form-field" 
+           [class.has-value]="content?.value" 
+           [class.error]="hasError('content')">
+        <div class="input-wrapper">
+          <ion-icon name="document-text-outline" class="field-icon"></ion-icon>
+          <textarea 
+            class="custom-textarea"
+            formControlName="content"
+            placeholder=" "
+            rows="6"
+            maxlength="1000">
+          </textarea>
+          <label class="floating-label">Note Content</label>
+        </div>
+        <div class="error-message" *ngIf="hasError('content')">
+          <ion-icon name="alert-circle-outline"></ion-icon>
+          {{ getErrorMessage('content') }}
+        </div>
+        <div class="character-count">
+          {{ content?.value?.length || 0 }} / 1000
+        </div>
+      </div>
+
+      <!-- Guidelines -->
+      <div class="guidelines">
+        <h4>
+          <ion-icon name="information-circle-outline"></ion-icon>
+          Note Guidelines
+        </h4>
+        <ul>
+          <li>Be specific and include relevant details</li>
+          <li>Include dates or timeframes when applicable</li>
+          <li>Keep notes professional and respectful</li>
+          <li>Update existing notes rather than duplicating</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="modal-actions">
+      <ion-button 
+        expand="block" 
+        type="submit"
+        [disabled]="noteForm.invalid || isLoading">
+        <ion-icon name="checkmark-circle" slot="start"></ion-icon>
+        Add Note
+      </ion-button>
+      <ion-button 
+        expand="block" 
+        fill="outline" 
+        (click)="close()">
+        Cancel
+      </ion-button>
+    </div>
+  </form>
+</ion-content>
