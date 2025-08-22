@@ -150,7 +150,7 @@ export class WorkflowService {
     );
   }
 
-  deleteWorkflow(id: string): Observable<void> {
+  archiveWorkflow(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/workflow-templates/${id}`).pipe(
       tap(() => this.getWorkflows().subscribe())
     );

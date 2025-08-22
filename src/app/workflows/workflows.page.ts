@@ -202,11 +202,11 @@ export class WorkflowsPage implements OnInit, OnDestroy {
           }
         },
         {
-          text: 'Delete',
-          icon: 'trash-outline',
+          text: 'Archive',
+          icon: 'archive-outline',
           role: 'destructive',
           handler: () => {
-            this.confirmDelete(workflow);
+            this.confirmArchive(workflow);
           }
         },
         {
@@ -317,20 +317,20 @@ export class WorkflowsPage implements OnInit, OnDestroy {
     await alert.present();
   }
 
-  async confirmDelete(workflow: Workflow) {
+  async confirmArchive(workflow: Workflow) {
     const alert = await this.alertController.create({
-      header: 'Delete Workflow',
-      message: `Are you sure you want to delete "${workflow.name}"? This action cannot be undone.`,
+      header: 'Archive Workflow',
+      message: `Are you sure you want to archive "${workflow.name}"? You can restore it later from the archived workflows section.`,
       buttons: [
         {
           text: 'Cancel',
           role: 'cancel'
         },
         {
-          text: 'Delete',
+          text: 'Archive',
           role: 'destructive',
           handler: () => {
-            this.deleteWorkflow(workflow);
+            this.archiveWorkflow(workflow);
           }
         }
       ]
@@ -347,17 +347,17 @@ export class WorkflowsPage implements OnInit, OnDestroy {
     return instance.progress_percentage || 0;
   }
 
-  deleteWorkflow(workflow: Workflow) {
-    this.workflowService.deleteWorkflow(workflow.id)
+  archiveWorkflow(workflow: Workflow) {
+    this.workflowService.archiveWorkflow(workflow.id)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
           this.loadWorkflows();
-          this.showToast('Workflow deleted successfully', 'success');
+          this.showToast('Workflow archived successfully', 'success');
         },
         error: (error) => {
-          console.error('Error deleting workflow:', error);
-          this.showToast('Failed to delete workflow', 'danger');
+          console.error('Error archiving workflow:', error);
+          this.showToast('Failed to archive workflow', 'danger');
         }
       });
   }

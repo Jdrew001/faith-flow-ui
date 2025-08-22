@@ -386,15 +386,34 @@ export class MemberDetailModalComponent implements OnInit {
       return;
     }
 
+    // Validate at least one contact method
+    const email = this.memberForm.get('email')?.value?.trim();
+    const phone = this.memberForm.get('phone')?.value?.trim();
+    
+    if (!email && !phone) {
+      await this.showToast('Please provide at least one contact method (email or phone)', 'warning');
+      return;
+    }
+
     const loading = await this.loadingController.create({
       message: 'Saving member...'
     });
     await loading.present();
 
     try {
+      const formValue = this.memberForm.value;
+      
+      // Clean up date fields - convert empty strings to null
+      const memberData = {
+        ...formValue,
+        birthdate: formValue.birthdate || null,
+        anniversary: formValue.anniversary || null,
+        membership_date: formValue.membership_date || null
+      };
+      
       const updatedMember = await this.membersService.updateMember(
         this.member.id,
-        this.memberForm.value
+        memberData
       ).toPromise();
       
       this.member = updatedMember!;

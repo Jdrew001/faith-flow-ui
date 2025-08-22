@@ -466,8 +466,6 @@ ion-content {
 // Members Container
 .members-container {
   padding: 16px;
-  max-width: 100%;
-  overflow-x: hidden;
   
   // List View
   .members-list {
@@ -602,9 +600,8 @@ ion-content {
   // Grid View
   .members-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 12px;
-    width: 100%;
     
     .member-grid-card {
       background: #3a3a3c;
@@ -614,7 +611,7 @@ ion-content {
       cursor: pointer;
       transition: all 0.3s ease;
       border: 1px solid #48484a;
-      min-width: 0; // Prevent overflow
+      overflow: hidden;
       
       &:hover {
         background: #48484a;
@@ -749,7 +746,7 @@ ion-fab-button {
 @media (min-width: 768px) {
   .members-container {
     .members-grid {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(3, 1fr);
     }
   }
 }
@@ -757,7 +754,7 @@ ion-fab-button {
 @media (min-width: 1024px) {
   .members-container {
     .members-grid {
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(4, 1fr);
     }
   }
 }

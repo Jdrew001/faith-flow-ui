@@ -200,6 +200,9 @@ ion-header {
 }
 
 .field-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   font-size: 13px;
   font-weight: 500;
   color: #8e8e93;
@@ -208,6 +211,61 @@ ion-header {
   &.required::after {
     content: ' *';
     color: #ff3b30;
+  }
+  
+  .optional-badge {
+    background: rgba(142, 142, 147, 0.2);
+    color: #8e8e93;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0;
+  }
+  
+  .required-badge {
+    background: rgba(255, 69, 58, 0.2);
+    color: #ff453a;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: none;
+    letter-spacing: 0;
+    animation: pulse-required 2s ease-in-out infinite;
+  }
+}
+
+@keyframes pulse-required {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+// Contact Requirement Notice
+.contact-requirement-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: rgba(0, 122, 255, 0.1);
+  border: 1px solid rgba(0, 122, 255, 0.3);
+  border-radius: 8px;
+  margin-bottom: 20px;
+  
+  ion-icon {
+    font-size: 20px;
+    color: #007aff;
+  }
+  
+  span {
+    font-size: 13px;
+    color: #ffffff;
+    line-height: 1.4;
   }
 }
 
@@ -229,6 +287,11 @@ ion-header {
   border-radius: 10px;
   border: 1px solid transparent;
   transition: all 0.2s;
+  
+  &.valid-contact {
+    border: 1px solid #34c759;
+    --background: rgba(52, 199, 89, 0.1);
+  }
   
   &:hover {
     background: #5a5a5c;

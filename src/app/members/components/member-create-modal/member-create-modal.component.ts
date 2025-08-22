@@ -56,12 +56,27 @@ export class MemberCreateModalComponent implements OnInit {
       await this.showToast('Please fill in all required fields', 'warning');
       return;
     }
+    
+    // Validate at least one contact method
+    const email = this.memberForm.get('email')?.value?.trim();
+    const phone = this.memberForm.get('phone')?.value?.trim();
+    
+    if (!email && !phone) {
+      await this.showToast('Please provide at least one contact method (email or phone)', 'warning');
+      return;
+    }
 
     this.isLoading = true;
 
     try {
+      const formValue = this.memberForm.value;
+      
+      // Clean up date fields - convert empty strings to null
       const memberData = {
-        ...this.memberForm.value,
+        ...formValue,
+        birthdate: formValue.birthdate || null,
+        anniversary: formValue.anniversary || null,
+        membership_date: formValue.membership_date || null,
         tags: this.tags
       };
       
@@ -107,9 +122,22 @@ export class MemberCreateModalComponent implements OnInit {
   }
   
   // Step Navigation Methods
-  nextStep() {
-    if (this.currentStep < this.totalSteps && this.isStepValid()) {
-      this.currentStep++;
+  async nextStep() {
+    if (this.currentStep < this.totalSteps) {
+      if (this.isStepValid()) {
+        this.currentStep++;
+      } else {
+        // Show specific error for step 1 contact requirement
+        if (this.currentStep === 1) {
+          const email = this.memberForm.get('email')?.value?.trim();
+          const phone = this.memberForm.get('phone')?.value?.trim();
+          if (!email && !phone) {
+            await this.showToast('Please provide at least one contact method (email or phone)', 'warning');
+          } else if (!this.memberForm.get('name')?.valid) {
+            await this.showToast('Please enter a valid name', 'warning');
+          }
+        }
+      }
     }
   }
   
@@ -135,8 +163,12 @@ export class MemberCreateModalComponent implements OnInit {
   isStepValid(): boolean {
     switch (this.currentStep) {
       case 1:
-        // Personal info - only name is required
-        return this.memberForm.get('name')?.valid || false;
+        // Personal info - name is required and at least one contact method
+        const nameValid = this.memberForm.get('name')?.valid || false;
+        const email = this.memberForm.get('email')?.value?.trim();
+        const phone = this.memberForm.get('phone')?.value?.trim();
+        const hasContact = !!(email || phone);
+        return nameValid && hasContact;
       case 2:
         // Address - all optional
         return true;

@@ -225,20 +225,20 @@ export class WorkflowDetailComponent implements OnInit, OnDestroy {
       });
   }
 
-  async deleteWorkflow() {
+  async archiveWorkflow() {
     const alert = await this.alertController.create({
-      header: 'Delete Workflow',
-      message: `Are you sure you want to delete "${this.workflow?.name}"? This action cannot be undone.`,
+      header: 'Archive Workflow',
+      message: `Are you sure you want to archive "${this.workflow?.name}"? You can restore it later from the archived workflows section.`,
       buttons: [
         {
           text: 'Cancel',
           role: 'cancel'
         },
         {
-          text: 'Delete',
+          text: 'Archive',
           role: 'destructive',
           handler: () => {
-            this.doDelete();
+            this.doArchive();
           }
         }
       ]
@@ -247,17 +247,17 @@ export class WorkflowDetailComponent implements OnInit, OnDestroy {
     await alert.present();
   }
 
-  doDelete() {
-    this.workflowService.deleteWorkflow(this.workflowId)
+  doArchive() {
+    this.workflowService.archiveWorkflow(this.workflowId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.showToast('Workflow deleted successfully', 'success');
+          this.showToast('Workflow archived successfully', 'success');
           this.router.navigate(['/workflows']);
         },
         error: (error) => {
-          console.error('Error deleting workflow:', error);
-          this.showToast('Failed to delete workflow', 'danger');
+          console.error('Error archiving workflow:', error);
+          this.showToast('Failed to archive workflow', 'danger');
         }
       });
   }
@@ -609,11 +609,11 @@ export class WorkflowDetailComponent implements OnInit, OnDestroy {
           }
         },
         {
-          text: 'Delete',
-          icon: 'trash-outline',
+          text: 'Archive',
+          icon: 'archive-outline',
           role: 'destructive',
           handler: () => {
-            this.deleteWorkflow();
+            this.archiveWorkflow();
           }
         },
         {

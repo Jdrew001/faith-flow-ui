@@ -29,14 +29,9 @@
 @import 'app/styles/disable-swipe.scss';
 
 /* iOS-style momentum scrolling and rubber band effect */
-* {
-  -webkit-overflow-scrolling: touch; // Enable momentum scrolling everywhere
-}
-
 // Enable bounce scrolling for all ion-content elements
 ion-content {
-  --overflow: scroll;
-  -webkit-overflow-scrolling: touch;
+  --overflow: scroll !important;
   
   // iOS specific - enable rubber band effect
   @supports (-webkit-touch-callout: none) {

@@ -52,26 +52,42 @@
             </span>
           </div>
           
-          <div class="form-field">
-            <label class="field-label">Email Address</label>
+          <!-- Contact Method Requirement Notice -->
+          <div class="contact-requirement-notice">
+            <ion-icon name="information-circle-outline"></ion-icon>
+            <span>At least one contact method is required (email or phone)</span>
+          </div>
+          
+          <div class="form-field" [class.has-value]="memberForm.get('email')?.value">
+            <label class="field-label">
+              Email Address
+              <span class="optional-badge" *ngIf="memberForm.get('phone')?.value">Optional</span>
+              <span class="required-badge" *ngIf="!memberForm.get('phone')?.value && !memberForm.get('email')?.value">Required</span>
+            </label>
             <ion-input 
               formControlName="email" 
               type="email"
               placeholder="email@example.com"
-              class="modern-input">
+              class="modern-input"
+              [class.valid-contact]="memberForm.get('email')?.value && memberForm.get('email')?.valid">
             </ion-input>
             <span class="field-error" *ngIf="memberForm.get('email')?.invalid && memberForm.get('email')?.touched">
               Please enter a valid email
             </span>
           </div>
           
-          <div class="form-field">
-            <label class="field-label">Phone Number</label>
+          <div class="form-field" [class.has-value]="memberForm.get('phone')?.value">
+            <label class="field-label">
+              Phone Number
+              <span class="optional-badge" *ngIf="memberForm.get('email')?.value">Optional</span>
+              <span class="required-badge" *ngIf="!memberForm.get('email')?.value && !memberForm.get('phone')?.value">Required</span>
+            </label>
             <ion-input 
               formControlName="phone" 
               type="tel"
               placeholder="(555) 123-4567"
-              class="modern-input">
+              class="modern-input"
+              [class.valid-contact]="memberForm.get('phone')?.value">
             </ion-input>
           </div>
           
