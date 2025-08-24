@@ -633,8 +633,85 @@
   min-height: 400px; // Ensure minimum height
   padding-bottom: 80px; // Add padding for FAB
   
-  // Simple Search
-  .notes-search {
+  // Filters Section
+  .notes-filters {
+    display: flex;
+    gap: 12px;
+    margin: 16px 0 20px;
+    padding: 0 16px;
+    align-items: center;
+    flex-wrap: wrap;
+    
+    .notes-search {
+      flex: 1;
+      min-width: 200px;
+      position: relative;
+      
+      ion-icon {
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #8e8e93;
+        font-size: 1.1rem;
+      }
+      
+      input {
+        width: 100%;
+        padding: 10px 12px 10px 40px;
+        background: #3a3a3c;
+        border: 1px solid #48484a;
+        border-radius: 10px;
+        color: #ffffff;
+        font-size: 0.95rem;
+        outline: none;
+        transition: all 0.2s ease;
+        
+        &:focus {
+          border-color: #007aff;
+          background: #48484a;
+        }
+        
+        &::placeholder {
+          color: #8e8e93;
+        }
+      }
+    }
+    
+    .category-filter {
+      min-width: 180px;
+      
+      app-custom-select {
+        display: block;
+      }
+    }
+    
+    .sort-button {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 16px;
+      background: #3a3a3c;
+      border: 1px solid #48484a;
+      border-radius: 10px;
+      color: #ffffff;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      
+      ion-icon {
+        font-size: 1rem;
+      }
+      
+      &:hover {
+        background: #48484a;
+        border-color: #007aff;
+      }
+    }
+  }
+  
+  // Simple Search (fallback for when filters section isn't shown)
+  .notes-search:not(.notes-filters .notes-search) {
     position: relative;
     margin-top: 8px;
     margin-bottom: 20px;
@@ -697,26 +774,47 @@
           align-items: flex-start;
           margin-bottom: 12px;
           
-          .note-date-clean {
+          .note-info {
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: 8px;
+            
+            .note-author {
+              display: flex;
+              align-items: center;
+              gap: 6px;
+              
+              ion-icon {
+                font-size: 18px;
+                color: #007aff;
+              }
+              
+              span {
+                font-size: 14px;
+                font-weight: 600;
+                color: #ffffff;
+              }
+            }
+          }
+          
+          .note-date-clean {
+            display: flex;
+            align-items: center;
+            gap: 6px;
             
             .date-primary {
-              font-size: 14px;
-              font-weight: 600;
-              color: #ffffff;
-            }
-            
-            .date-secondary {
               font-size: 12px;
               color: #8e8e93;
             }
             
-            .date-updated {
-              font-size: 11px;
+            .date-secondary {
+              font-size: 12px;
               color: #636366;
-              font-style: italic;
+            }
+            
+            .date-updated {
+              font-size: 12px;
+              color: #636366;
             }
           }
           

@@ -20,8 +20,16 @@ export class MemberDetailModalComponent implements OnInit {
   memberNotes: MemberNote[] = [];
   filteredNotes: MemberNote[] = [];
   noteSearchTerm = '';
+  selectedCategory = 'All';
   noteSortOrder: 'asc' | 'desc' = 'desc';
   expandedNoteId: string | null = null;
+  
+  noteCategoryOptions = [
+    { value: 'All', label: 'All Categories', icon: 'apps-outline' },
+    { value: 'General', label: 'General', icon: 'document-outline' },
+    { value: 'Follow-up', label: 'Follow-up', icon: 'flag-outline' },
+    { value: 'Prayer Request', label: 'Prayer Request', icon: 'heart-outline' }
+  ];
   
   // Related data
   attendanceHistory: any[] = [];
@@ -72,10 +80,21 @@ export class MemberDetailModalComponent implements OnInit {
   filterNotes() {
     let filtered = [...this.memberNotes];
     
+    // Filter by search term
     if (this.noteSearchTerm) {
       const searchLower = this.noteSearchTerm.toLowerCase();
       filtered = filtered.filter(note => 
-        note.content.toLowerCase().includes(searchLower)
+        note.content.toLowerCase().includes(searchLower) ||
+        note.category?.toLowerCase().includes(searchLower) ||
+        note.author?.toLowerCase().includes(searchLower)
+      );
+    }
+    
+    // Filter by category
+    if (this.selectedCategory && this.selectedCategory !== 'All') {
+      filtered = filtered.filter(note => 
+        note.category === this.selectedCategory ||
+        (!note.category && this.selectedCategory === 'General')
       );
     }
     
@@ -87,6 +106,11 @@ export class MemberDetailModalComponent implements OnInit {
     });
     
     this.filteredNotes = filtered;
+  }
+  
+  onCategoryChange(value: string) {
+    this.selectedCategory = value;
+    this.filterNotes();
   }
   
   toggleNoteSort() {
@@ -275,6 +299,8 @@ export class MemberDetailModalComponent implements OnInit {
       const index = this.memberNotes.findIndex(n => n.id === note.id);
       if (index > -1) {
         this.memberNotes.splice(index, 1);
+        // Update the filtered notes to reflect the deletion
+        this.filterNotes();
       }
       
       await this.showToast('Note deleted', 'success');

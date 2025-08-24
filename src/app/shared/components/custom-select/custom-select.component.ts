@@ -123,8 +123,15 @@ export class CustomSelectComponent implements ControlValueAccessor, OnDestroy {
     }
   };
   
-  private scrollListener = () => {
-    this.closeDropdown();
+  private scrollListener = (event: Event) => {
+    const target = event.target as HTMLElement;
+    // Only close if scrolling outside the component and not in a modal
+    const scrollingInside = this.elementRef.nativeElement.contains(target);
+    const scrollingInModal = target.closest('ion-modal') !== null;
+    
+    if (!scrollingInside && !scrollingInModal) {
+      this.closeDropdown();
+    }
   };
 
   selectOption(option: SelectOption, event?: Event) {

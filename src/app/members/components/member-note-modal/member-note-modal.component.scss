@@ -178,7 +178,6 @@
     color: #ff453a;
     font-size: 0.75rem;
     margin-top: 4px;
-    margin-left: 48px;
     display: flex;
     align-items: center;
     gap: 6px;
@@ -194,6 +193,33 @@
     color: #8e8e93;
     margin-top: 4px;
     margin-right: 4px;
+  }
+  
+  // Select Field
+  &.select-field {
+    margin-bottom: 24px;
+    
+    .select-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+      
+      .field-icon {
+        color: #8e8e93;
+        font-size: 1.2rem;
+      }
+      
+      .select-label {
+        color: #8e8e93;
+        font-size: 0.9rem;
+        font-weight: 500;
+      }
+    }
+    
+    app-custom-select {
+      display: block;
+    }
   }
 }
 

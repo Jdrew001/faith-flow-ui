@@ -15,6 +15,12 @@ export class MemberNoteModalComponent implements OnInit {
   
   noteForm!: FormGroup;
   isLoading = false;
+  
+  categoryOptions = [
+    { value: 'General', label: 'General', icon: 'document-outline' },
+    { value: 'Follow-up', label: 'Follow-up', icon: 'flag-outline' },
+    { value: 'Prayer Request', label: 'Prayer Request', icon: 'heart-outline' }
+  ];
 
   constructor(
     private modalController: ModalController,
@@ -30,7 +36,8 @@ export class MemberNoteModalComponent implements OnInit {
 
   initForm() {
     this.noteForm = this.formBuilder.group({
-      content: ['', [Validators.required, Validators.minLength(3)]]
+      content: ['', [Validators.required, Validators.minLength(3)]],
+      category: ['General']
     });
   }
 
@@ -70,7 +77,8 @@ export class MemberNoteModalComponent implements OnInit {
     try {
       const response = await this.membersService.addMemberNote(
         this.memberId,
-        this.noteForm.value.content
+        this.noteForm.value.content,
+        this.noteForm.value.category
       ).toPromise();
       
       // Create note object with proper structure if API doesn't return it

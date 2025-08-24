@@ -21,6 +21,19 @@
         </div>
       </div>
 
+      <!-- Category Selection -->
+      <div class="form-field select-field">
+        <div class="select-header">
+          <ion-icon name="pricetag-outline" class="field-icon"></ion-icon>
+          <ion-label class="select-label">Category</ion-label>
+        </div>
+        <app-custom-select
+          formControlName="category"
+          placeholder="Select a category"
+          [options]="categoryOptions">
+        </app-custom-select>
+      </div>
+
       <!-- Note Content -->
       <div class="form-field" 
            [class.has-value]="content?.value" 

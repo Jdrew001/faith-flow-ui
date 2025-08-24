@@ -338,14 +338,33 @@
   <!-- Notes Tab -->
   <div class="tab-content" *ngIf="activeTab === 'notes'">
     <div class="notes-section">
-      <!-- Simple Search -->
-      <div class="notes-search" *ngIf="memberNotes.length > 0">
-        <ion-icon name="search-outline"></ion-icon>
-        <input 
-          type="text" 
-          placeholder="Search notes..." 
-          [(ngModel)]="noteSearchTerm"
-          (ngModelChange)="filterNotes()">
+      <!-- Filters Section -->
+      <div class="notes-filters" *ngIf="memberNotes.length > 0">
+        <!-- Search Bar -->
+        <div class="notes-search">
+          <ion-icon name="search-outline"></ion-icon>
+          <input 
+            type="text" 
+            placeholder="Search notes..." 
+            [(ngModel)]="noteSearchTerm"
+            (ngModelChange)="filterNotes()">
+        </div>
+        
+        <!-- Category Filter -->
+        <div class="category-filter">
+          <app-custom-select
+            [(ngModel)]="selectedCategory"
+            (selectionChange)="onCategoryChange($event)"
+            placeholder="Filter by category"
+            [options]="noteCategoryOptions">
+          </app-custom-select>
+        </div>
+        
+        <!-- Sort Toggle -->
+        <button class="sort-button" (click)="toggleNoteSort()">
+          <ion-icon [name]="noteSortOrder === 'desc' ? 'arrow-down' : 'arrow-up'"></ion-icon>
+          {{ noteSortOrder === 'desc' ? 'Newest' : 'Oldest' }}
+        </button>
       </div>
       
       <!-- Clean Notes List -->
@@ -356,12 +375,18 @@
           
           <div class="note-main">
             <div class="note-header-clean">
-              <div class="note-date-clean">
-                <span class="date-primary">{{ note.created_at | date:'MMM d, yyyy' }}</span>
-                <span class="date-secondary">{{ note.created_at | date:'h:mm a' }}</span>
-                <span class="date-updated" *ngIf="wasUpdated(note)">
-                  Edited {{ note.updated_at | date:'MMM d' }}
-                </span>
+              <div class="note-info">
+                <div class="note-author">
+                  <ion-icon name="person-circle-outline"></ion-icon>
+                  <span>{{ note.author || 'Unknown User' }}</span>
+                </div>
+                <div class="note-date-clean">
+                  <span class="date-primary">{{ note.created_at | date:'MMM d, yyyy' }}</span>
+                  <span class="date-secondary">{{ note.created_at | date:'h:mm a' }}</span>
+                  <span class="date-updated" *ngIf="wasUpdated(note)">
+                    • Edited
+                  </span>
+                </div>
               </div>
               <button class="note-action-button" (click)="showNoteOptions(note, $event)">
                 <ion-icon name="ellipsis-horizontal"></ion-icon>
@@ -372,15 +397,11 @@
               <p class="note-text">{{ note.content }}</p>
             </div>
             
-            <div class="note-footer-clean" *ngIf="note.author || note.tags">
+            <div class="note-footer-clean" *ngIf="note.category && note.category !== 'General'">
               <div class="note-metadata">
-                <span class="metadata-item" *ngIf="note.author">
-                  <ion-icon name="person-outline"></ion-icon>
-                  {{ note.author }}
-                </span>
-                <span class="metadata-item" *ngIf="isRecentNote(note.created_at)">
-                  <ion-icon name="sparkles-outline"></ion-icon>
-                  Recent
+                <span class="metadata-item">
+                  <ion-icon name="pricetag-outline"></ion-icon>
+                  {{ note.category }}
                 </span>
               </div>
             </div>

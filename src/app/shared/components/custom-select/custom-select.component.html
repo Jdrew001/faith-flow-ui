@@ -34,7 +34,7 @@
   </div>
 
   <!-- Dropdown Options -->
-  <div class="dropdown-container" *ngIf="isOpen" [@slideDown]>
+  <div class="dropdown-container" *ngIf="isOpen" [@slideDown] (scroll)="$event.stopPropagation()">
     <!-- Search Box (if searchable) -->
     <div class="search-box" *ngIf="searchable">
       <ion-icon name="search-outline"></ion-icon>
@@ -47,7 +47,7 @@
     </div>
 
     <!-- Options List -->
-    <div class="options-list">
+    <div class="options-list" (scroll)="$event.stopPropagation()">
       <div 
         *ngFor="let option of filteredOptions"
         class="option-item"
