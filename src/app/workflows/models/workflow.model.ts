@@ -112,7 +112,7 @@ export interface WaitMetadata {
 }
 
 export interface ConditionalMetadata {
-  condition: {
+  conditions: {
     type: 'member_field' | 'email_opened' | 'sms_clicked' | 'step_completed' | 'custom';
     field?: string;
     operator?: 'equals' | 'not_equals' | 'contains' | 'is_null' | 'is_not_null' | 'greater_than' | 'less_than';
